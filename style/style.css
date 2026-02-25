@@ -1,0 +1,283 @@
+/* ================= GLOBAL ================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+/* ================= HEADER ================= */
+header {
+    background: #ffffff;
+    padding: 15px 40px;
+    border-bottom: 1px solid #ddd;
+    position: relative;
+    z-index: 1000;
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ================= LOGO ================= */
+.logo-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-title h1 {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* ================= TOP NAVIGATION ================= */
+.top-nav ul {
+    display: flex;
+    list-style: none;
+    gap: 35px;
+}
+
+.top-nav ul li {
+    position: relative; /* needed for dropdown positioning */
+}
+
+.top-nav ul li a {
+    text-decoration: none;
+    color: #8b0000;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 10px 0;
+    display: block;
+    transition: 0.3s ease;
+}
+
+.top-nav ul li a:hover {
+    opacity: 0.7;
+}
+
+/* ================= DROPDOWN ================= */
+.top-nav ul li .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 220px;
+    background: #ffffff;
+    padding: 0;
+    margin: 0;
+    border-radius: 6px;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+
+    display: block; /* vertical layout */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(5px);
+    transition: all 0.2s ease;
+    z-index: 999;
+}
+
+/* Show dropdown on hover */
+.top-nav ul li:hover > .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Dropdown items */
+.dropdown-menu li {
+    display: block;
+    margin: 0; /* remove spacing between items */
+    padding: 0;
+    list-style: none;
+}
+
+.dropdown-menu li a {
+    display: block;
+    width: 100%;
+    padding-left: 50px;
+    padding: 6px 20px; /* spacing controlled here */
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.dropdown-menu li a:hover {
+    background: #f3f3f3;
+    color: #8b0000;
+}
+
+/* Dropdown arrow indicator */
+.dropdown > a::after {
+    content: " ▼";
+    font-size: 10px;
+    margin-left: 4px;
+    color: #8b0000;
+}
+
+/* ================= HERO ================= */
+.hero {
+    padding: 60px 20px;
+    background: #f0f0f0;
+}
+
+.hero-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+}
+
+.hero-logo {
+    width: 120px;
+    height: auto;
+    border-radius: 10px;
+}
+
+.hero-text h2 {
+    font-size: 42px;
+    letter-spacing: 3px;
+    font-weight: 700;
+}
+
+.hero-text h3 {
+    font-size: 18px;
+    color: #555;
+    margin-top: 8px;
+}
+
+/* ================= PRIORITIES ================= */
+.priorities-container {
+    width: 85%;
+    margin: 30px auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+}
+
+.priorities-container h4 {
+    color: #8b0000;
+    margin-bottom: 15px;
+}
+
+.priorities {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.priority-card {
+    width: 23%;
+    text-align: center;
+}
+
+.priority-card p {
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* ================= VIDEO ================= */
+.video-section {
+    width: 85%;
+    margin: 40px auto;
+}
+
+.video-section h4 {
+    color: #8b0000;
+}
+
+.video-section p {
+    font-size: 13px;
+    margin-bottom: 15px;
+}
+
+.video-container {
+    background: #ddd;
+    height: 350px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.video-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* ================= FOOTER ================= */
+footer {
+    background: #e9e6e6;
+    padding: 40px 60px;
+    margin-top: 50px;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+}
+
+.footer-column {
+    width: 30%;
+}
+
+.footer-column h5 {
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.footer-column p,
+.footer-column a {
+    font-size: 12px;
+    display: block;
+    margin-bottom: 8px;
+    text-decoration: none;
+    color: #333;
+}
+
+.footer-column a:hover {
+    color: #8b0000;
+}
+
+.footer-bottom {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 12px;
+}
+
+/* ================= PLACEHOLDERS ================= */
+.logo-placeholder {
+    width: 35px;
+    height: 35px;
+    background: #8b0000;
+    border-radius: 4px;
+}
+
+.image-placeholder {
+    width: 100%;
+    height: 150px;
+    background: #ddd;
+    border-radius: 8px;
+    position: relative;
+}
+
+.image-placeholder::after {
+    content: "IMAGE";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #888;
+    font-weight: 600;
+}
