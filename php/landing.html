@@ -1,6 +1,3 @@
-<?php
-// Future PHP logic can go here
-?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -9,6 +6,8 @@
     <title>Alpha Aquila | Summit Life Insurance Agency</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../style/style.css">
+    
+
 </head>
 <body>
 
@@ -16,7 +15,7 @@
     <div class="header-container">
         
         <div class="logo-title">
-            <div class="logo-placeholder"></div>
+            <img src="../assets/logo.jpg" alt="Alpha Aquila Logo" class="logo">
             <h1>ALPHA AQUILA</h1>
         </div>
 
@@ -70,28 +69,57 @@
     </div>
 </section>
 
+<!-- ================= TOP SLIDE MODAL ================= -->
+<div id="topModal" class="top-modal">
+    <div class="top-modal-content">
+        <span class="close-btn">&times;</span>
+
+        <h2>ALPHA AQUILA</h2>
+
+        <img src="../assets/poster.jpg" alt="Top Financial Advisor Awarding">
+
+        <h3>NEWS!</h3>
+        <p><strong>TOP FINANCIAL ADVISOR AWARDING</strong></p>
+        <p>March 15, 2026</p>
+        <p>ATEL GLOBAL CORPORATE CENTER 20TH FLOOR</p>
+
+        <p class="description">
+            BREAKING: Top Financial Advisors of the Year Award ceremony celebrates excellence 
+            in wealth management. Join us for an evening of recognition, networking, 
+            and insights from industry leaders.
+        </p>
+    </div>
+</div>
+
+
 <!-- ================= PRIORITIES ================= -->
 <section class="priorities-container">
     <h4>Priorities:</h4>
 
-    <div class="priorities">
-        <?php
-        $priorities = [
-            "PROTECTION",
-            "EDUCATION",
-            "RETIREMENT",
-            "MEDIUM TO LONG TERM GOALS"
-        ];
+    <div class="carousel-wrapper">
+        <button class="arrow left-arrow">&#10094;</button>
 
-        foreach ($priorities as $title) {
-            echo '
-            <div class="priority-card">
-                <div class="image-placeholder"></div>
-                <p>'.$title.'</p>
-            </div>
-            ';
-        }
-        ?>
+        <div class="priorities-carousel">
+            <?php
+            $priorities = [
+                "PROTECTION",
+                "EDUCATION",
+                "RETIREMENT",
+                "MEDIUM TO LONG TERM GOALS"
+            ];
+
+            foreach ($priorities as $title) {
+                echo '
+                <div class="priority-card">
+                    <div class="image-placeholder"></div>
+                    <p><?php echo $title; ?></p>
+                </div>
+                ';
+            }
+            ?>
+        </div>
+
+        <button class="arrow right-arrow">&#10095;</button>
     </div>
 </section>
 
@@ -142,6 +170,8 @@
 </footer>
 
 
+
+<script src="../js/landing.js"></script>
 
 </body>
 </html>
