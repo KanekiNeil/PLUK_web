@@ -19,6 +19,20 @@ document.addEventListener("click", function (e) {
     }
 });
 
+const filterBtn = document.querySelector(".filter-calendar");
+const dateInput = document.getElementById("overviewDate");
+
+filterBtn.addEventListener("click", () => {
+    dateInput.showPicker(); // modern browsers
+});
+
+dateInput.addEventListener("change", () => {
+    const selected = dateInput.value;
+    alert("Filter dashboard data for: " + selected);
+
+    // Later you can fetch from database here using AJAX
+});
+
 // CALENDAR
 const monthYear = document.getElementById("monthYear");
 const datesContainer = document.getElementById("dates");

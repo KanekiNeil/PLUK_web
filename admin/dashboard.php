@@ -20,11 +20,12 @@ $user_role = "Junior Unit Manager";
 <header>
     <div class="header">
 
-        <div class="logo-section">
-            <img src="../assets/logo.jpg" class="logo">
-            <h2 class="brand">ALPHA AQUILA</h2>
-        </div>
+    <div class="logo-section">
+        <img src="../assets/logo.jpg" class="logo">
+        <h2 class="brand">ALPHA AQUILA</h2>
+    </div>
 
+    <div class="header-right">
         <nav class="nav">
             <a href="#" class="nav-link active">Home</a>
             <a href="#" class="nav-link">Insurance Inquiries</a>
@@ -37,13 +38,12 @@ $user_role = "Junior Unit Manager";
             <span class="material-icons notification-icon">notifications</span>
 
             <div class="profile-wrapper" id="profileToggle">
-                <div class="profile-avatar">LD</div>
-
                 <div class="user-info">
                     <strong><?php echo $user_name; ?></strong>
                     <small><?php echo $user_role; ?></small>
                 </div>
 
+                <div class="profile-avatar">LD</div>
                 <span class="dropdown-arrow">▼</span>
 
                 <div class="profile-dropdown">
@@ -53,8 +53,9 @@ $user_role = "Junior Unit Manager";
                 </div>
             </div>
         </div>
-
     </div>
+
+</div>
 </header>
 
 <div class="container">
@@ -69,6 +70,7 @@ $user_role = "Junior Unit Manager";
                 <!-- Calendar Filter -->
                 <div class="filter-calendar">
                     <span class="material-icons">calendar_month</span>
+                    <input type="date" id="overviewDate" hidden>
                 </div>
             </div>
 
