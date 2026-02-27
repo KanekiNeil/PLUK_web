@@ -174,7 +174,7 @@ header {
 
 .container {
     display: flex;
-    padding: 30px 40px;
+    padding: 10px 20px;
     gap: 30px;
 }
 
