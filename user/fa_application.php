@@ -54,6 +54,24 @@ $fullDates = [
             background-color: #d1e7dd !important;
             cursor: pointer;
         }
+
+        /* cam design */
+        .camera-container {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: black;
+        }
+
+        #video {
+            width: 100%;
+            height: auto;
+        }
+
+        #preview {
+            max-width: 400px;
+        }
     </style>
 </head>
 <body>
@@ -118,28 +136,27 @@ $fullDates = [
             </div>
 
             <!-- UPLOAD WITH CAMERA ICON -->
-            <div class="mb-3">
-                <label class="form-label">Upload Profile Photo</label>
-                <div class="input-group">
-                    <span class="input-group-text">
-                        <i class="bi bi-camera"></i>
-                    </span>
-                    <input type="file" class="form-control" accept="image/*">
-                </div>
-            </div>
+           <div class="mb-3">
+                <label class="form-label">Verify Face ID</label>
 
-            <!-- ADD SKILLS -->
-            <div class="mb-3">
-                <label class="form-label">Your Skills</label>
-
-                <div class="input-group mb-2">
-                    <input type="text" id="skillInput" class="form-control" placeholder="Enter a skill">
-                    <button type="button" class="btn btn-primary" id="addSkillBtn">
-                        Add Skill
-                    </button>
+                <!-- Camera Preview -->
+                <div class="camera-container">
+                    <video id="video" autoplay playsinline></video>
+                    <canvas id="canvas" style="display:none;"></canvas>
                 </div>
 
-                <div id="skillsContainer"></div>
+                <!-- Capture Button -->
+                <button type="button" class="btn btn-primary mt-2" id="captureBtn">
+                    Capture Face
+                </button>
+
+                <!-- Preview Image -->
+                <div class="mt-3">
+                    <img id="preview" class="img-fluid rounded" style="display:none;">
+                </div>
+
+                <!-- Hidden input (image data for PHP) -->
+                <input type="hidden" name="face_image" id="faceImage">
             </div>
 
             <!-- APPOINTMENT CALENDAR -->
@@ -228,6 +245,53 @@ $fullDates = [
         });
 
         calendar.render();
+    });
+
+
+    // camera verification js.
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const captureBtn = document.getElementById("captureBtn");
+    const preview = document.getElementById("preview");
+    const faceImage = document.getElementById("faceImage");
+
+    // Start Camera
+    async function startCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: "user" // front camera
+                },
+                audio: false
+            });
+
+            video.srcObject = stream;
+        } catch (err) {
+            alert("Camera access denied or not supported.");
+            console.error(err);
+        }
+    }
+
+    startCamera();
+
+    // Capture Photo
+    captureBtn.addEventListener("click", () => {
+        const context = canvas.getContext("2d");
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        context.drawImage(video, 0, 0);
+
+        // Convert to image
+        const imageData = canvas.toDataURL("image/png");
+
+        // Show preview
+        preview.src = imageData;
+        preview.style.display = "block";
+
+        // Save to hidden input (for PHP)
+        faceImage.value = imageData;
     });
 </script>
 </body>

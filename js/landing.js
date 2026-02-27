@@ -41,3 +41,20 @@ window.addEventListener('load', () => {
     }, 5000);
 });
 
+// sales_app and fa_app navigation js
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Sales click
+    document.getElementById("salesLink").addEventListener("click", function (e) {
+        e.preventDefault(); // stop #
+        window.location.href = "user/sales_application.php";
+    });
+
+    // Career click
+    document.getElementById("careerLink").addEventListener("click", function (e) {
+        e.preventDefault();
+        window.location.href = "user/fa_application.php";
+    });
+
+});
+
