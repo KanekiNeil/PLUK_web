@@ -188,26 +188,58 @@
 
             <div class="divider">OR Login with Email</div>
 
-            <form action="login_process.php" method="POST">
-                <div class="input-group">
-                    <input type="email" name="email" placeholder="Email" required>
-                </div>
+                <form id="loginForm">
+                    <div class="input-group">
+                        <input type="email" id="email" placeholder="Email" required>
+                    </div>
 
-                <div class="input-group">
-                    <input type="password" name="password" placeholder="Password" required>
-                </div>
+                    <div class="input-group">
+                        <input type="password" id="password" placeholder="Password" required>
+                    </div>
 
-                <div class="forgot">
-                    <a href="#">Forgot Password?</a>
-                </div>
+                    <div class="forgot">
+                        <a href="#">Forgot Password?</a>
+                    </div>
 
-                <button type="submit" class="login-btn">Login</button>
-            </form>
+                    <button type="submit" class="login-btn">Login</button>
+                </form>
 
         </div>
     </div>
 
 </div>
 
+<script>
+document.getElementById("loginForm").addEventListener("submit", function(e) {
+    e.preventDefault(); // 🚫 stop normal form submit
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    fetch("../php/login.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            email: email,
+            password: password
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Login successful!");
+            window.location.href = "dashboard.php";
+        } else {
+            alert(data.error || "Login failed");
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("Something went wrong");
+    });
+});
+</script>
 </body>
 </html>

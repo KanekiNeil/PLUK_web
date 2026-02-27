@@ -1,4 +1,12 @@
 <?php
+include_once "../php/session.php";
+
+
+if (!isset($_SESSION['user_id'])) {
+    // Not logged in
+    header("Location: admin_login.php");
+    exit;
+}
 $applicants = 10;
 $clients = 12;
 $events = 32;
@@ -30,8 +38,8 @@ $user_role = "Junior Unit Manager";
             <a href="#" class="nav-link active">Home</a>
             <a href="#" class="nav-link">Insurance Inquiries</a>
             <a href="#" class="nav-link">Set Availability</a>
-            <a href="#" class="nav-link">Appointment List</a>
-            <a href="#" class="nav-link">Applicant List</a>
+            <a href="appointment_list.php" class="nav-link">Appointment List</a>
+            <a href="applicant_list.php" class="nav-link">Applicant List</a>
         </nav>
 
         <div class="user-section">
@@ -49,7 +57,7 @@ $user_role = "Junior Unit Manager";
                 <div class="profile-dropdown">
                     <a href="#">Profile</a>
                     <a href="#">Settings</a>
-                    <a href="#">Logout</a>
+                    <a href="#" id="logout">Logout</a>
                 </div>
             </div>
         </div>
@@ -164,5 +172,28 @@ $user_role = "Junior Unit Manager";
 </div>
 
 <script src="../js/dashboard.js"></script>
+
+<script>
+document.getElementById("logout").addEventListener("click", function(e) {
+    e.preventDefault();
+
+    fetch("../php/logout.php", {
+        method: "POST"
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            // Redirect to login page
+            window.location.href = "admin_login.php";
+        } else {
+            alert("Logout failed");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Something went wrong");
+    });
+});
+</script>
 </body>
 </html>
