@@ -25,18 +25,19 @@ window.addEventListener('load', () => {
     const modal = document.getElementById('topModal');
     const closeBtn = document.querySelector('.top-modal .close-btn');
 
-    // Slide down the modal
+    // Show popup
     setTimeout(() => {
-        modal.style.top = '0';
+        modal.classList.add('active');
     }, 300);
 
     // Close modal on X click
     closeBtn.addEventListener('click', () => {
-        modal.style.top = '-100%';
+        modal.classList.remove('active');
     });
 
     // Optional: auto-close after 5 seconds
     setTimeout(() => {
-        modal.style.top = '-100%';
+        modal.classList.remove('active');
     }, 5000);
 });
+
