@@ -57,20 +57,29 @@ $fullDates = [
 
         /* cam design */
         .camera-container {
+            position: relative;
             width: 100%;
-            max-width: 400px;
-            border-radius: 10px;
-            overflow: hidden;
-            background: black;
+            max-width: 420px;
+            margin: auto;
         }
 
         #video {
             width: 100%;
-            height: auto;
+            border-radius: 12px;
         }
 
-        #preview {
-            max-width: 400px;
+        /* CIRCLE FACE GUIDE */
+        .face-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 220px;  /* adjust size */
+            height: 220px; /* keep it square for circle */
+            border: 4px solid #00ffc8;
+            border-radius: 50%;
+            pointer-events: none; /* allow clicks through */
+            box-shadow: 0 0 12px rgba(0,255,200,0.7);
         }
     </style>
 </head>
@@ -136,12 +145,16 @@ $fullDates = [
             </div>
 
             <!-- UPLOAD WITH CAMERA ICON -->
-           <div class="mb-3">
+            <div class="mb-3">
                 <label class="form-label">Verify Face ID</label>
 
                 <!-- Camera Preview -->
                 <div class="camera-container">
                     <video id="video" autoplay playsinline></video>
+
+                    <!-- CIRCLE FACE GUIDE -->
+                    <div class="face-circle"></div>
+
                     <canvas id="canvas" style="display:none;"></canvas>
                 </div>
 
@@ -158,6 +171,8 @@ $fullDates = [
                 <!-- Hidden input (image data for PHP) -->
                 <input type="hidden" name="face_image" id="faceImage">
             </div>
+
+
 
             <!-- APPOINTMENT CALENDAR -->
             <div class="container">
@@ -260,12 +275,16 @@ $fullDates = [
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: {
-                    facingMode: "user" // front camera
+                    facingMode: "user"
                 },
                 audio: false
             });
 
             video.srcObject = stream;
+
+            // wait until camera fully loads
+            await video.play();
+
         } catch (err) {
             alert("Camera access denied or not supported.");
             console.error(err);
@@ -276,21 +295,26 @@ $fullDates = [
 
     // Capture Photo
     captureBtn.addEventListener("click", () => {
+
+        if (!video.videoWidth) {
+            alert("Camera not ready yet.");
+            return;
+        }
+
         const context = canvas.getContext("2d");
 
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
 
-        context.drawImage(video, 0, 0);
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        // Convert to image
         const imageData = canvas.toDataURL("image/png");
 
-        // Show preview
+        // Preview image
         preview.src = imageData;
         preview.style.display = "block";
 
-        // Save to hidden input (for PHP)
+        // Send to PHP
         faceImage.value = imageData;
     });
 </script>
