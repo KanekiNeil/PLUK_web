@@ -26,8 +26,8 @@
                 <li class="dropdown">
                     <a href="#">Work with Us</a>
                     <ul class="dropdown-menu">
-                        <li><a href="#">Sales</a></li>
-                        <li><a href="#">Career</a></li>
+                        <li><a href="#" id="salesLink">Sales</a></li>
+                        <li><a href="#" id="careerLink">Career</a></li>
                     </ul>
                 </li>
 
