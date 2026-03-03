@@ -302,7 +302,7 @@ body::before {
                 <div class="dropdown" id="profileDropdown">
                     <a href="#">
                         <span class="icon-wrapper">
-                            <img src="../assets/    account.png">
+                            <img src="../assets/account.png">
                         </span>
                         <span>Account</span>
                     </a>
