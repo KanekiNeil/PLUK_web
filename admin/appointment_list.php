@@ -213,6 +213,77 @@ body::before {
         row-gap: 10px;
     }
 }
+
+/* MODAL */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.modal {
+    background: white;
+    width: 400px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    animation: fadeIn 0.2s ease;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.modal-content {
+    padding: 20px;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+}
+
+.close-btn {
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.appointment-box {
+    background: #f8d7da;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 15px 0;
+}
+
+.details p {
+    margin: 8px 0;
+}
+
+.close-modal-btn {
+    background: #880318;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+.close-modal-btn:hover {
+    opacity: 0.85;
+}
+
+@keyframes fadeIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
 </style>
 </head>
 <body>
@@ -231,7 +302,7 @@ body::before {
                 <div class="dropdown" id="profileDropdown">
                     <a href="#">
                         <span class="icon-wrapper">
-                            <img src="../assets/account.png">
+                            <img src="../assets/    account.png">
                         </span>
                         <span>Account</span>
                     </a>
@@ -284,7 +355,15 @@ body::before {
             };
         ?>
 
-        <div class="table-row">
+        <div class="table-row"
+            onclick="openModal(
+                '<?= date("F d, Y", strtotime($appt[0])) ?>',
+                '<?= $appt[1] ?>',
+                '<?= htmlspecialchars($appt[2]) ?>',
+                '<?= htmlspecialchars($appt[3]) ?>',
+                '<?= htmlspecialchars($appt[4]) ?>'
+            )">
+
             <div><?= date("m/d/y", strtotime($appt[0])) ?></div>
             <div><?= $appt[1] ?></div>
             <div><?= htmlspecialchars($appt[2]) ?></div>
@@ -301,6 +380,31 @@ body::before {
     </div>
 </div>
 
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="modalType">Appointment Details</h3>
+            <span class="close-btn" onclick="closeModal()">✖</span>
+        </div>
+
+        <div class="modal-content">
+            <h2 id="modalName"></h2>
+
+            <div class="appointment-box">
+                <p><strong>Date:</strong> <span id="modalDate"></span></p>
+                <p><strong>Time:</strong> <span id="modalTime"></span></p>
+            </div>
+
+            <div class="details">
+                <p><strong>Appointment Type:</strong> <span id="modalApptType"></span></p>
+                <p><strong>Status:</strong> <span id="modalStatus"></span></p>
+            </div>
+
+            <button class="close-modal-btn" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+</div>
+
 <script>
 function toggleMenu() {
     const nav = document.getElementById("navbar");
@@ -310,6 +414,29 @@ function toggleProfile() {
     const dropdown = document.getElementById("profileDropdown");
     dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
 }
+
+function openModal(date, time, name, type, status) {
+    document.getElementById("modalOverlay").style.display = "flex";
+
+    document.getElementById("modalDate").innerText = date;
+    document.getElementById("modalTime").innerText = time;
+    document.getElementById("modalName").innerText = name;
+    document.getElementById("modalApptType").innerText = type;
+    document.getElementById("modalStatus").innerText = status;
+
+    document.getElementById("modalType").innerText = type + " Details";
+}
+
+function closeModal() {
+    document.getElementById("modalOverlay").style.display = "none";
+}
+
+document.getElementById("modalOverlay").addEventListener("click", function(e){
+    if(e.target === this){
+        closeModal();
+    }
+});
+
 </script>
 
 </body>
