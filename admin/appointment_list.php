@@ -16,7 +16,20 @@ $appointments = [
 body {
     margin: 0;
     font-family: system-ui;
-    background: #f5f6fa;
+    background-color: #f5f6fa;
+    position: relative;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("../assets/logo.jpg");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 400px;
+    opacity: 0.07; /* Makes it very light */
+    z-index: -1;
 }
 
 /* HEADER */
@@ -46,6 +59,53 @@ body {
     font-size: 26px;
     cursor: pointer;
     user-select: none;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.admin-profile {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    position: relative;
+}
+
+.admin-img {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.dropdown {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background: white;
+    border: 1.5px solid #880318;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    display: none;
+    flex-direction: column;
+    min-width: 150px;
+    overflow: hidden;
+}
+
+.dropdown a {
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #333;
+    transition: 0.2s;
+}
+
+.dropdown a:hover {
+    background: #f0f0f0;
 }
 
 /* NAVBAR */
@@ -164,7 +224,35 @@ body {
         <img src="../assets/logo.jpg" height="40">
         <div class="logo">Alpha Aquila</div>
     </div>
-    <div class="burger" onclick="toggleMenu()">☰</div>
+    <div class="header-right">
+        <div class="admin-profile" onclick="toggleProfile()">
+            <img src="../assets/admin.png" class="admin-img">
+            <span>Levi De Guzman ▼</span>
+                <div class="dropdown" id="profileDropdown">
+                    <a href="#">
+                        <span class="icon-wrapper">
+                            <img src="../assets/account.png">
+                        </span>
+                        <span>Account</span>
+                    </a>
+
+                    <a href="#">
+                        <span class="icon-wrapper">
+                            <img src="../assets/setting.png">
+                        </span>
+                        <span>Settings</span>
+                    </a>
+
+                    <a href="#">
+                        <span class="icon-wrapper">
+                            <img src="../assets/logout.png">
+                        </span>
+                        <span>Logout</span>
+                    </a>
+                </div>
+        </div>
+        <div class="burger" onclick="toggleMenu()">☰</div>
+    </div>
 </div>
 <!-- NAVBAR (Hidden by default) -->
 <div class="navbar" id="navbar">
@@ -217,6 +305,10 @@ body {
 function toggleMenu() {
     const nav = document.getElementById("navbar");
     nav.style.display = nav.style.display === "flex" ? "none" : "flex";
+}
+function toggleProfile() {
+    const dropdown = document.getElementById("profileDropdown");
+    dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
 }
 </script>
 
