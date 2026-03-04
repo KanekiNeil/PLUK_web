@@ -271,7 +271,7 @@ header {
 
 /* ================= PRIORITIES ================= */
 .priorities-container {
-    width: 85%;
+    width: 80%;
     margin: 30px auto;
     background: #fff;
     padding: 20px;
@@ -317,7 +317,63 @@ header {
     border-radius: 8px;
 }
 
+/* ================= ARROW BUTTONS ================= */
+.arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: #8b0000;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+    z-index: 999; /* 🔥 make it very high */
+}
 
+/* Left button */
+.left-arrow {
+    left: -20px;
+}
+
+/* Right button */
+.right-arrow {
+    right: -20px;
+}
+
+/* Hover effect */
+.arrow:hover {
+    background: #a30000;
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* Optional: Slight transparency when disabled */
+.arrow:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.carousel-wrapper {
+    position: relative;
+    overflow: visible;
+    padding: 0 30px;
+}
+
+.priorities-carousel {
+    position: relative;
+    z-index: 1;
+}
+
+.arrow {
+    z-index: 999;
+}
 
 
 
