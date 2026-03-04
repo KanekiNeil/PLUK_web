@@ -1,5 +1,5 @@
 <?php
-$hostname = getenv('MYSQLHOST') ?: 'db.ncsobcjlvytbivoxezfd.supabase.co';
+$hostname = getenv('MYSQLHOST') ?: 'ncsobcjlvytbivoxezfd.supabase.co';
 $port     = getenv('MYSQLPORT') ?: '5432';
 $username = getenv('MYSQLUSER') ?: 'postgres';
 $password = getenv('MYSQLPASSWORD') ?: 'pluk_Boslia';

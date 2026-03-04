@@ -100,48 +100,47 @@ $fullDates = [
     <div class="card shadow p-4">
         <h3 class="mb-4 text-center">Personal Information Form</h3>
 
-        <form>
+        <form id="applicationForm">
 
             <!-- PERSONAL INFO -->
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label class="form-label">First Name</label>
-                    <input type="text" class="form-control" placeholder="Enter first name">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Last Name</label>
-                    <input type="text" class="form-control" placeholder="Enter last name">
-                </div>
+            <div class="mb-3">
+                <label class="form-label">First Name</label>
+                <input type="text" name="first_name" class="form-control" placeholder="Enter first name">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Last Name</label>
+                <input type="text" name="last_name" class="form-control" placeholder="Enter last name">
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Email Address</label>
-                <input type="email" class="form-control" placeholder="Enter email">
+                <input type="email" name="email" class="form-control" placeholder="Enter email">
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Phone Number</label>
-                <input type="tel" class="form-control" placeholder="Enter phone number">
+                <input type="tel" name="phone" class="form-control" placeholder="Enter phone number">
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Address</label>
-                <input type="text" class="form-control" placeholder="Enter address">
+                <input type="text" name="address" class="form-control" placeholder="Enter address">
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Date of Birth</label>
-                <input type="date" class="form-control" placeholder="Enter date of birth">
+                <input type="date" name="birthdate" class="form-control">
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Current Job</label>
-                <input type="text" class="form-control" placeholder="Enter Current Job">
+                <input type="text" name="current_job" class="form-control" placeholder="Enter Current Job">
             </div>
 
             <div class="mb-3">
                 <label class="form-label">School Graduated</label>
-                <input type="text" class="form-control" placeholder="Enter school graduated">
+                <input type="text" name="school_graduated" class="form-control" placeholder="Enter school graduated">
             </div>
 
             <!-- UPLOAD WITH CAMERA ICON -->
@@ -180,6 +179,8 @@ $fullDates = [
                 <div id="calendar"></div>
             </div>
 
+            <input type="hidden" name="appointment_date" id="appointmentDate">
+
             <div class="text-center">
                 <button type="submit" class="btn btn-success px-4">
                     Submit
@@ -193,77 +194,75 @@ $fullDates = [
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-    const addSkillBtn = document.getElementById('addSkillBtn');
-    const skillInput = document.getElementById('skillInput');
-    const skillsContainer = document.getElementById('skillsContainer');
 
-    addSkillBtn.addEventListener('click', function () {
-        const skillValue = skillInput.value.trim();
-
-        if (skillValue !== '') {
-            const badge = document.createElement('span');
-            badge.className = 'badge bg-secondary skill-badge';
-            badge.innerHTML = skillValue + ' <i class="bi bi-x ms-1" style="cursor:pointer;"></i>';
-
-            // Remove skill on click
-            badge.querySelector('i').addEventListener('click', function () {
-                badge.remove();
-            });
-
-            skillsContainer.appendChild(badge);
-            skillInput.value = '';
-        }
-    });
-</script>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.34.0/dist/supabase.min.js"></script>
+
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+  const SUPABASE_URL = "https://ncsobcjlvytbivoxezfd.supabase.co"; // your project URL
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jc29iY2psdnl0Yml2b3hlemZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1Njg3NzYsImV4cCI6MjA4NzE0NDc3Nn0.LWELQVNAh5GzjU-YUSrO5O3b3Gj-lP7pUB3A_D-vNfA"; // your anon/public API key
 
-        const availableDates = <?php echo json_encode($availableDates); ?>;
-        const fullDates = <?php echo json_encode($fullDates); ?>;
+  const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+</script>
 
-        const calendarEl = document.getElementById('calendar');
+<script>
+document.addEventListener('DOMContentLoaded', function () {
 
-        const calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            selectable: true,
+    /* =========================
+       📅 FULLCALENDAR
+    ========================== */
 
-            dateClick: function(info) {
-                const clickedDate = info.dateStr;
+    const availableDates = <?php echo json_encode($availableDates); ?>;
+    const fullDates = <?php echo json_encode($fullDates); ?>;
 
-                if (fullDates.includes(clickedDate)) {
-                    alert("This date is fully booked.");
-                    return;
-                }
+    const calendarEl = document.getElementById('calendar');
 
-                if (!availableDates.includes(clickedDate)) {
-                    alert("Appointments not available on this date.");
-                    return;
-                }
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        selectable: true,
 
-                alert("You selected: " + clickedDate);
-                // You can open modal here
-            },
+        dateClick: function(info) {
+            const clickedDate = info.dateStr;
 
-            dayCellDidMount: function(info) {
-                const date = info.date.toISOString().split('T')[0];
-
-                if (fullDates.includes(date)) {
-                    info.el.classList.add('fc-day-full');
-                } 
-                else if (availableDates.includes(date)) {
-                    info.el.classList.add('fc-day-available');
-                }
+            if (fullDates.includes(clickedDate)) {
+                alert("This date is fully booked.");
+                return;
             }
-        });
 
-        calendar.render();
+            if (!availableDates.includes(clickedDate)) {
+                alert("Appointments not available on this date.");
+                return;
+            }
+
+            alert("You selected: " + clickedDate);
+
+            // ✅ SAVE SELECTED DATE
+            const appointmentInput = document.getElementById("appointmentDate");
+            if (appointmentInput) {
+                appointmentInput.value = clickedDate;
+            }
+        },
+
+        dayCellDidMount: function(info) {
+            const date = info.date.toISOString().split('T')[0];
+
+            if (fullDates.includes(date)) {
+                info.el.classList.add('fc-day-full');
+            } 
+            else if (availableDates.includes(date)) {
+                info.el.classList.add('fc-day-available');
+            }
+        }
     });
 
+    calendar.render();
 
-    // camera verification js.
+
+    /* =========================
+       📷 CAMERA SECTION
+    ========================== */
+
     const video = document.getElementById("video");
     const canvas = document.getElementById("canvas");
     const captureBtn = document.getElementById("captureBtn");
@@ -274,15 +273,11 @@ $fullDates = [
     async function startCamera() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: "user"
-                },
+                video: { facingMode: "user" },
                 audio: false
             });
 
             video.srcObject = stream;
-
-            // wait until camera fully loads
             await video.play();
 
         } catch (err) {
@@ -291,32 +286,89 @@ $fullDates = [
         }
     }
 
-    startCamera();
+    // Only start if video exists
+    if (video) {
+        startCamera();
+    }
 
     // Capture Photo
-    captureBtn.addEventListener("click", () => {
+    if (captureBtn) {
+        captureBtn.addEventListener("click", () => {
 
-        if (!video.videoWidth) {
-            alert("Camera not ready yet.");
-            return;
+            if (!video.videoWidth) {
+                alert("Camera not ready yet.");
+                return;
+            }
+
+            const context = canvas.getContext("2d");
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const imageData = canvas.toDataURL("image/png");
+
+            // Show preview
+            preview.src = imageData;
+            preview.style.display = "block";
+
+            // Save to hidden input
+            faceImage.value = imageData;
+        });
+    }
+
+});
+</script>
+<script>
+document.getElementById("applicationForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    // Make sure appointment date is selected
+    const appointmentDate = document.getElementById("appointmentDate").value;
+    if (!appointmentDate) {
+        alert("Please select an appointment date.");
+        return;
+    }
+
+    const form = this;
+    const formData = new FormData(form);
+
+    // Optional: convert FormData to plain object
+    const payload = {};
+    formData.forEach((value, key) => {
+        payload[key] = value;
+    });
+
+    try {
+        // Send POST request to PHP endpoint (which uses Supabase REST API)
+        const response = await fetch("../php/submit_application.php", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.status === "success") {
+            alert(data.message);
+            form.reset();
+
+            // Remove face preview
+            const preview = document.getElementById("preview");
+            if (preview) preview.style.display = "none";
+
+            // Clear appointment date
+            document.getElementById("appointmentDate").value = "";
+
+        } else {
+            alert("Error: " + data.message);
         }
 
-        const context = canvas.getContext("2d");
-
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        const imageData = canvas.toDataURL("image/png");
-
-        // Preview image
-        preview.src = imageData;
-        preview.style.display = "block";
-
-        // Send to PHP
-        faceImage.value = imageData;
-    });
+    } catch (err) {
+        console.error(err);
+        alert("Something went wrong. Please try again.");
+    }
+});
 </script>
 </body>
 </html>
