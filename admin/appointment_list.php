@@ -1,9 +1,20 @@
 <?php
-$appointments = [
-    ["2026-02-16", "7:00-8:00 AM", "Juan Dela Cruz", "Career", "Rescheduled"],
-    ["2026-02-23", "1:00-2:00 PM", "Maria Santos", "Career", "Attended BYB"],
-    ["2026-02-27", "3:00-4:00 PM", "Rizal Doe", "Sales", "Processing"],
-];
+
+include_once "../php/session.php";
+
+
+if (!isset($_SESSION['user_id'])) {
+    // Not logged in
+    header("Location: admin_login.php");
+    exit;
+}
+// $appointments = [
+//     ["2026-02-16", "7:00-8:00 AM", "Juan Dela Cruz", "Career", "Rescheduled"],
+//     ["2026-02-23", "1:00-2:00 PM", "Maria Santos", "Career", "Attended BYB"],
+//     ["2026-02-27", "3:00-4:00 PM", "Rizal Doe", "Sales", "Processing"],
+// ];
+
+$appointments = include_once "../php/get_appointment_list.php";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -159,7 +170,7 @@ body::before {
 .table-header,
 .table-row {
     display: grid;
-    grid-template-columns: 1fr 1fr 1.5fr 1.5fr 1.2fr;
+    grid-template-columns: 1fr 1fr 1.5fr 1.5fr 1.2fr 0.2fr;
     padding: 16px 15px;
     align-items: center;
 }
@@ -378,7 +389,7 @@ body::before {
                         <span>Settings</span>
                     </a>
 
-                    <a href="#">
+                    <a href="#" id="logout">
                         <span class="icon-wrapper">
                             <img src="../assets/logout.png">
                         </span>
@@ -435,6 +446,9 @@ body::before {
                     <div onclick="applyStatusFilter('No Budget')">No Budget</div>
                 </div>
             </div>
+            <div>
+                Face
+            </div>
         </div>
 
         <?php foreach ($appointments as $appt): 
@@ -451,6 +465,7 @@ body::before {
             data-time="<?= $appt[1] ?>"
             data-name="<?= htmlspecialchars($appt[2]) ?>"
             data-type="<?= htmlspecialchars($appt[3]) ?>"
+            data-face="<?= htmlspecialchars($appt[5]) ?>"
             onclick="openModal(this)">
 
             <div><?= date("m/d/y", strtotime($appt[0])) ?></div>
@@ -481,6 +496,9 @@ body::before {
                     <?php endif; ?>
 
                 </select>
+            </div>
+            <div>
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAAFkklEQVR4nO2Wa0xTdxjGm/nFZF/2wVNBzcYQbct1KkMQULkJCIIiMAQEuVQuQtQN2dx0ZmEqICFMRawgaEBhuLZy1QIW0SIqmukUDOrwwrUtLRcBlYnPwgFBpFwOt2rCk/y+9OTfPL/3vP/k0GgzmclMBkXCZdqJuaxaCZcFZSD+i1kj4bFsaeMN+QdKKi8ZkHg+bgFll5f0MSMgmRFgDcDXQUdFNLpbb6G7tRwdFVHkb5IRzixKustmZP6rQ8vELKUL9BTGq+pBkBLc4c9oJN0BI/0JmDxJB4svEbHON1oqTaBn8h8KdLfeHpMAiy/phSdu0xU0fK4kgfKhAi03hz/D0xoqwJdAh9u04ONZoftDV0jK04aUr4um898ofAO0ffhMiZc4inwTii6xtL/4EsiylkGWbaBAQFI6qXfgyQkNPD6ijro0xgTkNN8rrg9ZjgHkuUaQ5xoPEWDyJQmTItCQzsTNcFWUsAmSKwEEqmK/plxeytOClK+Hpqyl5MTlOUZozjNGc/5KtFxYrUBAHDxhgfqzDJTtVMFlf2IIldFqFMprk3su61mXnOWQ567oL9560QKtgjVDBDR5YpMJCdSlMlAaooJiX2JYxiLRXz5bH/IcQ3LqLfmr0HLRHK0CK7QV2KCt0G6wAE/8Vo/f/MW4BWpOL4YoSAXFPsSoVEYplqg7qYkajjYkGXrkvveWN+mbuiXaCqzRVrgWL4rWof2SI5iJd6B75imWcqVYdk76ZEzlFQk8T16EEjYdQm9izFREDkiI/9TEw9+0URmmQ/IgXAe1nGUflLfBi0J7vLjkiHbhBnQIN2LJ8bswTH0G08wmrMpsyhqXwNMkDZT4zcUlL4IyPRKNGSxU/TpQ/n1qE5YPlC+yJ6feLnRCR7ELOi9/B+Nj/8D81DNYZ8hgmy6LoCxQzdGAcAsdRZ7EuCkPVVdY/h11HOO+8uvJqfeWd8PLEneYH7mHtcnPseGMDBvPylwpCTw+uhBFmwkUekycG4EjS9SfWIUOcvKu6CzZhJdXPPDqqhfsDt+Dc2IN3FPl8EiVMsYsUBWnjkJ3Ogo2EZPG9YCRJRoSzdFZ4oaXVzzx6qo3Xot84Bx3H56cGvilNHe6UPmkLnAjIJgCbowi0XjSipz8a5EvukrZ8IitADuhFiEn5TdpVCJwJTBVXN86soQ42QZdpf7oKguAX0wFQuPrsCuxJYmSwEVnAlNJGXsUiRQ7/FcWhKDoSoQdrcMejnw7JYELTgSmmjL/kSUkp9ZhR9QD/HK4Hvs5zWaUBPLXE5gOrvmNLPHjwQeIiKtHDKdtDiWBPAcC08U13+El9h6sQmRsfR2NanLtCUwnpT6KJSIOPERMTL2AskCOHYHpplSBRNSBRzh8qOEQZYFsWzqUgWjLYIlDvz/CsSjxZsoCWdZ0KAuR94CE/w+3kBjdqEtZ4LwVHcpE5NUrYbZViJR9mE1ZIMdBFXwLulK55s/Aum2lnbTxJHabrTDbXhU8M7pSyLZWRUKwL9y/v11NG2/UQtMdF3jH581zia6ea723kzAMAWEQDOLboF70AxXQ92wY5ryPwTuC+9FyjIeJzwWY+gmwcqsQ7LD7ebTJylf7imfPD00zWxBwev/8zfEl85wixSqWe7roRttBNxyJHb0YKWInCdEHfUUYDLfkYXWgCGbBZQjZ/ehn2lRHIzR/ITOQG8f0Sitf5MJpUrOJfKNq8hPmGof1sWsYwnsxGYya1QGYbyuHReht7NxTrUdTVrRCBWuY7HMZDLfkpwsd/uj80iLirYrJrlHEwkm0nU9h7fa/u2kfW4xCspn6/ryYpR5p5VpOCXL1NZFv5pnuHiKlYhwO+4DLNbRPIi6ZsywDcjeZemZy9V1TqrUcjrTrb0yqt/XnLVZ2tZnMhPaJ5H+NbC7Xc4vWqgAAAABJRU5ErkJggg==" alt="stack-of-photos">
             </div>
         </div>
 
@@ -527,6 +545,10 @@ body::before {
                 </p>
             </div>
 
+            <div>
+                <img id="modalFaceImage" src="" alt="Face Image" style="max-width: 100%; height: auto;">
+            </div>
+
             <div style="margin-top:20px; display:flex; gap:10px;">
                 <button class="close-modal-btn" onclick="enableEdit()">Edit</button>
                 <button class="close-modal-btn" id="saveBtn" onclick="saveChanges()" style="display:none; background:#155724;">Save</button>
@@ -557,6 +579,7 @@ function openModal(row) {
     const time = row.dataset.time;
     const name = row.dataset.name;
     const type = row.dataset.type;
+    const face = row.dataset.face;
 
     const select = row.querySelector(".status-select");
     const status = select.value;
@@ -569,6 +592,7 @@ function openModal(row) {
     document.getElementById("modalTimeText").innerText = time;
     document.getElementById("modalApptTypeText").innerText = type;
     document.getElementById("modalStatusText").innerText = status;
+    document.getElementById("modalFaceImage").src = "data:image/png;base64," + face;
 
     document.getElementById("modalType").innerText = type + " Details";
 
@@ -758,6 +782,27 @@ document.addEventListener("click", function(e) {
 });
 
 </script>
+<script>
+document.getElementById("logout").addEventListener("click", function(e) {
+    e.preventDefault();
 
+    fetch("../php/logout.php", {
+        method: "POST"
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            // Redirect to login page
+            window.location.href = "admin_login.php";
+        } else {
+            alert("Logout failed");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Something went wrong");
+    });
+});
+</script>
 </body>
 </html>
