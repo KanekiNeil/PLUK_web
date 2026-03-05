@@ -39,17 +39,11 @@
 			height: 40px;
 		}
 		
-		.hamburger {
-			font-size: 24px;
-			cursor: pointer;
-			color: #333;
-		}
-		
 		.container {
 			max-width: 900px;
-			margin: 40px auto;
+			margin: 20px auto;
 			background: white;
-			padding: 40px;
+			padding: 25px 40px;
 			border-radius: 8px;
 			box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 		}
@@ -58,19 +52,12 @@
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			margin-bottom: 50px;
+			margin-bottom: 40px;
 			position: relative;
 		}
 		
 		.steps-progress::before {
-			content: '';
-			position: absolute;
-			top: 20px;
-			left: 0;
-			right: 0;
-			height: 2px;
-			background: #ddd;
-			z-index: 1;
+			display: none;
 		}
 		
 		.step {
@@ -81,20 +68,32 @@
 			flex: 1;
 			position: relative;
 			z-index: 2;
+			cursor: pointer;
 		}
 		
-		.step-number {
-			width: 40px;
-			height: 40px;
-			border-radius: 50%;
-			background: white;
-			border: 2px solid #999;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			font-weight: bold;
-			color: #999;
-			font-size: 14px;
+		.step::after {
+			content: '';
+			position: absolute;
+			top: 20px;
+			left: calc(50% + 25px);
+			width: calc(100% - 50px);
+			height: 2px;
+			background: #ccc;
+			z-index: 0;
+		}
+		
+		.step:last-child::after {
+			display: none;
+		}
+		
+		.step.completed::after {
+			background: #8B3A3A;
+		}
+		
+		.step.completed .step-number {
+			background: #8B3A3A;
+			color: white;
+			border-color: #8B3A3A;
 		}
 		
 		.step.active .step-number {
@@ -103,11 +102,25 @@
 			border-color: #8B3A3A;
 		}
 		
-		.step.completed .step-number {
-			background: #8B3A3A;
-			color: white;
-			border-color: #8B3A3A;
+		.step-number {
+			width: 42px;
+			height: 42px;
+			border-radius: 50%;
+			background: white;
+			border: 2px solid #ccc;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-weight: bold;
+			color: #666;
+			font-size: 15px;
+			transition: transform 0.2s ease;
 		}
+		
+		.step:hover .step-number {
+			transform: scale(1.1);
+		}
+		
 		
 		.step-label {
 			font-size: 12px;
@@ -118,7 +131,7 @@
 		
 		.step.active .step-label {
 			color: #333;
-			font-weight: bold;
+			font-weight: 500;
 		}
 		
 		.content {
@@ -223,31 +236,35 @@
 			<img src="../assets/nobg_logo.png" alt="Alpha Aquila Logo">
 			<span>ALPHA AQUILA</span>
 		</div>
-		<div class="hamburger">☰</div>
 	</div>
 	
 	<!-- Main Container -->
 	<div class="container">
 		<!-- Progress Steps -->
 		<div class="steps-progress">
-			<div class="step active">
+			<div class="step active" onclick="navigateToStep(1)">
 				<div class="step-number">1</div>
 				<div class="step-label">Verify Email</div>
 			</div>
 			
-			<div class="step">
+			<div class="step" onclick="navigateToStep(2)">
 				<div class="step-number">2</div>
-				<div class="step-label">Confirm Payment</div>
+				<div class="step-label">Exam Payment</div>
 			</div>
 			
-			<div class="step">
+			<div class="step" onclick="navigateToStep(3)">
 				<div class="step-number">3</div>
 				<div class="step-label">Training Registration</div>
 			</div>
 			
-			<div class="step">
+			<div class="step" onclick="navigateToStep(4)">
 				<div class="step-number">4</div>
-				<div class="step-label"></div>
+				<div class="step-label">Training Payment</div>
+			</div>
+			
+			<div class="step" onclick="navigateToStep(5)">
+				<div class="step-number">5</div>
+				<div class="step-label">Review</div>
 			</div>
 		</div>
 		
@@ -276,6 +293,14 @@
 	</div>
 	
 	<script>
+		const currentStep = 1;
+		const pages = ['verify_email.php', 'exam_payment.php', 'training_registration.php', 'training_payment.php', 'review.php'];
+		
+		function navigateToStep(targetStep) {
+			if (targetStep === currentStep) return;
+			window.location.href = pages[targetStep - 1];
+		}
+		
 		function verifyEmail() {
 			const email = document.getElementById('email').value;
 			
@@ -292,6 +317,7 @@
 			// TODO: Send verification email
 			alert('Verification email sent to ' + email);
 			console.log('Email verified:', email);
+			window.location.href = 'exam_payment.php';
 		}
 		
 		function validateEmail(email) {

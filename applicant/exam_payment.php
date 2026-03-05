@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Confirm Payment - Alpha Aquila</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+		
+		body {
+			font-family: Arial, Helvetica, sans-serif;
+			background: #f5f5f5;
+		}
+		
+		.header {
+			background: white;
+			padding: 15px 30px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			border-bottom: 1px solid #ddd;
+		}
+		
+		.logo {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			font-weight: bold;
+			font-size: 16px;
+			color: #8B3A3A;
+		}
+		
+		.logo img {
+			width: 40px;
+			height: 40px;
+		}
+		
+		.container {
+			max-width: 900px;
+			margin: 20px auto;
+			background: white;
+			padding: 25px 40px;
+			border-radius: 8px;
+			box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+		}
+		
+		.steps-progress {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 40px;
+			position: relative;
+		}
+		
+		.steps-progress::before {
+			display: none;
+		}
+		
+		.step {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 10px;
+			flex: 1;
+			position: relative;
+			z-index: 2;
+			cursor: pointer;
+		}
+		
+		.step::after {
+			content: '';
+			position: absolute;
+			top: 20px;
+			left: calc(50% + 25px);
+			width: calc(100% - 50px);
+			height: 2px;
+			background: #ccc;
+			z-index: 0;
+		}
+		
+		.step:last-child::after {
+			display: none;
+		}
+		
+		.step.completed::after {
+			background: #8B3A3A;
+		}
+		
+		.step.completed .step-number {
+			background: #8B3A3A;
+			color: white;
+			border-color: #8B3A3A;
+		}
+		
+		.step.active .step-number {
+			background: #8B3A3A;
+			color: white;
+			border-color: #8B3A3A;
+		}
+		
+		.step-number {
+			width: 42px;
+			height: 42px;
+			border-radius: 50%;
+			background: white;
+			border: 2px solid #ccc;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-weight: bold;
+			color: #666;
+			font-size: 15px;
+			transition: transform 0.2s ease;
+		}
+		
+		.step:hover .step-number {
+			transform: scale(1.1);
+		}
+		
+		.step.completed .step-number {
+			background: #8B3A3A;
+			color: white;
+			border-color: #8B3A3A;
+		}
+		
+		.step-label {
+			font-size: 12px;
+			color: #666;
+			text-align: center;
+			font-weight: 500;
+		}
+		
+		.step.active .step-label {
+			color: #333;
+			font-weight: 500;
+		}
+		
+		.step.completed .step-label {
+			color: #333;
+			font-weight: bold;
+		}
+		
+		.content {
+			text-align: center;
+		}
+		
+		.content h2 {
+			color: #666;
+			font-size: 18px;
+			margin-bottom: 15px;
+			font-weight: 500;
+		}
+		
+		.payment-box {
+			border: 2px solid #ddd;
+			border-radius: 8px;
+			padding: 20px;
+			margin-bottom: 15px;
+			background: #fafafa;
+		}
+		
+		.payment-box h3 {
+			color: #333;
+			font-size: 16px;
+			margin-bottom: 15px;
+			font-weight: 600;
+		}
+		
+		.payment-details {
+			display: flex;
+			flex-direction: column;
+			gap: 15px;
+			text-align: left;
+		}
+		
+		.detail-row {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 8px 0;
+			border-bottom: 1px solid #e0e0e0;
+		}
+		
+		.detail-row:last-child {
+			border-bottom: none;
+		}
+		
+		.detail-label {
+			color: #666;
+			font-size: 12px;
+			font-weight: 500;
+		}
+		
+		.detail-value {
+			color: #333;
+			font-size: 12px;
+			font-weight: 600;
+		}
+		
+		.description {
+			color: #999;
+			font-size: 12px;
+			margin-bottom: 15px;
+			line-height: 1.4;
+		}
+		
+		.submit-btn {
+			width: 100%;
+			max-width: 500px;
+			padding: 14px;
+			background: #8B3A3A;
+			color: white;
+			border: none;
+			font-size: 16px;
+			font-weight: bold;
+			cursor: pointer;
+			border-radius: 4px;
+			transition: background 0.3s;
+		}
+		
+		.submit-btn:hover {
+			background: #6B2A2A;
+		}
+		
+		.submit-btn:active {
+			transform: scale(0.98);
+		}
+		
+		@media (max-width: 768px) {
+			.container {
+				padding: 20px;
+				margin: 20px;
+			}
+			
+			.steps-progress {
+				margin-bottom: 30px;
+			}
+			
+			.payment-box {
+				padding: 15px;
+			}
+			
+			.detail-row {
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 5px;
+			}
+		}
+	</style>
+</head>
+<body>
+	<!-- Header -->
+	<div class="header">
+		<div class="logo">
+			<img src="../assets/nobg_logo.png" alt="Alpha Aquila Logo">
+			<span>ALPHA AQUILA</span>
+		</div>
+	</div>
+	
+	<!-- Main Container -->
+	<div class="container">
+		<!-- Progress Steps -->
+		<div class="steps-progress">
+			<div class="step completed" onclick="navigateToStep(1)">
+				<div class="step-number">1</div>
+				<div class="step-label">Verify Email</div>
+			</div>
+			
+			<div class="step active" onclick="navigateToStep(2)">
+				<div class="step-number">2</div>
+				<div class="step-label">Exam Payment</div>
+			</div>
+			
+			<div class="step" onclick="navigateToStep(3)">
+				<div class="step-number">3</div>
+				<div class="step-label">Training Registration</div>
+			</div>
+			
+			<div class="step" onclick="navigateToStep(4)">
+				<div class="step-number">4</div>
+				<div class="step-label">Training Payment</div>
+			</div>
+			
+			<div class="step" onclick="navigateToStep(5)">
+				<div class="step-number">5</div>
+				<div class="step-label">Review</div>
+			</div>
+		</div>
+		
+		<!-- Content -->
+		<div class="content">
+			<!-- Heading -->
+			<h2>Confirm your examination payment</h2>
+			
+			<!-- Payment Details Box -->
+			<div class="payment-box">
+				<h3>Payment Details</h3>
+				<div class="payment-details">
+					<div class="detail-row">
+						<span class="detail-label">Name:</span>
+						<span class="detail-value"></span>
+					</div>
+					<div class="detail-row">
+						<span class="detail-label">Amount:</span>
+						<span class="detail-value"></span>
+					</div>
+					<div class="detail-row">
+						<span class="detail-label">Timestamp:</span>
+						<span class="detail-value"></span>
+					</div>
+					<div class="detail-row">
+						<span class="detail-label">Transaction ID:</span>
+						<span class="detail-value"></span>
+					</div>
+				</div>
+			</div>
+			
+			<!-- Description -->
+			<div class="description">
+				You can only proceed to the next step once your payment has been reviewed<br>
+				and confirmed by the admin.
+			</div>
+			
+			<!-- Submit Button -->
+			<button class="submit-btn" onclick="sendConfirmation()">Send Confirmation</button>
+		</div>
+	</div>
+	
+	<script>
+		const currentStep = 2;
+		const pages = ['verify_email.php', 'exam_payment.php', 'training_registration.php', 'training_payment.php', 'review.php'];
+		
+		function navigateToStep(targetStep) {
+			if (targetStep === currentStep) return;
+			window.location.href = pages[targetStep - 1];
+		}
+		
+		function sendConfirmation() {
+			alert('Confirmation sent to admin for review');
+			console.log('Payment confirmation sent');
+			window.location.href = 'training_registration.php';
+		}
+	</script>
+</body>
+</html>
