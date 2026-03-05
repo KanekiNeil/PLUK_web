@@ -39,12 +39,6 @@
 			height: 40px;
 		}
 		
-		.hamburger {
-			font-size: 24px;
-			cursor: pointer;
-			color: #333;
-		}
-		
 		.container {
 			max-width: 900px;
 			margin: 20px auto;
@@ -63,38 +57,37 @@
 		}
 		
 		.steps-progress::before {
-			content: '';
-			position: absolute;
-			top: 20px;
-			left: 0;
-			right: 0;
-			height: 2px;
-			background: #ddd;
-			z-index: 1;
+			display: none;
 		}
 		
 		.step {
 			display: flex;
 			flex-direction: column;
 			align-items: center;
-			gap: 8px;
+			gap: 10px;
 			flex: 1;
 			position: relative;
 			z-index: 2;
+			cursor: pointer;
 		}
 		
-		.step-number {
-			width: 40px;
-			height: 40px;
-			border-radius: 50%;
-			background: white;
-			border: 2px solid #999;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			font-weight: bold;
-			color: #999;
-			font-size: 14px;
+		.step::after {
+			content: '';
+			position: absolute;
+			top: 20px;
+			left: calc(50% + 25px);
+			width: calc(100% - 50px);
+			height: 2px;
+			background: #ccc;
+			z-index: 0;
+		}
+		
+		.step:last-child::after {
+			display: none;
+		}
+		
+		.step.completed::after {
+			background: #8B3A3A;
 		}
 		
 		.step.completed .step-number {
@@ -109,8 +102,33 @@
 			border-color: #8B3A3A;
 		}
 		
+		.step-number {
+			width: 42px;
+			height: 42px;
+			border-radius: 50%;
+			background: white;
+			border: 2px solid #ccc;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-weight: bold;
+			color: #666;
+			font-size: 15px;
+			transition: transform 0.2s ease;
+		}
+		
+		.step:hover .step-number {
+			transform: scale(1.1);
+		}
+		
+		.step.completed .step-number {
+			background: #8B3A3A;
+			color: white;
+			border-color: #8B3A3A;
+		}
+		
 		.step-label {
-			font-size: 11px;
+			font-size: 12px;
 			color: #666;
 			text-align: center;
 			font-weight: 500;
@@ -118,7 +136,7 @@
 		
 		.step.active .step-label {
 			color: #333;
-			font-weight: bold;
+			font-weight: 500;
 		}
 		
 		.step.completed .step-label {
@@ -209,6 +227,23 @@
 			margin-bottom: 15px;
 		}
 		
+		.training-item.whole-day-item {
+			justify-content: center;
+			padding: 25px 15px;
+		}
+		
+		.training-item.whole-day-item .training-label {
+			flex: none;
+		}
+		
+		.training-item.whole-day-item .training-inputs {
+			flex: none;
+		}
+		
+		.training-item.whole-day-item .input-group {
+			min-width: 200px;
+		}
+		
 		.training-label {
 			flex: 0 0 180px;
 			font-size: 14px;
@@ -295,31 +330,35 @@
 			<img src="../assets/nobg_logo.png" alt="Alpha Aquila Logo">
 			<span>ALPHA AQUILA</span>
 		</div>
-		<div class="hamburger">☰</div>
 	</div>
 	
 	<!-- Main Container -->
 	<div class="container">
 		<!-- Progress Steps -->
 		<div class="steps-progress">
-			<div class="step completed">
+			<div class="step completed" onclick="navigateToStep(1)">
 				<div class="step-number">1</div>
 				<div class="step-label">Verify Email</div>
 			</div>
 			
-			<div class="step completed">
+			<div class="step completed" onclick="navigateToStep(2)">
 				<div class="step-number">2</div>
-				<div class="step-label">Confirm Payment</div>
+				<div class="step-label">Exam Payment</div>
 			</div>
 			
-			<div class="step active">
+			<div class="step active" onclick="navigateToStep(3)">
 				<div class="step-number">3</div>
 				<div class="step-label">Training Registration</div>
 			</div>
 			
-			<div class="step">
+			<div class="step" onclick="navigateToStep(4)">
 				<div class="step-number">4</div>
-				<div class="step-label"></div>
+				<div class="step-label">Training Payment</div>
+			</div>
+			
+			<div class="step" onclick="navigateToStep(5)">
+				<div class="step-number">5</div>
+				<div class="step-label">Review</div>
 			</div>
 		</div>
 		
@@ -344,8 +383,19 @@
 			</div>
 			
 			<div class="training-schedule">
-				<!-- Training 1 -->
-				<div class="training-item">
+				<!-- Whole Day Schedule (shown when whole-day is selected) -->
+				<div class="training-item whole-day-item" id="wholeDayItem" style="display: none;">
+					<div class="training-label">Instruction-Led Training (Whole Day)</div>
+					<div class="training-inputs">
+						<div class="input-group">
+							<label>Date</label>
+							<input type="date" id="wholeDayDate">
+						</div>
+					</div>
+				</div>
+				
+				<!-- Training 1 (shown when separated is selected) -->
+				<div class="training-item separated-item" id="training1Item">
 					<div class="training-label">Instruction-Led Training 1</div>
 					<div class="training-inputs">
 						<div class="input-group">
@@ -359,8 +409,8 @@
 					</div>
 				</div>
 				
-				<!-- Training 2 -->
-				<div class="training-item">
+				<!-- Training 2 (shown when separated is selected) -->
+				<div class="training-item separated-item" id="training2Item">
 					<div class="training-label">Instruction-Led Training 2</div>
 					<div class="training-inputs">
 						<div class="input-group">
@@ -381,8 +431,34 @@
 	</div>
 	
 	<script>
+		const currentStep = 3;
+		const pages = ['verify_email.php', 'exam_payment.php', 'training_registration.php', 'training_payment.php', 'review.php'];
+		
+		function navigateToStep(targetStep) {
+			if (targetStep === currentStep) return;
+			window.location.href = pages[targetStep - 1];
+		}
+		
+		// Handle schedule type change
+		document.getElementById('scheduleType').addEventListener('change', function() {
+			const wholeDayItem = document.getElementById('wholeDayItem');
+			const training1Item = document.getElementById('training1Item');
+			const training2Item = document.getElementById('training2Item');
+			
+			if (this.value === 'whole-day') {
+				wholeDayItem.style.display = 'flex';
+				training1Item.style.display = 'none';
+				training2Item.style.display = 'none';
+			} else {
+				wholeDayItem.style.display = 'none';
+				training1Item.style.display = 'flex';
+				training2Item.style.display = 'flex';
+			}
+		});
+		
 		function registerTraining() {
 			alert('Training registered successfully!');
+			window.location.href = 'training_payment.php';
 		}
 	</script>
 </body>

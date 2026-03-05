@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Confirm Payment - Alpha Aquila</title>
+	<title>Training Payment - Alpha Aquila</title>
 	<style>
 		* {
 			margin: 0;
@@ -39,12 +39,6 @@
 			height: 40px;
 		}
 		
-		.hamburger {
-			font-size: 24px;
-			cursor: pointer;
-			color: #333;
-		}
-		
 		.container {
 			max-width: 900px;
 			margin: 20px auto;
@@ -58,19 +52,12 @@
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			margin-bottom: 25px;
+			margin-bottom: 40px;
 			position: relative;
 		}
 		
 		.steps-progress::before {
-			content: '';
-			position: absolute;
-			top: 20px;
-			left: 0;
-			right: 0;
-			height: 2px;
-			background: #ddd;
-			z-index: 1;
+			display: none;
 		}
 		
 		.step {
@@ -81,20 +68,26 @@
 			flex: 1;
 			position: relative;
 			z-index: 2;
+			cursor: pointer;
 		}
 		
-		.step-number {
-			width: 40px;
-			height: 40px;
-			border-radius: 50%;
-			background: white;
-			border: 2px solid #999;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			font-weight: bold;
-			color: #999;
-			font-size: 14px;
+		.step::after {
+			content: '';
+			position: absolute;
+			top: 20px;
+			left: calc(50% + 25px);
+			width: calc(100% - 50px);
+			height: 2px;
+			background: #ccc;
+			z-index: 0;
+		}
+		
+		.step:last-child::after {
+			display: none;
+		}
+		
+		.step.completed::after {
+			background: #8B3A3A;
 		}
 		
 		.step.completed .step-number {
@@ -109,6 +102,31 @@
 			border-color: #8B3A3A;
 		}
 		
+		.step-number {
+			width: 42px;
+			height: 42px;
+			border-radius: 50%;
+			background: white;
+			border: 2px solid #ccc;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-weight: bold;
+			color: #666;
+			font-size: 15px;
+			transition: transform 0.2s ease;
+		}
+		
+		.step:hover .step-number {
+			transform: scale(1.1);
+		}
+		
+		.step.completed .step-number {
+			background: #8B3A3A;
+			color: white;
+			border-color: #8B3A3A;
+		}
+		
 		.step-label {
 			font-size: 12px;
 			color: #666;
@@ -118,12 +136,12 @@
 		
 		.step.active .step-label {
 			color: #333;
-			font-weight: bold;
+			font-weight: 500;
 		}
 		
 		.step.completed .step-label {
 			color: #333;
-			font-weight: bold;
+			font-weight: 500;
 		}
 		
 		.content {
@@ -131,63 +149,56 @@
 		}
 		
 		.content h2 {
-			color: #666;
-			font-size: 18px;
-			margin-bottom: 15px;
-			font-weight: 500;
+			color: #8B3A3A;
+			font-size: 22px;
+			margin-bottom: 25px;
+			font-weight: bold;
 		}
 		
 		.payment-box {
-			border: 2px solid #ddd;
+			border: 1px solid #ddd;
 			border-radius: 8px;
-			padding: 20px;
-			margin-bottom: 15px;
-			background: #fafafa;
+			padding: 25px 30px;
+			max-width: 500px;
+			margin: 0 auto 25px;
+			text-align: left;
 		}
 		
 		.payment-box h3 {
+			font-size: 18px;
 			color: #333;
-			font-size: 16px;
-			margin-bottom: 15px;
-			font-weight: 600;
+			margin-bottom: 20px;
+			font-weight: bold;
 		}
 		
 		.payment-details {
 			display: flex;
 			flex-direction: column;
 			gap: 15px;
-			text-align: left;
 		}
 		
 		.detail-row {
 			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			padding: 8px 0;
-			border-bottom: 1px solid #e0e0e0;
-		}
-		
-		.detail-row:last-child {
-			border-bottom: none;
+			gap: 15px;
 		}
 		
 		.detail-label {
-			color: #666;
-			font-size: 12px;
+			font-size: 14px;
+			color: #333;
 			font-weight: 500;
+			min-width: 120px;
 		}
 		
 		.detail-value {
+			font-size: 14px;
 			color: #333;
-			font-size: 12px;
-			font-weight: 600;
 		}
 		
 		.description {
-			color: #999;
-			font-size: 12px;
-			margin-bottom: 15px;
-			line-height: 1.4;
+			color: #666;
+			font-size: 13px;
+			margin: 20px 0 25px;
+			line-height: 1.6;
 		}
 		
 		.submit-btn {
@@ -219,7 +230,7 @@
 			}
 			
 			.steps-progress {
-				margin-bottom: 30px;
+				margin-bottom: 25px;
 			}
 			
 			.payment-box {
@@ -241,38 +252,42 @@
 			<img src="../assets/nobg_logo.png" alt="Alpha Aquila Logo">
 			<span>ALPHA AQUILA</span>
 		</div>
-		<div class="hamburger">☰</div>
 	</div>
 	
 	<!-- Main Container -->
 	<div class="container">
 		<!-- Progress Steps -->
 		<div class="steps-progress">
-			<div class="step completed">
+			<div class="step completed" onclick="navigateToStep(1)">
 				<div class="step-number">1</div>
 				<div class="step-label">Verify Email</div>
 			</div>
 			
-			<div class="step active">
+			<div class="step completed" onclick="navigateToStep(2)">
 				<div class="step-number">2</div>
-				<div class="step-label">Confirm Payment</div>
+				<div class="step-label">Exam Payment</div>
 			</div>
 			
-			<div class="step">
+			<div class="step completed" onclick="navigateToStep(3)">
 				<div class="step-number">3</div>
 				<div class="step-label">Training Registration</div>
 			</div>
 			
-			<div class="step">
+			<div class="step active" onclick="navigateToStep(4)">
 				<div class="step-number">4</div>
-				<div class="step-label"></div>
+				<div class="step-label">Training Payment</div>
+			</div>
+			
+			<div class="step" onclick="navigateToStep(5)">
+				<div class="step-number">5</div>
+				<div class="step-label">Review</div>
 			</div>
 		</div>
 		
 		<!-- Content -->
 		<div class="content">
 			<!-- Heading -->
-			<h2>Confirm your examination payment</h2>
+			<h2>Confirm your training payment</h2>
 			
 			<!-- Payment Details Box -->
 			<div class="payment-box">
@@ -309,9 +324,18 @@
 	</div>
 	
 	<script>
+		const currentStep = 4;
+		const pages = ['verify_email.php', 'exam_payment.php', 'training_registration.php', 'training_payment.php', 'review.php'];
+		
+		function navigateToStep(targetStep) {
+			if (targetStep === currentStep) return;
+			window.location.href = pages[targetStep - 1];
+		}
+		
 		function sendConfirmation() {
-			alert('Confirmation sent to admin for review');
-			console.log('Payment confirmation sent');
+			// TODO: Send confirmation to admin
+			alert('Confirmation sent to admin for review.');
+			console.log('Training payment confirmation sent');
 		}
 	</script>
 </body>

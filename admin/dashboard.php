@@ -1,39 +1,63 @@
 <?php
 include_once "../php/session.php";
 
-
-if (!isset($_SESSION['user_id'])) {
-    // Not logged in
+/* ==============================
+   AUTHENTICATION CHECK
+================================*/
+/*if (!isset($_SESSION['user_id'])) {
     header("Location: admin_login.php");
-    exit;
+    exit();
 }
-$applicants = 10;
-$clients = 12;
-$events = 32;
 
+/* ==============================
+   SAMPLE DASHBOARD DATA
+   (Replace later with DB queries)
+================================*/
+$stats = [
+    "applicants" => 10,
+    "clients" => 12,
+    "events" => 32
+];
+
+/* ==============================
+   USER INFO
+================================*/
 $user_name = "Levi De Guzman";
 $user_role = "Junior Unit Manager";
+
+/* Avatar Initials */
+$initials = strtoupper(substr($user_name, 0, 1)) .
+            strtoupper(substr(strrchr($user_name, " "), 1, 1));
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="../style/dashboard.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="UTF-8">
+<title>Dashboard</title>
+
+<link rel="stylesheet" href="../style/dashboard.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
+
 <body>
 
+<!-- ==============================
+HEADER
+================================-->
 <header>
-    <div class="header">
+<div class="header">
 
     <div class="logo-section">
-        <img src="../assets/logo.jpg" class="logo">
+        <img src="../assets/logo.jpg" class="logo" alt="Alpha Aquila Logo">
         <h2 class="brand">ALPHA AQUILA</h2>
     </div>
 
     <div class="header-right">
+
+        <!-- Navigation -->
         <nav class="nav">
             <a href="#" class="nav-link active">Home</a>
             <a href="#" class="nav-link">Insurance Inquiries</a>
@@ -42,16 +66,22 @@ $user_role = "Junior Unit Manager";
             <a href="applicant_list.php" class="nav-link">Applicant List</a>
         </nav>
 
+        <!-- User Section -->
         <div class="user-section">
+
             <span class="material-icons notification-icon">notifications</span>
 
             <div class="profile-wrapper" id="profileToggle">
+
                 <div class="user-info">
-                    <strong><?php echo $user_name; ?></strong>
-                    <small><?php echo $user_role; ?></small>
+                    <strong><?= htmlspecialchars($user_name) ?></strong>
+                    <small><?= htmlspecialchars($user_role) ?></small>
                 </div>
 
-                <div class="profile-avatar">LD</div>
+                <div class="profile-avatar">
+                    <?= $initials ?>
+                </div>
+
                 <span class="dropdown-arrow">▼</span>
 
                 <div class="profile-dropdown">
@@ -59,141 +89,170 @@ $user_role = "Junior Unit Manager";
                     <a href="#">Settings</a>
                     <a href="#" id="logout">Logout</a>
                 </div>
+
             </div>
         </div>
+
     </div>
 
 </div>
 </header>
 
+
+<!-- ==============================
+MAIN CONTENT
+================================-->
 <div class="container">
 
-    <div class="left">
+<!-- LEFT SIDE -->
+<div class="left">
 
-        <!-- OVERVIEW -->
-        <div class="card overview">
-            <div class="overview-header">
-                <h3>Insurance and Appointment Activity Overview</h3>
+<!-- OVERVIEW CARD -->
+<div class="card overview">
 
-                <!-- Calendar Filter -->
-                <div class="filter-calendar">
-                    <span class="material-icons">calendar_month</span>
-                    <input type="date" id="overviewDate" hidden>
-                </div>
-            </div>
+    <div class="overview-header">
+        <h3>Insurance and Appointment Activity Overview</h3>
 
-            <div class="stats">
-                <div class="stat-box">
-                    <span class="material-icons stat-icon">groups</span>
-                    <p>No. of Applicants</p>
-                    <h1><?php echo $applicants; ?></h1>
-                </div>
+        <div class="filter-calendar">
+            <span class="material-icons">calendar_month</span>
+            <input type="date" id="overviewDate" hidden>
+        </div>
+    </div>
 
-                <div class="stat-box">
-                    <span class="material-icons stat-icon">person</span>
-                    <p>No. of Clients</p>
-                    <h1><?php echo $clients; ?></h1>
-                </div>
+    <div class="stats">
 
-                <div class="stat-box">
-                    <span class="material-icons stat-icon">event</span>
-                    <p>Upcoming Events</p>
-                    <h1><?php echo $events; ?></h1>
-                </div>
-            </div>
+        <div class="stat-box">
+            <span class="material-icons stat-icon">groups</span>
+            <p>No. of Applicants</p>
+            <h1><?= $stats['applicants'] ?></h1>
         </div>
 
-        <!-- PRIORITIES + PAST JOB -->
-        <div class="chart-row">
-            <div class="card equal-card">
-                <h3>Priorities</h3>
-                <div class="pie"></div>
-            </div>
-
-            <div class="card equal-card">
-                <h3>Past Job</h3>
-                <div class="bars">
-                    <div class="bar red"></div>
-                    <div class="bar blue"></div>
-                    <div class="bar teal"></div>
-                    <div class="bar orange"></div>
-                    <div class="bar yellow"></div>
-                </div>
-            </div>
+        <div class="stat-box">
+            <span class="material-icons stat-icon">person</span>
+            <p>No. of Clients</p>
+            <h1><?= $stats['clients'] ?></h1>
         </div>
 
-        <!-- LINE GRAPH -->
-        <div class="card">
-            <h3>Line</h3>
-            <canvas id="lineChart"></canvas>
+        <div class="stat-box">
+            <span class="material-icons stat-icon">event</span>
+            <p>Upcoming Events</p>
+            <h1><?= $stats['events'] ?></h1>
         </div>
 
     </div>
+</div>
 
-    <!-- RIGHT SIDE -->
-    <div class="right">
 
-        <div class="card schedule-card">
+<!-- PRIORITIES + PAST JOB -->
+<div class="chart-row">
 
-            <div class="calendar-header">
-                <h3>Schedule</h3>
-                <a href="#" class="see-all">See All</a>
-            </div>
+    <div class="card equal-card">
+        <h3>Priorities</h3>
+        <div class="pie"></div>
+    </div>
 
-            <div class="calendar">
-                <div class="month">
-                    <button id="prev">&lt;</button>
-                    <span id="monthYear"></span>
-                    <button id="next">&gt;</button>
-                </div>
+    <div class="card equal-card">
+        <h3>Past Job</h3>
 
-                <div class="days">
-                    <span>Sun</span><span>Mon</span><span>Tue</span>
-                    <span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
-                </div>
-
-                <div class="dates" id="dates"></div>
-            </div>
-
-            <div class="appointments">
-                <h4 id="selectedDate">February 16, 2026</h4>
-
-                <div class="meeting">9:00 AM - 11:00 AM | 1st Client Meeting</div>
-                <div class="meeting">1:00 PM - 2:00 PM | 2nd Client Meeting</div>
-                <div class="meeting">3:00 PM - 4:00 PM | 3rd Client Meeting</div>
-                <div class="meeting">4:30 PM - 5:30 PM | 4th Client Meeting</div>
-                <div class="meeting">6:00 PM - 7:00 PM | 5th Client Meeting</div>
-            </div>
-
+        <div class="bars">
+            <div class="bar red"></div>
+            <div class="bar blue"></div>
+            <div class="bar teal"></div>
+            <div class="bar orange"></div>
+            <div class="bar yellow"></div>
         </div>
 
     </div>
 
 </div>
 
+
+<!-- LINE CHART -->
+<div class="card">
+    <h3>Line</h3>
+    <canvas id="lineChart"></canvas>
+</div>
+
+</div>
+
+
+<!-- RIGHT SIDE -->
+<div class="right">
+
+<div class="card schedule-card">
+
+    <div class="calendar-header">
+        <h3>Schedule</h3>
+        <a href="#" class="see-all">See All</a>
+    </div>
+
+    <!-- Calendar -->
+    <div class="calendar">
+
+        <div class="month">
+            <button id="prev">&lt;</button>
+            <span id="monthYear"></span>
+            <button id="next">&gt;</button>
+        </div>
+
+        <div class="days">
+            <span>Sun</span><span>Mon</span><span>Tue</span>
+            <span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+        </div>
+
+        <div class="dates" id="dates"></div>
+
+    </div>
+
+    <!-- Appointments -->
+    <div class="appointments">
+
+        <h4 id="selectedDate">February 16, 2026</h4>
+
+        <div class="meeting">9:00 AM - 11:00 AM | 1st Client Meeting</div>
+        <div class="meeting">1:00 PM - 2:00 PM | 2nd Client Meeting</div>
+        <div class="meeting">3:00 PM - 4:00 PM | 3rd Client Meeting</div>
+        <div class="meeting">4:30 PM - 5:30 PM | 4th Client Meeting</div>
+        <div class="meeting">6:00 PM - 7:00 PM | 5th Client Meeting</div>
+
+    </div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- ==============================
+SCRIPTS
+================================-->
 <script src="../js/dashboard.js"></script>
 
 <script>
 document.getElementById("logout").addEventListener("click", function(e) {
+
     e.preventDefault();
 
     fetch("../php/logout.php", {
         method: "POST"
     })
-    .then(res => res.json())
+    .then(response => response.json())
     .then(data => {
+
         if (data.success) {
-            // Redirect to login page
             window.location.href = "admin_login.php";
         } else {
-            alert("Logout failed");
+            alert("Logout failed.");
         }
+
     })
-    .catch(err => {
-        console.error(err);
-        alert("Something went wrong");
+    .catch(() => {
+        alert("An error occurred during logout.");
     });
+
 });
 </script>
+
 </body>
 </html>
