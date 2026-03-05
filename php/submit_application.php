@@ -85,16 +85,16 @@ function supabaseInsert($table, $data, $SUPABASE_URL, $SUPABASE_KEY) {
 try {
     // Insert applicant
     $insertedApplicant = supabaseInsert("applicant_information", $applicantData, $SUPABASE_URL, $SUPABASE_KEY);
-    if (!$insertedApplicant || !isset($insertedApplicant["AIID"])) {
+    if (!$insertedApplicant || !isset($insertedApplicant["aiid"])) {
         throw new Exception("Failed to create applicant record.");
     }
-    $AIID = $insertedApplicant["AIID"];
+    $AIID = $insertedApplicant["aiid"];
 
     // Insert appointment
     $appointmentData = [
         "AA_FaceID" => $faceImage ?: null,
         "AA_DateTime" => $appointmentDate,
-        "AIID" => $AIID
+        "aiid" => $AIID
     ];
     $insertedAppointment = supabaseInsert("application_appointment", $appointmentData, $SUPABASE_URL, $SUPABASE_KEY);
 
