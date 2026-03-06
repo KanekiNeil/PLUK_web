@@ -37,7 +37,7 @@ $user_role = "Junior Unit Manager";
         <nav class="nav">
             <a href="#" class="nav-link active">Home</a>
             <a href="#" class="nav-link">Insurance Inquiries</a>
-            <a href="#" class="nav-link">Set Availability</a>
+            <a href="set_availability_ui.php" class="nav-link"> Set Availability </a>
             <a href="appointment_list.php" class="nav-link">Appointment List</a>
             <a href="applicant_list.php" class="nav-link">Applicant List</a>
         </nav>
