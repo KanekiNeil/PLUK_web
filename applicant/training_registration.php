@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Training Registration - Alpha Aquila</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+		
+		body {
+			font-family: Arial, Helvetica, sans-serif;
+			background: #f5f5f5;
+		}
+		
+		.header {
+			background: white;
+			padding: 15px 30px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			border-bottom: 1px solid #ddd;
+		}
+		
+		.logo {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			font-weight: bold;
+			font-size: 16px;
+			color: #8B3A3A;
+		}
+		
+		.logo img {
+			width: 40px;
+			height: 40px;
+		}
+		
+		.container {
+			max-width: 900px;
+			margin: 20px auto;
+			background: white;
+			padding: 25px 40px;
+			border-radius: 8px;
+			box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+		}
+		
+		.steps-progress {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 40px;
+			position: relative;
+		}
+		
+		.steps-progress::before {
+			display: none;
+		}
+		
+		.step {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 10px;
+			flex: 1;
+			position: relative;
+			z-index: 2;
+			cursor: pointer;
+		}
+		
+		.step::after {
+			content: '';
+			position: absolute;
+			top: 20px;
+			left: calc(50% + 25px);
+			width: calc(100% - 50px);
+			height: 2px;
+			background: #ccc;
+			z-index: 0;
+		}
+		
+		.step:last-child::after {
+			display: none;
+		}
+		
+		.step.completed::after {
+			background: #8B3A3A;
+		}
+		
+		.step.completed .step-number {
+			background: #8B3A3A;
+			color: white;
+			border-color: #8B3A3A;
+		}
+		
+		.step.active .step-number {
+			background: #8B3A3A;
+			color: white;
+			border-color: #8B3A3A;
+		}
+		
+		.step-number {
+			width: 42px;
+			height: 42px;
+			border-radius: 50%;
+			background: white;
+			border: 2px solid #ccc;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-weight: bold;
+			color: #666;
+			font-size: 15px;
+			transition: transform 0.2s ease;
+		}
+		
+		.step:hover .step-number {
+			transform: scale(1.1);
+		}
+		
+		.step.completed .step-number {
+			background: #8B3A3A;
+			color: white;
+			border-color: #8B3A3A;
+		}
+		
+		.step-label {
+			font-size: 12px;
+			color: #666;
+			text-align: center;
+			font-weight: 500;
+		}
+		
+		.step.active .step-label {
+			color: #333;
+			font-weight: 500;
+		}
+		
+		.step.completed .step-label {
+			color: #333;
+			font-weight: bold;
+		}
+		
+		.content {
+			text-align: center;
+		}
+		
+		.content h2 {
+			color: #333;
+			font-size: 20px;
+			margin-bottom: 15px;
+			font-weight: 600;
+		}
+		
+		.info-text {
+			color: #666;
+			font-size: 14px;
+			margin-bottom: 30px;
+			line-height: 1.6;
+		}
+		
+		.joinpru-link {
+			color: #0066cc;
+			text-decoration: none;
+			font-weight: 600;
+		}
+		
+		.joinpru-link:hover {
+			text-decoration: underline;
+		}
+		
+		.select-schedule-title {
+			text-align: left;
+			font-size: 14px;
+			font-weight: 600;
+			color: #333;
+			margin-bottom: 20px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+		
+		.schedule-dropdown {
+			padding: 8px 12px;
+			border: none;
+			background: none;
+			font-size: 16px;
+			font-weight: 600;
+			color: #8B3A3A;
+			cursor: pointer;
+			appearance: none;
+			-webkit-appearance: none;
+			-moz-appearance: none;
+			background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238B3A3A' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+			background-repeat: no-repeat;
+			background-position: right 0 center;
+			padding-right: 20px;
+			border-bottom: 2px solid #8B3A3A;
+		}
+		
+		.schedule-dropdown:focus {
+			outline: none;
+		}
+		
+		.schedule-dropdown option {
+			padding: 8px 12px;
+			color: #8B3A3A;
+			background: white;
+			border-bottom: 2px solid #8B3A3A;
+		}
+		
+		.training-schedule {
+			margin-bottom: 30px;
+			padding-bottom: 20px;
+		}
+		
+		.training-item {
+			display: flex;
+			align-items: center;
+			gap: 20px;
+			padding: 15px;
+			background: #f9f9f9;
+			border-radius: 6px;
+			margin-bottom: 15px;
+		}
+		
+		.training-item.whole-day-item {
+			justify-content: center;
+			padding: 25px 15px;
+		}
+		
+		.training-item.whole-day-item .training-label {
+			flex: none;
+		}
+		
+		.training-item.whole-day-item .training-inputs {
+			flex: none;
+		}
+		
+		.training-item.whole-day-item .input-group {
+			min-width: 200px;
+		}
+		
+		.training-label {
+			flex: 0 0 180px;
+			font-size: 14px;
+			font-weight: 500;
+			color: #333;
+			text-align: left;
+		}
+		
+		.training-inputs {
+			display: flex;
+			gap: 10px;
+			flex: 1;
+		}
+		
+		.input-group {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			gap: 5px;
+		}
+		
+		.input-group label {
+			font-size: 11px;
+			color: #999;
+			font-weight: 500;
+		}
+		
+		.input-group input {
+			padding: 8px 10px;
+			border: 1px solid #ddd;
+			border-radius: 4px;
+			font-size: 13px;
+			color: #333;
+		}
+		
+		.input-group input:focus {
+			outline: none;
+			border-color: #8B3A3A;
+			box-shadow: 0 0 3px rgba(139, 58, 58, 0.3);
+		}
+		
+		.register-btn {
+			width: 100%;
+			padding: 14px;
+			background: #8B3A3A;
+			color: white;
+			border: none;
+			font-size: 16px;
+			font-weight: bold;
+			cursor: pointer;
+			border-radius: 4px;
+			transition: background 0.3s;
+			margin-top: 20px;
+		}
+		
+		.register-btn:hover {
+			background: #6B2A2A;
+		}
+		
+		.register-btn:active {
+			transform: scale(0.98);
+		}
+		
+		@media (max-width: 768px) {
+			.container {
+				padding: 15px 20px;
+			}
+			
+			.training-item {
+				flex-direction: column;
+				align-items: flex-start;
+			}
+			
+			.training-inputs {
+				width: 100%;
+			}
+		}
+	</style>
+</head>
+<body>
+	<!-- Header -->
+	<div class="header">
+		<div class="logo">
+			<img src="../assets/nobg_logo.png" alt="Alpha Aquila Logo">
+			<span>ALPHA AQUILA</span>
+		</div>
+	</div>
+	
+	<!-- Main Container -->
+	<div class="container">
+		<!-- Progress Steps -->
+		<div class="steps-progress">
+			<div class="step completed" onclick="navigateToStep(1)">
+				<div class="step-number">1</div>
+				<div class="step-label">Verify Email</div>
+			</div>
+			
+			<div class="step completed" onclick="navigateToStep(2)">
+				<div class="step-number">2</div>
+				<div class="step-label">Exam Payment</div>
+			</div>
+			
+			<div class="step active" onclick="navigateToStep(3)">
+				<div class="step-number">3</div>
+				<div class="step-label">Training Registration</div>
+			</div>
+			
+			<div class="step" onclick="navigateToStep(4)">
+				<div class="step-number">4</div>
+				<div class="step-label">Training Payment</div>
+			</div>
+			
+			<div class="step" onclick="navigateToStep(5)">
+				<div class="step-number">5</div>
+				<div class="step-label">Review</div>
+			</div>
+		</div>
+		
+		<!-- Content -->
+		<div class="content">
+			<!-- Heading -->
+			<h2>Register for Instruction-Led Training</h2>
+			
+			<!-- Info Text -->
+			<div class="info-text">
+				To register for Instruction-Led Training. Click this link 
+				<a href="#" class="https://joinpru.com.ph/our-proposals">-JoinPRU</a>
+			</div>
+			
+			<!-- Select Schedule -->
+			<div class="select-schedule-title">
+				<span>Select Schedule</span>
+				<select class="schedule-dropdown" id="scheduleType">
+					<option value="separated">Separated</option>
+					<option value="whole-day">Whole Day</option>
+				</select>
+			</div>
+			
+			<div class="training-schedule">
+				<!-- Whole Day Schedule (shown when whole-day is selected) -->
+				<div class="training-item whole-day-item" id="wholeDayItem" style="display: none;">
+					<div class="training-label">Instruction-Led Training (Whole Day)</div>
+					<div class="training-inputs">
+						<div class="input-group">
+							<label>Date</label>
+							<input type="date" id="wholeDayDate">
+						</div>
+					</div>
+				</div>
+				
+				<!-- Training 1 (shown when separated is selected) -->
+				<div class="training-item separated-item" id="training1Item">
+					<div class="training-label">Instruction-Led Training 1</div>
+					<div class="training-inputs">
+						<div class="input-group">
+							<label>Date</label>
+							<input type="date" id="date1">
+						</div>
+						<div class="input-group">
+							<label>Time</label>
+							<input type="time" id="time1">
+						</div>
+					</div>
+				</div>
+				
+				<!-- Training 2 (shown when separated is selected) -->
+				<div class="training-item separated-item" id="training2Item">
+					<div class="training-label">Instruction-Led Training 2</div>
+					<div class="training-inputs">
+						<div class="input-group">
+							<label>Date</label>
+							<input type="date" id="date2">
+						</div>
+						<div class="input-group">
+							<label>Time</label>
+							<input type="time" id="time2">
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- Register Button -->
+			<button class="register-btn" onclick="registerTraining()">Register</button>
+		</div>
+	</div>
+	
+	<script>
+		const currentStep = 3;
+		const pages = ['verify_email.php', 'exam_payment.php', 'training_registration.php', 'training_payment.php', 'review.php'];
+		
+		function navigateToStep(targetStep) {
+			if (targetStep === currentStep) return;
+			window.location.href = pages[targetStep - 1];
+		}
+		
+		// Handle schedule type change
+		document.getElementById('scheduleType').addEventListener('change', function() {
+			const wholeDayItem = document.getElementById('wholeDayItem');
+			const training1Item = document.getElementById('training1Item');
+			const training2Item = document.getElementById('training2Item');
+			
+			if (this.value === 'whole-day') {
+				wholeDayItem.style.display = 'flex';
+				training1Item.style.display = 'none';
+				training2Item.style.display = 'none';
+			} else {
+				wholeDayItem.style.display = 'none';
+				training1Item.style.display = 'flex';
+				training2Item.style.display = 'flex';
+			}
+		});
+		
+		function registerTraining() {
+			alert('Training registered successfully!');
+			window.location.href = 'training_payment.php';
+		}
+	</script>
+</body>
+</html>
