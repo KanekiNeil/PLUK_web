@@ -21,13 +21,14 @@ $appointments = include_once "../php/get_appointment_list.php";
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <title>Appointment List</title>
 
 <style>
 body {
     margin: 0;
     font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-    background-color: #f5f6fa;
+    background-color: #f5f5f5;
     color: #333;
 }
 
@@ -44,114 +45,150 @@ body::before {
 }
 
 /* HEADER */
-.header {
-    background: white;
-    padding: 18px 35px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+
+.main-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:#ffffff;
+    padding:15px 40px;
+    border-bottom:1px solid #ddd;
+    font-family: 'Segoe UI', sans-serif;
 }
 
-/* LEFT SIDE (logo + text) */
-.header-left {
+/* LOGO */
+
+.logo-section {
     display: flex;
     align-items: center;
-    gap: 12px; /* space between image and text */
+    gap: 10px;
 }
 
 .logo {
-    font-size: 22px;
-    font-weight: 700;
-    color: #880318;
-    letter-spacing: 0.5px;
-}
-
-.burger {
-    font-size: 26px;
-    cursor: pointer;
-    user-select: none;
-}
-
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.admin-profile {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    font-weight: 500;
-    position: relative;
-}
-
-.admin-img {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
+    width: 60px;
+    height: 60px;
     object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #8b0000;
 }
 
-.dropdown {
-    position: absolute;
-    top: 50px;
-    right: 0;
-    background: white;
-    border: 1.5px solid #880318;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    display: none;
+.brand {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* NAVIGATION */
+.nav-menu{
+    display:flex;
+    gap:35px;
+}
+
+.nav-menu a{
+    text-decoration: none;
+    color: #8b0000;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 10px 0;
+    display: block;
+    transition: 0.3s ease;
+    cursor: pointer;
+}
+
+.nav-menu a:hover{
+    opacity: 0.8;
+}
+
+.nav-menu a.active{
+    border-bottom: 2px solid #8b0000;
+}
+
+/* USER SECTION */
+
+.user-section{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.user-info{
+   display: flex;
     flex-direction: column;
-    min-width: 150px;
-    overflow: hidden;
+    line-height: 1.2;
 }
 
-.dropdown a {
-    padding: 10px 15px;
-    text-decoration: none;
+.user-info strong {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.user-info small{
+    font-size: 12px;
+    color: #666;
+}
+
+.avatar{
+    background:#2c6ed5;
+    color:white;
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+}
+
+.arrow{
+    font-size: 10px;
+    color: #444;
+}
+
+/* PROFILE DROPDOWN */
+
+.user-section{
+    position: relative;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    cursor:pointer;
+}
+
+.profile-dropdown{
+    position:absolute;
+    top:55px;
+    right:0;
+    background:white;
+    border-radius:10px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.15);
+    display:none;
+    flex-direction:column;
+    min-width:160px;
+    z-index:999;
+    overflow:hidden;
+}
+
+.profile-dropdown a{
+    padding:12px 15px;
+    text-decoration:none;
+    color:#333;
+    font-size:14px;
+    transition:0.2s;
+}
+
+.profile-dropdown a:hover{
+    background:#f5f5f5;
+}
+
+/* Notification Icon */
+.notification-icon {
+    font-size: 22px;
+    cursor: pointer;
     color: #333;
-    transition: 0.2s;
-}
-
-.dropdown a:hover {
-    background: #f0f0f0;
-}
-
-/* NAVBAR */
-.navbar {
-    background: #880318;
-    color: white;
-    display: none;
-    flex-direction: row;
-    justify-content: center;   /* centers items */
-    align-items: center;
-    gap: 30px;                 /* space between menu items */
-    padding: 10px 25px;        /* smaller height */
-    border-radius: 12px;       /* rounded corners */
-    margin: 15px 30px;         /* spacing from header */
-    animation: slideDown 0.3s ease;
-}
-
-.navbar a {
-    color: white;
-    text-decoration: none;
-    padding: 6px 12px;         /* smaller clickable area */
-    font-weight: 500;
-    border-radius: 8px;        /* rounded each item */
     transition: 0.2s ease;
 }
 
-.navbar a:hover {
-    opacity: 0.8;
-	background: rgba(255, 255, 255, 0.15);
-}
-
-@keyframes slideDown {
-    from {opacity: 0; transform: translateY(-10px);}
-    to {opacity: 1; transform: translateY(0);}
+.notification-icon:hover {
+    color: #8b0000;
 }
 
 /* MAIN CONTENT */
@@ -364,50 +401,44 @@ body::before {
 <body>
 
 <!-- HEADER -->
-<div class="header">
+<header class="main-header">
 
-    <div class="header-left">
-        <img src="../assets/logo.jpg" height="40">
-        <div class="logo">Alpha Aquila</div>
+    <div class="logo-section">
+        <img src="../assets/logo.jpg" class="logo">
+        <span class="brand">ALPHA AQUILA</span>
     </div>
-    <div class="header-right">
-        <div class="admin-profile" onclick="toggleProfile()">
-            <img src="../assets/admin.png" class="admin-img">
-            <span>Levi De Guzman ▼</span>
-                <div class="dropdown" id="profileDropdown">
-                    <a href="#">
-                        <span class="icon-wrapper">
-                            <img src="../assets/account.png">
-                        </span>
-                        <span>Account</span>
-                    </a>
 
-                    <a href="#">
-                        <span class="icon-wrapper">
-                            <img src="../assets/setting.png">
-                        </span>
-                        <span>Settings</span>
-                    </a>
+    <nav class="nav-menu">
+        <a href="dashboard.php">Home</a>
+        <a href="#">Insurance Inquiries</a>
+        <a href="#">Set Availability</a>
+        <a href="appointment_list.php" class="active">Appointment List</a>
+        <a href="#">Applicant List</a>
+    </nav>
 
-                    <a href="#" id="logout">
-                        <span class="icon-wrapper">
-                            <img src="../assets/logout.png">
-                        </span>
-                        <span>Logout</span>
-                    </a>
-                </div>
+    <div class="user-section" onclick="toggleProfile()">
+
+        <span class="material-icons notification-icon">notifications</span>
+
+        <div class="user-info">
+            <strong>Levi De Guzman</strong>
+            <small>Junior Unit Manager</small>
         </div>
-        <div class="burger" onclick="toggleMenu()">☰</div>
+
+        <div class="avatar">LG</div>
+
+        <span class="arrow">▼</span>
+
+        <div class="profile-dropdown" id="profileDropdown">
+            <a href="#">Profile</a>
+            <a href="#">Settings</a>
+            <a href="#" id="logout">Logout</a>
+        </div>
+
     </div>
-</div>
-<!-- NAVBAR (Hidden by default) -->
-<div class="navbar" id="navbar">
-    <a href="#">Home</a>
-    <a href="#">Insurance Inquiries</a>
-    <a href="#">Set Availability</a>
-    <a href="#"><strong>Appointment List</strong></a>
-    <a href="#">Applicant List</a>
-</div>
+
+</header>
+
 
 <!-- CONTENT -->
 <div class="container">
@@ -565,9 +596,26 @@ function toggleMenu() {
     nav.style.display = nav.style.display === "flex" ? "none" : "flex";
 }
 function toggleProfile() {
+
     const dropdown = document.getElementById("profileDropdown");
-    dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
+
+    if (dropdown.style.display === "flex") {
+        dropdown.style.display = "none";
+    } else {
+        dropdown.style.display = "flex";
+    }
 }
+
+document.addEventListener("click", function(e){
+
+    const profile = document.querySelector(".user-section");
+    const dropdown = document.getElementById("profileDropdown");
+
+    if (!profile.contains(e.target)) {
+        dropdown.style.display = "none";
+    }
+
+});
 
 let currentRow = null;
 

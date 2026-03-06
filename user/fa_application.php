@@ -501,6 +501,7 @@ $fullDates = [
 
                 <div class="mt-3">
                 <img id="preview" style="display:none;">
+                <input type="text" style="display: none;" name="face_image" id="faceImage">
                 </div>
 
                 </div>
@@ -573,88 +574,87 @@ $fullDates = [
 </script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener("DOMContentLoaded", () => {
 
     /* =========================
-       📅 FULLCALENDAR
+       📅 CALENDAR
     ========================== */
 
-const availableDates = <?php echo json_encode($availableDates); ?>;
-const fullDates = <?php echo json_encode($fullDates); ?>;
+    const availableDates = <?php echo json_encode($availableDates); ?>;
+    const fullDates = <?php echo json_encode($fullDates); ?>;
 
-const calendarDates = document.getElementById("calendarDates");
-const header = document.getElementById("calendarHeader");
-const monthSelect = document.getElementById("monthSelect");
-const yearSelect = document.getElementById("yearSelect");
-const appointmentInput = document.getElementById("appointmentDate");
+    const calendarDates = document.getElementById("calendarDates");
+    const header = document.getElementById("calendarHeader");
+    const monthSelect = document.getElementById("monthSelect");
+    const yearSelect = document.getElementById("yearSelect");
+    const appointmentInput = document.getElementById("appointmentDate");
 
-let selectedBtn = null;
+    let selectedBtn = null;
 
-function renderCalendar(){
+    function renderCalendar() {
 
-    const month = parseInt(monthSelect.value);
-    const year = parseInt(yearSelect.value);
+        const month = parseInt(monthSelect.value);
+        const year = parseInt(yearSelect.value);
 
-    const firstDay = new Date(year, month-1, 1).getDay();
-    const totalDays = new Date(year, month, 0).getDate();
+        const firstDay = new Date(year, month - 1, 1).getDay();
+        const totalDays = new Date(year, month, 0).getDate();
 
-    const monthNames = [
-        "January","February","March","April","May","June",
-        "July","August","September","October","November","December"
-    ];
+        const monthNames = [
+            "January","February","March","April","May","June",
+            "July","August","September","October","November","December"
+        ];
 
-    header.textContent = `${monthNames[month-1]} ${year}`;
+        header.textContent = `${monthNames[month-1]} ${year}`;
+        calendarDates.innerHTML = "";
 
-    calendarDates.innerHTML = "";
-
-    // Empty spaces for first week
-    for(let i=0;i<firstDay;i++){
-        const empty = document.createElement("div");
-        calendarDates.appendChild(empty);
-    }
-
-    for(let day=1; day<=totalDays; day++){
-
-        const btn = document.createElement("button");
-        btn.classList.add("calendar-btn");
-        btn.textContent = day;
-
-        const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-
-        if(availableDates.includes(dateStr)){
-            btn.classList.add("available");
+        for (let i = 0; i < firstDay; i++) {
+            calendarDates.appendChild(document.createElement("div"));
         }
 
-        if(fullDates.includes(dateStr)){
-            btn.classList.add("full");
-            btn.disabled = true;
-        }
+        for (let day = 1; day <= totalDays; day++) {
 
-        btn.addEventListener("click", function(){
+            const btn = document.createElement("button");
+            btn.className = "calendar-btn";
+            btn.textContent = day;
 
-            if(selectedBtn){
-                selectedBtn.classList.remove("active");
+            const dateStr =
+                `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+
+            if (availableDates.includes(dateStr)) {
+                btn.classList.add("available");
             }
 
-            btn.classList.add("active");
-            selectedBtn = btn;
+            if (fullDates.includes(dateStr)) {
+                btn.classList.add("full");
+                btn.disabled = true;
+            }
 
-            appointmentInput.value = dateStr;
+            btn.addEventListener("click", () => {
 
-            alert("Selected Date: " + dateStr);
-        });
+                if (selectedBtn) {
+                    selectedBtn.classList.remove("active");
+                }
 
-        calendarDates.appendChild(btn);
+                btn.classList.add("active");
+                selectedBtn = btn;
+
+                appointmentInput.value = dateStr;
+
+                alert("Selected Date: " + dateStr);
+            });
+
+            calendarDates.appendChild(btn);
+        }
     }
-}
 
-monthSelect.addEventListener("change", renderCalendar);
-yearSelect.addEventListener("change", renderCalendar);
-
-renderCalendar();
+    if (monthSelect && yearSelect) {
+        monthSelect.addEventListener("change", renderCalendar);
+        yearSelect.addEventListener("change", renderCalendar);
+        renderCalendar();
+    }
 
     /* =========================
-       📷 CAMERA SECTION
+       📷 CAMERA
     ========================== */
 
     const video = document.getElementById("video");
@@ -663,9 +663,11 @@ renderCalendar();
     const preview = document.getElementById("preview");
     const faceImage = document.getElementById("faceImage");
 
-    // Start Camera
     async function startCamera() {
+        if (!video) return;
+
         try {
+
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: "user" },
                 audio: false
@@ -675,18 +677,15 @@ renderCalendar();
             await video.play();
 
         } catch (err) {
-            alert("Camera access denied or not supported.");
             console.error(err);
+            alert("Camera access denied or not supported.");
         }
     }
 
-    // Only start if video exists
-    if (video) {
-        startCamera();
-    }
+    startCamera();
 
-    // Capture Photo
     if (captureBtn) {
+
         captureBtn.addEventListener("click", () => {
 
             if (!video.videoWidth) {
@@ -703,65 +702,80 @@ renderCalendar();
 
             const imageData = canvas.toDataURL("image/png");
 
-            // Show preview
             preview.src = imageData;
             preview.style.display = "block";
 
-            // Save to hidden input
             faceImage.value = imageData;
-        });
-    }
 
-});
-</script>
-<script>
-document.getElementById("applicationForm").addEventListener("submit", async function(e) {
-    e.preventDefault();
-
-    // Make sure appointment date is selected
-    const appointmentDate = document.getElementById("appointmentDate").value;
-    if (!appointmentDate) {
-        alert("Please select an appointment date.");
-        return;
-    }
-
-    const form = this;
-    const formData = new FormData(form);
-
-    // Optional: convert FormData to plain object
-    const payload = {};
-    formData.forEach((value, key) => {
-        payload[key] = value;
-    });
-
-    try {
-        // Send POST request to PHP endpoint (which uses Supabase REST API)
-        const response = await fetch("../php/submit_application.php", {
-            method: "POST",
-            body: formData
+            console.log("Face captured");
         });
 
-        const data = await response.json();
-
-        if (data.status === "success") {
-            alert(data.message);
-            form.reset();
-
-            // Remove face preview
-            const preview = document.getElementById("preview");
-            if (preview) preview.style.display = "none";
-
-            // Clear appointment date
-            document.getElementById("appointmentDate").value = "";
-
-        } else {
-            alert("Error: " + data.message);
-        }
-
-    } catch (err) {
-        console.error(err);
-        alert("Something went wrong. Please try again.");
     }
+
+    /* =========================
+       📤 FORM SUBMISSION
+    ========================== */
+
+    const form = document.getElementById("applicationForm");
+
+    if (form) {
+
+        form.addEventListener("submit", async (e) => {
+
+            e.preventDefault();
+
+            if (form.dataset.submitting === "true") return;
+
+            const appointmentDate = appointmentInput.value;
+
+            if (!appointmentDate) {
+                alert("Please select an appointment date.");
+                return;
+            }
+
+            const submitBtn = form.querySelector("button[type='submit']");
+            submitBtn.disabled = true;
+
+            form.dataset.submitting = "true";
+
+            try {
+
+                const formData = new FormData(form);
+
+                const response = await fetch("../php/submit_application.php", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.status === "success") {
+
+                    alert(data.message);
+
+                    form.reset();
+                    appointmentInput.value = "";
+
+                    if (preview) preview.style.display = "none";
+
+                } else {
+                    alert("Error: " + data.message);
+                }
+
+            } catch (err) {
+
+                console.error(err);
+                alert("Something went wrong. Please try again.");
+
+            }
+
+            submitBtn.disabled = false;
+            form.dataset.submitting = "false";
+
+        });
+
+    }
+
 });
 </script>
 </body>

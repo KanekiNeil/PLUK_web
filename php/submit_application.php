@@ -40,6 +40,9 @@ if (!empty($errors)) {
 if ($faceImage) {
     $faceImage = preg_replace('/^data:image\/\w+;base64,/', '', $faceImage); // remove prefix
     // keep as base64 string, Supabase TEXT column can store this
+}else{
+    echo json_encode(["status" => "error", "message" => "Face image is required."]);
+    exit;
 }
 
 // ---------------------------
