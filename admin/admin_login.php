@@ -1,245 +1,317 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Admin Login - Alpha Aquila</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-
-        body {
-            height: 100vh;
-            display: flex;
-        }
-
-        .container {
-            display: flex;
-            width: 100%;
-        }
-
-        /* LEFT SIDE */
-        .left-panel {
-            width: 50%;
-            background-color: #d71920;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 40px;
-        }
-
-        .left-panel img {
-            width: 90%;
-            max-width: 600px;
-        }
-
-        /* RIGHT SIDE */
-        .right-panel {
-            width: 50%;
-            background-color: #f2f2f2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .login-box {
-            width: 80%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        .logo-title {
-            color: #d71920;
-            font-weight: bold;
-            font-size: 30px;
-            margin-bottom: 10px;
-        }
-
-        .welcome {
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-
-        .google-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            background-color: #ffffff;
-            border: 1px solid #ccc;
-            padding: 10px;
-            cursor: pointer;
-            font-size: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            width: 100%;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-        }
-
-        .google-btn:hover{
-            background-color: #f5f5f5;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            transform: translateY(-2px);
-        }
-
-        .divider {
-            margin: 15px 0;
-            font-size: 12px;
-            color: #777;
-        }
-
-        .divider::before,
-        .divider::after {
-            content: "";
-            display: inline-block;
-            width: 30%;
-            height: 1px;
-            background: #ccc;
-            vertical-align: middle;
-            margin: 0 10px;
-        }
-
-        .input-group {
-            margin-bottom: 15px;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            font-size: 14px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-radius: 5px;
-        }
-
-        .forgot {
-            text-align: right;
-            font-size: 13px;
-            margin-bottom: 20px;
-        }
-
-        .forgot a {
-            color: #555;
-            text-decoration: none;
-        }
-
-        .forgot a:hover {
-            text-decoration: underline;
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 10px;
-            background: linear-gradient(90deg, #E90303, #830202);
-            color: white;
-            border: none;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s ease;
-        }
-
-        .login-btn:hover {
-            background: linear-gradient(90deg, #c40000, #8b0000);
-            transform: scale(1.02);
-        }
-
-        @media (max-width: 900px) {
-            .left-panel {
-                display: none;
-            }
-
-            .right-panel {
-                width: 100%;
-            }
-        }
-    </style>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>LOGIN</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+		html, body {
+			width: 100%;
+			height: 100vh;
+			font-family: system-ui;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: #f5f5f5;
+		}
+		
+		.container {
+			display: flex;
+			width: 800px;
+			height: 520px;
+			border-radius: 16px;
+			overflow: hidden;
+			box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+		}
+		
+		.left-panel {
+			flex: 0 0 40%;
+			background: linear-gradient(135deg, #D22131 0%, #E80303 100%);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 30px;
+		}
+		
+		.left-panel img {
+			max-width: 100%;
+			height: auto;
+		}
+		
+		.right-panel {
+			flex: 1;
+			background: #FFFFFF;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			padding: 30px;
+			overflow: hidden;
+		}
+		
+		.form-container {
+			width: 100%;
+			max-width: 100%;
+		}
+		
+		.logo-section {
+			text-align: center;
+			margin-bottom: 15px;
+		}
+		
+		.logo-section img {
+			width: 90px;
+			height: 90px;
+			margin-bottom: 10px;
+		}
+		
+		.welcome-text {
+			font-size: 18px;
+			font-weight: bold;
+			color: #000000;
+			text-align: center;
+			margin-bottom: 15px;
+		}
+		
+		.google-btn {
+			width: 100%;
+			padding: 11px;
+			background: #FFFFFF;
+			border: 1px solid #D9D9D9;
+			border-radius: 4px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 10px;
+			cursor: pointer;
+			font-size: 14px;
+			color: #000000;
+			margin-bottom: 12px;
+			box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+		}
+		
+		.google-btn img {
+			width: 24px;
+			height: 24px;
+		}
+		
+		.divider {
+			display: flex;
+			align-items: center;
+			margin: 12px 0;
+			color: #CCCCCC;
+			font-size: 11px;
+		}
+		
+		.divider::before,
+		.divider::after {
+			content: '';
+			flex: 1;
+			height: 1px;
+			background: #CCCCCC;
+		}
+		
+		.divider::before {
+			margin-right: 10px;
+		}
+		
+		.divider::after {
+			margin-left: 10px;
+		}
+		
+		.form-group {
+			margin-bottom: 10px;
+		}
+		
+		.form-group input {
+			width: 100%;
+			padding: 10px 12px;
+			border: 1px solid #D9D9D9;
+			border-radius: 4px;
+			font-size: 13px;
+			color: #000000;
+		}
+		
+		.form-group input::placeholder {
+			color: #999999;
+		}
+		
+		.forgot-password {
+			text-align: right;
+			margin-bottom: 15px;
+		}
+		
+		.forgot-password a {
+			color: #666666;
+			text-decoration: none;
+			font-size: 13px;
+		}
+		
+		.forgot-password a:hover {
+			text-decoration: underline;
+		}
+		
+		.login-btn {
+			width: 100%;
+			padding: 14px;
+			background: linear-gradient(180deg, #E80303, #820101);
+			color: #FFFFFF;
+			border: none;
+			border-radius: 4px;
+			font-size: 18px;
+			font-weight: bold;
+			cursor: pointer;
+			transition: opacity 0.3s;
+		}
+		
+		.login-btn:hover {
+			opacity: 0.9;
+		}
+		
+		.login-btn:disabled {
+			opacity: 0.6;
+			cursor: not-allowed;
+		}
+		
+		.error-message {
+			color: #D22131;
+			font-size: 14px;
+			margin-bottom: 20px;
+			padding: 12px;
+			background: #FFE5E5;
+			border-radius: 4px;
+			display: none;
+			text-align: center;
+		}
+		
+		.error-message.show {
+			display: block;
+		}
+		
+		.success-message {
+			color: #2E7D32;
+			font-size: 14px;
+			margin-bottom: 20px;
+			padding: 12px;
+			background: #E8F5E9;
+			border-radius: 4px;
+			display: none;
+			text-align: center;
+		}
+		
+		.success-message.show {
+			display: block;
+		}
+	</style>
 </head>
-
 <body>
-
-<div class="container">
-
-    <!-- LEFT SIDE -->
-    <div class="left-panel">
-        <!-- Replace with your actual logo path -->
-        <img src="../assets/nobg_logo.png" alt="Alpha Aquila Logo">
-    </div>
-
-    <!-- RIGHT SIDE -->
-    <div class="right-panel">
-        <div class="login-box">
-
-            <div class="logo-title">PRU LIFE UK</div>
-
-            <div class="welcome">Welcome Alpha Aquila!</div>
-
-            <button class="google-btn">
-                <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20">
-                Login with Google
-            </button>
-
-            <div class="divider">OR Login with Email</div>
-
-                <form id="loginForm">
-                    <div class="input-group">
-                        <input type="email" id="email" placeholder="Email" required>
-                    </div>
-
-                    <div class="input-group">
-                        <input type="password" id="password" placeholder="Password" required>
-                    </div>
-
-                    <div class="forgot">
-                        <a href="#">Forgot Password?</a>
-                    </div>
-
-                    <button type="submit" class="login-btn">Login</button>
-                </form>
-
-        </div>
-    </div>
-
-</div>
-
-<script>
-document.getElementById("loginForm").addEventListener("submit", function(e) {
-    e.preventDefault(); // 🚫 stop normal form submit
-
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-
-    fetch("../php/login.php", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            email: email,
-            password: password
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert("Login successful!");
-            window.location.href = "dashboard.php";
-        } else {
-            alert(data.error || "Login failed");
-        }
-    })
-    .catch(error => {
-        console.error("Error:", error);
-        alert("Something went wrong");
-    });
-});
-</script>
+	<div class="container">
+		<div class="left-panel">
+			<img src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/rlaNNhoEyR/wvx7rki4_expires_30_days.png" alt="Alpha Aquila">
+		</div>
+		
+		<div class="right-panel">
+			<div class="form-container">
+				<div class="logo-section">
+					<img src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/rlaNNhoEyR/fed41b8o_expires_30_days.png" alt="Logo">
+				</div>
+				
+				<div class="welcome-text">Welcome Alpha Aquila!</div>
+				
+				<div id="errorMessage" class="error-message"></div>
+				<div id="successMessage" class="success-message"></div>
+				
+				<button type="button" class="google-btn" onclick="googleLogin()">
+					<img src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/rlaNNhoEyR/3r1e44g0_expires_30_days.png" alt="Google">
+					Login with Google
+				</button>
+				
+				<div class="divider">OR Login with Email</div>
+				
+				<form id="loginForm">
+					<div class="form-group">
+						<input type="email" id="email" placeholder="Email" required>
+					</div>
+					
+					<div class="form-group">
+						<input type="password" id="password" placeholder="Password" required>
+					</div>
+					
+					<div class="forgot-password">
+						<a href="#forgot">Forgot Password?</a>
+					</div>
+					
+					<button type="submit" class="login-btn" id="loginBtn">Login</button>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<script>
+		// Form submission handler
+		document.getElementById("loginForm").addEventListener("submit", function(e) {
+			e.preventDefault();
+			
+			const email = document.getElementById("email").value;
+			const password = document.getElementById("password").value;
+			const loginBtn = document.getElementById("loginBtn");
+			const errorMessage = document.getElementById("errorMessage");
+			const successMessage = document.getElementById("successMessage");
+			
+			// Clear messages
+			errorMessage.classList.remove("show");
+			errorMessage.textContent = "";
+			successMessage.classList.remove("show");
+			successMessage.textContent = "";
+			
+			// Disable button
+			loginBtn.disabled = true;
+			loginBtn.textContent = "Logging in...";
+			
+			fetch("../php/login.php", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({
+					email: email,
+					password: password
+				})
+			})
+			.then(response => response.json())
+			.then(data => {
+				if (data.success) {
+					successMessage.textContent = "Login successful! Redirecting...";
+					successMessage.classList.add("show");
+					setTimeout(() => {
+						window.location.href = "dashboard.php";
+					}, 1500);
+				} else {
+					errorMessage.textContent = data.error || "Login failed";
+					errorMessage.classList.add("show");
+					loginBtn.disabled = false;
+					loginBtn.textContent = "Login";
+				}
+			})
+			.catch(error => {
+				console.error("Error:", error);
+				errorMessage.textContent = "An error occurred. Please try again.";
+				errorMessage.classList.add("show");
+				loginBtn.disabled = false;
+				loginBtn.textContent = "Login";
+			});
+		});
+		
+		// Google login placeholder
+		function googleLogin() {
+			alert("Google login not yet implemented");
+		}
+	</script>
 </body>
 </html>

@@ -40,6 +40,9 @@ if (!empty($errors)) {
 if ($faceImage) {
     $faceImage = preg_replace('/^data:image\/\w+;base64,/', '', $faceImage); // remove prefix
     // keep as base64 string, Supabase TEXT column can store this
+}else{
+    echo json_encode(["status" => "error", "message" => "Face image is required."]);
+    exit;
 }
 
 // ---------------------------
@@ -85,16 +88,16 @@ function supabaseInsert($table, $data, $SUPABASE_URL, $SUPABASE_KEY) {
 try {
     // Insert applicant
     $insertedApplicant = supabaseInsert("applicant_information", $applicantData, $SUPABASE_URL, $SUPABASE_KEY);
-    if (!$insertedApplicant || !isset($insertedApplicant["AIID"])) {
+    if (!$insertedApplicant || !isset($insertedApplicant["aiid"])) {
         throw new Exception("Failed to create applicant record.");
     }
-    $AIID = $insertedApplicant["AIID"];
+    $AIID = $insertedApplicant["aiid"];
 
     // Insert appointment
     $appointmentData = [
         "AA_FaceID" => $faceImage ?: null,
         "AA_DateTime" => $appointmentDate,
-        "AIID" => $AIID
+        "aiid" => $AIID
     ];
     $insertedAppointment = supabaseInsert("application_appointment", $appointmentData, $SUPABASE_URL, $SUPABASE_KEY);
 

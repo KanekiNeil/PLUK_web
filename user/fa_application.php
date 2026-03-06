@@ -23,78 +23,418 @@ $fullDates = [
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
     <style>
+        /* ================= GLOBAL ================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
         body {
-            background-color: #f4f6f9;
+            background-color: #f5f5f5;
+            color: #333;
         }
 
-        .form-container {
-            max-width: 800px;
-            margin: 50px auto;
+        /* ================= HEADER ================= */
+        header {
+            background: #ffffff;
+            padding: 15px 40px;
+            border-bottom: 1px solid #ddd;
+            position: relative;
+            z-index: 1000;
         }
 
-        .card {
-            border-radius: 15px;
+        .header-container {
+            display: flex;
+            align-items: center;
         }
 
-        .skill-badge {
-            margin-right: 5px;
-            margin-bottom: 5px;
-        }
-                #calendar {
-            max-width: 900px;
-            margin: 40px auto;
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 50%; /* makes logo circular */
+            border: 2px solid #8b0000; /* optional border color */
         }
 
-        .fc-day-full {
-            background-color: #f8d7da !important;
-            cursor: not-allowed;
+
+        /* ================= LOGO ================= */
+        .logo-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .fc-day-available {
-            background-color: #d1e7dd !important;
+        .logo-title h1 {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+
+        /* ================= TOP NAVIGATION ================= */
+        .top-nav ul {
+            display: flex;
+            list-style: none;
+            gap: 50px;
+            ;
+        }
+
+        .top-nav ul li {
+            position: relative; 
+        }
+
+        .top-nav ul li a {
+            text-decoration: none;
+            color: #8b0000;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 10px 0;
+            display: block;
+            transition: 0.3s ease;
+        }
+
+        .top-nav ul li a:hover {
+            opacity: 0.8;
+        }
+
+        .top-nav {
+            margin-left: 500px;
+        }
+
+        /* ================= DROPDOWN ================= */
+        .top-nav ul li .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 200px;
+            background: #ffffff;
+            padding: 0;
+            margin: 0;
+            border-radius: 6px;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+
+            display: block; /* vertical layout */
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(5px);
+            transition: all 0.2s ease;
+            z-index: 999;
+        }
+
+        .top-nav ul li .dropdown-menu li a {
+            text-align: left;
+            padding: 10px 15px;
+            display: block;
+        }
+
+        /* Show dropdown on hover */
+        .top-nav ul li:hover > .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        /* Dropdown items */
+        .dropdown-menu li {
+            display: block;
+            margin: 0; /* remove spacing between items */
+            padding: 0;
+            list-style: none;
+        }
+
+        .dropdown-menu li a {
+            display: block;
+            width: 100%;
+            padding-left: 50px;
+            padding: 6px 20px; /* spacing controlled here */
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+            line-height: 1.2;
+            text-decoration: none;
+            white-space: nowrap;
             cursor: pointer;
         }
 
-        /* cam design */
-        .camera-container {
+        .dropdown-menu li a:hover {
+            background: #f3f3f3;
+            color: #8b0000;
+        }
+
+        /* Dropdown arrow indicator */
+        .dropdown > a::after {
+            content: " ▼";
+            font-size: 10px;
+            margin-left: 4px;
+            color: #8b0000;
+        }
+
+
+        /* PAGE BACKGROUND */
+        body{
+            background: linear-gradient(135deg,#f4f6f9,#e9eef5);
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        /* FORM CONTAINER */
+        .form-container{
+            max-width: 850px;
+            margin: 60px auto;
+        }
+
+        /* CARD DESIGN */
+        .card{
+            border-radius: 18px;
+            border: none;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.08);
+            padding: 35px;
+        }
+
+        /* TITLE */
+        .card h3{
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+
+        /* INPUT FIELDS */
+        .form-control{
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px solid #dcdcdc;
+            transition: all .3s;
+        }
+
+        .form-control:focus{
+            border-color: #809bc4;
+            box-shadow: 0 0 0 0.15rem rgba(13,110,253,.2);
+        }
+
+        /* LABELS */
+        .form-label{
+            font-weight: 500;
+        }
+
+        /* CAMERA SECTION */
+        .camera-container{
             position: relative;
             width: 100%;
             max-width: 420px;
             margin: auto;
         }
 
-        #video {
+        #video{
             width: 100%;
             border-radius: 12px;
+            border: 2px solid #e5e5e5;
         }
 
-        /* CIRCLE FACE GUIDE */
-        .face-circle {
+        /* FACE GUIDE */
+        .face-circle{
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 220px;  /* adjust size */
-            height: 220px; /* keep it square for circle */
+            width: 220px;
+            height: 220px;
             border: 4px solid #00ffc8;
             border-radius: 50%;
-            pointer-events: none; /* allow clicks through */
+            pointer-events: none;
             box-shadow: 0 0 12px rgba(0,255,200,0.7);
         }
+
+        /* BUTTONS */
+        #captureBtn{
+            border-radius: 10px;
+            padding: 10px 25px;
+            font-weight: 500;
+            background-color: #880318;
+            color: white
+        }
+
+       #submitBtn{
+            border-radius: 10px;
+            padding:12px 30px;
+            font-weight: 500;
+            background-color: #880318;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s ease;
+            border-radius: 50px;
+            cursor:pointer;
+        }
+
+
+        #submitBtn:hover{
+            background-color: #6d0212;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+
+        .submit-container{
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+
+        /* PREVIEW IMAGE */
+        #preview{
+            max-width: 200px;
+            margin-top: 10px;
+            border-radius: 10px;
+            border: 2px solid #eee;
+        }
+
+ /* ================= CALENDAR ================= */
+.calendar-container{
+    margin-top:20px;
+}
+
+.calendar-header{
+    text-align:center;
+    margin-bottom:15px;
+    font-size:20px;
+    font-weight:bold;
+    color:#880318;
+}
+
+.calendar-days{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    background:#880318;
+    color:white;
+    text-align:center;
+    padding:10px 0;
+    border-radius:8px;
+    font-weight:bold;
+}
+
+.calendar-dates{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:10px;
+    margin-top:15px;
+}
+
+.calendar-btn{
+    padding:12px 0;
+    border:none;
+    border-radius:8px;
+    background:#e2e0e0;
+    cursor:pointer;
+}
+
+/* Hover */
+.calendar-btn:hover{
+    background:#d6d6d6;
+}
+
+/* Selected */
+.calendar-btn.active{
+    background:#880318;
+    color:white;
+}
+
+/* Available */
+.calendar-btn.available{
+    background:#d1e7dd;
+}
+
+/* Fully booked */
+.calendar-btn.full{
+    background:#f8d7da;
+    cursor:not-allowed;
+}
+
+/* ===== MONTH & YEAR DROPDOWN ===== */
+.calendar-selectors{
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    margin-bottom:15px;
+}
+
+.calendar-selectors select{
+    padding:8px 12px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    font-size:14px;
+    cursor:pointer;
+    outline:none;
+    background:#f5f5f5;
+    transition:0.2s;
+}
+
+/* Hover */
+.calendar-selectors select:hover{
+    border-color:#880318;
+}
+
+/* Focus */
+.calendar-selectors select:focus{
+    border-color:#880318;
+    box-shadow:0 0 4px rgba(136,3,24,0.3);
+}
+
+/* Optional: make it cleaner */
+.calendar-selectors select option{
+    background:white;
+}
+
+
+
+
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-dark bg-dark px-3">
-        <!-- Logo Placeholder -->
-        <a class="navbar-brand" href="#">
-            <img src="https://via.placeholder.com/40" alt="Logo">
-        </a>
+    
+<header>
+    <div class="header-container">
+        
+        <div class="logo-title">
+            <img src="../assets/logo.jpg" alt="Alpha Aquila Logo" class="logo">
+            <h1>ALPHA AQUILA</h1>
+        </div>
 
-        <!-- Burger Icon -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </nav>
+        <nav class="top-nav">
+            <ul>
+                <li><a href="#">Home</a></li>
+
+                <li class="dropdown">
+                    <a href="#">Work with Us</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#" id="salesLink">Sales</a></li>
+                        <li><a href="#" id="careerLink">Career</a></li>
+                    </ul>
+                </li>
+
+                <li class="dropdown">
+                    <a href="#">Claim and Services</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">PRUServices</a></li>
+                        <li><a href="#">Make a Request</a></li>
+                        <li><a href="#">Claims</a></li>
+                        <li><a href="#">Policy Services Information</a></li>
+                    </ul>
+                </li>
+
+                <li class="dropdown">
+                    <a href="#">Contact Us</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Phone</a></li>
+                        <li><a href="#">Email Address</a></li>
+                        <li><a href="#">Address</a></li>
+                    </ul>
+                </li>
+
+            </ul>
+        </nav>
+
+    </div>
+</header>
 
     <div class="container form-container">
     <div class="card shadow p-4">
@@ -144,45 +484,72 @@ $fullDates = [
             </div>
 
             <!-- UPLOAD WITH CAMERA ICON -->
-            <div class="mb-3">
-                <label class="form-label">Verify Face ID</label>
+            <h5 class="mt-4">Face Verification</h5>
+                <hr>
 
-                <!-- Camera Preview -->
+                <div class="text-center">
+
                 <div class="camera-container">
-                    <video id="video" autoplay playsinline></video>
-
-                    <!-- CIRCLE FACE GUIDE -->
-                    <div class="face-circle"></div>
-
-                    <canvas id="canvas" style="display:none;"></canvas>
+                <video id="video" autoplay playsinline></video>
+                <div class="face-circle"></div>
+                <canvas id="canvas" style="display:none;"></canvas>
                 </div>
 
-                <!-- Capture Button -->
-                <button type="button" class="btn btn-primary mt-2" id="captureBtn">
-                    Capture Face
+                <button type="button" class="btn" id="captureBtn">
+                📷 Capture
                 </button>
 
-                <!-- Preview Image -->
                 <div class="mt-3">
-                    <img id="preview" class="img-fluid rounded" style="display:none;">
+                <img id="preview" style="display:none;">
+                <input type="text" style="display: none;" name="face_image" id="faceImage">
                 </div>
 
-                <!-- Hidden input (image data for PHP) -->
-                <input type="hidden" name="face_image" id="faceImage">
-            </div>
-
-
+                </div>
 
             <!-- APPOINTMENT CALENDAR -->
-            <div class="container">
-                <h3 class="text-center mt-4">Set an Appointment</h3>
-                <div id="calendar"></div>
-            </div>
+              <h5 class="mt-4">Appointment Calendar</h5>
+                <hr>
 
-            <input type="hidden" name="appointment_date" id="appointmentDate">
+            <div class="calendar-container">
+
+    <div style="display:flex; justify-content:center; gap:10px; margin-bottom:10px;">
+        <select id="monthSelect" class="form-select" style="width:150px;">
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3" selected>March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+        </select>
+
+        <select id="yearSelect" class="form-select" style="width:120px;">
+            <option>2025</option>
+            <option selected>2026</option>
+            <option>2027</option>
+        </select>
+    </div>
+
+    <div class="calendar-header" id="calendarHeader"></div>
+
+    <div class="calendar-days">
+        <div>SUN</div><div>MON</div><div>TUE</div>
+        <div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
+    </div>
+
+    <div class="calendar-dates" id="calendarDates"></div>
+
+</div>
+
+<input type="hidden" name="appointment_date" id="appointmentDate">
 
             <div class="text-center">
-                <button type="submit" class="btn btn-success px-4">
+                <button type="submit" class="btn "id="submitBtn">
                     Submit
                 </button>
             </div>
@@ -207,60 +574,87 @@ $fullDates = [
 </script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener("DOMContentLoaded", () => {
 
     /* =========================
-       📅 FULLCALENDAR
+       📅 CALENDAR
     ========================== */
 
     const availableDates = <?php echo json_encode($availableDates); ?>;
     const fullDates = <?php echo json_encode($fullDates); ?>;
 
-    const calendarEl = document.getElementById('calendar');
+    const calendarDates = document.getElementById("calendarDates");
+    const header = document.getElementById("calendarHeader");
+    const monthSelect = document.getElementById("monthSelect");
+    const yearSelect = document.getElementById("yearSelect");
+    const appointmentInput = document.getElementById("appointmentDate");
 
-    const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        selectable: true,
+    let selectedBtn = null;
 
-        dateClick: function(info) {
-            const clickedDate = info.dateStr;
+    function renderCalendar() {
 
-            if (fullDates.includes(clickedDate)) {
-                alert("This date is fully booked.");
-                return;
-            }
+        const month = parseInt(monthSelect.value);
+        const year = parseInt(yearSelect.value);
 
-            if (!availableDates.includes(clickedDate)) {
-                alert("Appointments not available on this date.");
-                return;
-            }
+        const firstDay = new Date(year, month - 1, 1).getDay();
+        const totalDays = new Date(year, month, 0).getDate();
 
-            alert("You selected: " + clickedDate);
+        const monthNames = [
+            "January","February","March","April","May","June",
+            "July","August","September","October","November","December"
+        ];
 
-            // ✅ SAVE SELECTED DATE
-            const appointmentInput = document.getElementById("appointmentDate");
-            if (appointmentInput) {
-                appointmentInput.value = clickedDate;
-            }
-        },
+        header.textContent = `${monthNames[month-1]} ${year}`;
+        calendarDates.innerHTML = "";
 
-        dayCellDidMount: function(info) {
-            const date = info.date.toISOString().split('T')[0];
-
-            if (fullDates.includes(date)) {
-                info.el.classList.add('fc-day-full');
-            } 
-            else if (availableDates.includes(date)) {
-                info.el.classList.add('fc-day-available');
-            }
+        for (let i = 0; i < firstDay; i++) {
+            calendarDates.appendChild(document.createElement("div"));
         }
-    });
 
-    calendar.render();
+        for (let day = 1; day <= totalDays; day++) {
 
+            const btn = document.createElement("button");
+            btn.className = "calendar-btn";
+            btn.textContent = day;
+
+            const dateStr =
+                `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+
+            if (availableDates.includes(dateStr)) {
+                btn.classList.add("available");
+            }
+
+            if (fullDates.includes(dateStr)) {
+                btn.classList.add("full");
+                btn.disabled = true;
+            }
+
+            btn.addEventListener("click", () => {
+
+                if (selectedBtn) {
+                    selectedBtn.classList.remove("active");
+                }
+
+                btn.classList.add("active");
+                selectedBtn = btn;
+
+                appointmentInput.value = dateStr;
+
+                alert("Selected Date: " + dateStr);
+            });
+
+            calendarDates.appendChild(btn);
+        }
+    }
+
+    if (monthSelect && yearSelect) {
+        monthSelect.addEventListener("change", renderCalendar);
+        yearSelect.addEventListener("change", renderCalendar);
+        renderCalendar();
+    }
 
     /* =========================
-       📷 CAMERA SECTION
+       📷 CAMERA
     ========================== */
 
     const video = document.getElementById("video");
@@ -269,9 +663,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const preview = document.getElementById("preview");
     const faceImage = document.getElementById("faceImage");
 
-    // Start Camera
     async function startCamera() {
+        if (!video) return;
+
         try {
+
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: "user" },
                 audio: false
@@ -281,18 +677,15 @@ document.addEventListener('DOMContentLoaded', function () {
             await video.play();
 
         } catch (err) {
-            alert("Camera access denied or not supported.");
             console.error(err);
+            alert("Camera access denied or not supported.");
         }
     }
 
-    // Only start if video exists
-    if (video) {
-        startCamera();
-    }
+    startCamera();
 
-    // Capture Photo
     if (captureBtn) {
+
         captureBtn.addEventListener("click", () => {
 
             if (!video.videoWidth) {
@@ -309,65 +702,80 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const imageData = canvas.toDataURL("image/png");
 
-            // Show preview
             preview.src = imageData;
             preview.style.display = "block";
 
-            // Save to hidden input
             faceImage.value = imageData;
-        });
-    }
 
-});
-</script>
-<script>
-document.getElementById("applicationForm").addEventListener("submit", async function(e) {
-    e.preventDefault();
-
-    // Make sure appointment date is selected
-    const appointmentDate = document.getElementById("appointmentDate").value;
-    if (!appointmentDate) {
-        alert("Please select an appointment date.");
-        return;
-    }
-
-    const form = this;
-    const formData = new FormData(form);
-
-    // Optional: convert FormData to plain object
-    const payload = {};
-    formData.forEach((value, key) => {
-        payload[key] = value;
-    });
-
-    try {
-        // Send POST request to PHP endpoint (which uses Supabase REST API)
-        const response = await fetch("../php/submit_application.php", {
-            method: "POST",
-            body: formData
+            console.log("Face captured");
         });
 
-        const data = await response.json();
-
-        if (data.status === "success") {
-            alert(data.message);
-            form.reset();
-
-            // Remove face preview
-            const preview = document.getElementById("preview");
-            if (preview) preview.style.display = "none";
-
-            // Clear appointment date
-            document.getElementById("appointmentDate").value = "";
-
-        } else {
-            alert("Error: " + data.message);
-        }
-
-    } catch (err) {
-        console.error(err);
-        alert("Something went wrong. Please try again.");
     }
+
+    /* =========================
+       📤 FORM SUBMISSION
+    ========================== */
+
+    const form = document.getElementById("applicationForm");
+
+    if (form) {
+
+        form.addEventListener("submit", async (e) => {
+
+            e.preventDefault();
+
+            if (form.dataset.submitting === "true") return;
+
+            const appointmentDate = appointmentInput.value;
+
+            if (!appointmentDate) {
+                alert("Please select an appointment date.");
+                return;
+            }
+
+            const submitBtn = form.querySelector("button[type='submit']");
+            submitBtn.disabled = true;
+
+            form.dataset.submitting = "true";
+
+            try {
+
+                const formData = new FormData(form);
+
+                const response = await fetch("../php/submit_application.php", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.status === "success") {
+
+                    alert(data.message);
+
+                    form.reset();
+                    appointmentInput.value = "";
+
+                    if (preview) preview.style.display = "none";
+
+                } else {
+                    alert("Error: " + data.message);
+                }
+
+            } catch (err) {
+
+                console.error(err);
+                alert("Something went wrong. Please try again.");
+
+            }
+
+            submitBtn.disabled = false;
+            form.dataset.submitting = "false";
+
+        });
+
+    }
+
 });
 </script>
 </body>
