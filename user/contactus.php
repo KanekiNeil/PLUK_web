@@ -8,7 +8,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'] ?? "";
     $messageText = $_POST['message'] ?? "";
 
-    // Example processing (you can connect to database or send email)
     $message = "Thank you for contacting us, $name! We received your message.";
 }
 ?>
@@ -21,77 +20,174 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <style>
 
-body{
-    font-family: Arial, sans-serif;
-    background:#f5f5f5;
-    margin:0;
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family: 'Segoe UI', sans-serif;
 }
+
+body{
+background:#f7f3ef;
+}
+
+/* HEADER */
+
+.header{
+background:#6b0f1a;
+color:white;
+text-align:center;
+padding:25px;
+font-size:28px;
+font-weight:bold;
+letter-spacing:1px;
+}
+
+/* MAIN CONTAINER */
 
 .container{
-    width:1100px;
-    margin:auto;
-    padding:40px 0;
+width:1100px;
+margin:auto;
+padding:50px 0;
 }
 
-h1{
-    text-align:center;
-    background:#d9dde2;
-    padding:15px;
+/* SUCCESS MESSAGE */
+
+.success{
+background:#d4edda;
+color:#155724;
+padding:12px;
+border-radius:6px;
+margin-bottom:20px;
 }
+
+/* CONTACT WRAPPER */
 
 .contact-wrapper{
-    display:flex;
-    gap:40px;
-    margin-top:40px;
+display:flex;
+gap:50px;
+align-items:center;
 }
+
+/* LEFT SIDE */
 
 .left{
-    flex:1;
+flex:1;
+background:white;
+padding:35px;
+border-radius:10px;
+box-shadow:0 8px 20px rgba(0,0,0,0.08);
 }
 
-.right{
-    flex:1;
+.left h2{
+color:#6b0f1a;
+margin-bottom:10px;
 }
 
-.right img{
-    width:100%;
-    border-radius:6px;
+.left p{
+font-size:14px;
+margin-bottom:15px;
+color:#555;
+}
+
+/* FORM */
+
+form label{
+font-weight:600;
+font-size:14px;
+color:#333;
 }
 
 .radio-group{
-    margin:10px 0 20px;
+margin:10px 0 20px 0;
+display:flex;
+gap:20px;
 }
 
-form input, form textarea{
-    width:100%;
-    padding:10px;
-    margin-bottom:15px;
-    border:1px solid #ccc;
-    border-radius:4px;
+.radio-group label{
+font-weight:500;
+cursor:pointer;
 }
+
+form input,
+form textarea{
+width:100%;
+padding:12px;
+margin-bottom:15px;
+border-radius:6px;
+border:1px solid #ddd;
+font-size:14px;
+transition:0.3s;
+}
+
+form input:focus,
+form textarea:focus{
+outline:none;
+border-color:#bfa046;
+box-shadow:0 0 4px rgba(191,160,70,0.4);
+}
+
+/* BUTTON */
 
 button{
-    background:#8b0000;
-    color:white;
-    padding:10px 20px;
-    border:none;
-    cursor:pointer;
+background:#6b0f1a;
+color:white;
+padding:12px 22px;
+border:none;
+border-radius:6px;
+font-size:15px;
+cursor:pointer;
+transition:0.3s;
 }
+
+button:hover{
+background:#bfa046;
+color:#fff;
+}
+
+/* RIGHT IMAGE */
+
+.right{
+flex:1;
+}
+
+.right img{
+width:100%;
+border-radius:12px;
+box-shadow:0 10px 25px rgba(0,0,0,0.15);
+}
+
+/* CONTACT INFO */
 
 .contact-info{
-    margin-top:40px;
-    display:flex;
-    justify-content:space-between;
+margin-top:60px;
+display:flex;
+justify-content:space-between;
+gap:30px;
 }
 
-.contact-info div{
-    width:30%;
+.contact-box{
+flex:1;
+background:white;
+padding:25px;
+border-radius:10px;
+box-shadow:0 8px 18px rgba(0,0,0,0.08);
 }
 
-.success{
-    background:#d4edda;
-    padding:10px;
-    margin-bottom:15px;
+.contact-box h3{
+color:#6b0f1a;
+margin-bottom:10px;
+}
+
+.contact-box p{
+font-size:14px;
+color:#444;
+line-height:1.6;
+}
+
+.email{
+color:#bfa046;
+font-weight:600;
 }
 
 </style>
@@ -99,7 +195,7 @@ button{
 
 <body>
 
-<h1>Contact Us</h1>
+<div class="header">Contact Us</div>
 
 <div class="container">
 
@@ -112,14 +208,15 @@ button{
 <div class="left">
 
 <h2>We'd love to hear from you</h2>
+<p>Thank you for reaching out to us. Our team is ready to assist you.</p>
 
 <form method="POST">
 
 <label>Are you a Pru Life UK policyowner? *</label>
 
 <div class="radio-group">
-<input type="radio" name="policyowner" value="Yes"> Yes
-<input type="radio" name="policyowner" value="No"> No
+<label><input type="radio" name="policyowner" value="Yes"> Yes</label>
+<label><input type="radio" name="policyowner" value="No"> No</label>
 </div>
 
 <input type="text" name="name" placeholder="Your Name" required>
@@ -132,49 +229,48 @@ button{
 
 </form>
 
-<p>Thank you for reaching out to us!</p>
-<p>
-For product or service inquiries, our support team is ready to assist you at  
-<strong>+63 (2) 8887 5433</strong> or <strong>1-800-10-7785465</strong>.
-</p>
-
 </div>
 
 <div class="right">
-<img src="meeting.jpg" alt="meeting">
+<img src="../assets/contact.jpg" alt="meeting">
 </div>
 
 </div>
 
 <div class="contact-info">
 
-<div>
+<div class="contact-box">
 <h3>Phone</h3>
-<p>PLDT Metro Manila<br>+63 (2) 8887 5433</p>
-
-<p>Domestic Toll-free<br>
-1 800 10 PRULINK (1 800 10 7785465)
+<p>
+PLDT Metro Manila<br>
++63 (2) 8887 5433
 </p>
 
-<p>Globe Metro Manila<br>
+<p>
+Domestic Toll-free<br>
+1 800 10 PRULINK<br>
+(1 800 10 7785465)
+</p>
+
+<p>
+Globe Metro Manila<br>
 +63 (2) 7793-5433
 </p>
 </div>
 
-<div>
+<div class="contact-box">
 <h3>Email Address</h3>
-<p style="color:red;">contact.us@prulifeuk.com.ph</p>
+<p class="email">contact.us@prulifeuk.com.ph</p>
 </div>
 
-<div>
+<div class="contact-box">
 <h3>Address</h3>
 <p>
-Head Office<br>
-9/F Uptown Place Tower 1,<br>
-1 East 11th Drive,<br>
-Uptown Bonifacio, Taguig City 1634,<br>
-Metro Manila<br>
-+63 (2) 8683 9000
+Black Orcas Summit Life Insurance Agency<br>
+Unit 2004, 20th Floor<br>
+Antel Global Corporate Center<br>
+Julia Vargas Avenue, Ortigas Center<br>
+Brgy. San Antonio, Pasig City
 </p>
 </div>
 
