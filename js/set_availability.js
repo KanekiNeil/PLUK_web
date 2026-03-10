@@ -14,6 +14,9 @@ const savedTimes = document.getElementById("savedTimes");
 let currentDate = new Date();
 let selectedDateKey = null;
 let availability = {};
+let availableDates = new Set();
+let selectedDate = null;
+let editingSlotId = null;
 
 // NAVBAR ACTIVE
 document.querySelectorAll(".nav-link").forEach(link => {
@@ -35,7 +38,12 @@ document.addEventListener("click", function (e) {
         profile.classList.remove("active");
     }
 });
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
+const supabase = createClient(
+  'https://ncsobcjlvytbivoxezfd.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jc29iY2psdnl0Yml2b3hlemZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1Njg3NzYsImV4cCI6MjA4NzE0NDc3Nn0.LWELQVNAh5GzjU-YUSrO5O3b3Gj-lP7pUB3A_D-vNfA'
+)
 function renderCalendar() {
 
     const year = currentDate.getFullYear();
@@ -45,8 +53,8 @@ function renderCalendar() {
     const lastDate = new Date(year, month + 1, 0).getDate();
 
     monthYear.innerText =
-        currentDate.toLocaleString("default", { month: "long" }) +
-        " " + year;
+    currentDate.toLocaleString("default", { month: "long" }) +
+    " " + year;
 
     calendarDates.innerHTML = "";
 
@@ -60,23 +68,18 @@ function renderCalendar() {
         dateDiv.classList.add("date");
         dateDiv.innerText = day;
 
-        const key = `${year}-${month}-${day}`;
+        const dateString =
+            year + "-" +
+            String(month + 1).padStart(2,"0") + "-" +
+            String(day).padStart(2,"0");
 
-        if (availability[key]) {
+        if (availableDates.has(dateString)) {
             dateDiv.classList.add("available");
         }
 
-        dateDiv.addEventListener("click", function() {
-
-            selectedDateKey = key;
-
-            modalDateTitle.innerText =
-                "Set Availability for " +
-                day + " " +
-                currentDate.toLocaleString("default", { month: "long" }) +
-                " " + year;
-
-            loadSavedTimes();
+        dateDiv.addEventListener("click", () => {
+            selectedDate = dateString;
+            loadSavedTimes(dateString);
             modal.style.display = "block";
         });
 
@@ -84,41 +87,170 @@ function renderCalendar() {
     }
 }
 
-function loadSavedTimes() {
+async function loadSavedTimes(date) {
 
     savedTimes.innerHTML = "";
 
-    if (!availability[selectedDateKey]) return;
+    const { data, error } = await supabase
+        .from("available_dates")
+        .select("*")
+        .eq("date", date)
+        .order("start_time");
 
-    availability[selectedDateKey].forEach(time => {
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    data.forEach(row => {
+
         const div = document.createElement("div");
         div.classList.add("saved-time-item");
-        div.innerText = time;
+
+        const start = row.start_time.substring(0,5);
+        const end = row.end_time.substring(0,5);
+
+        div.innerHTML = `
+            <span>${start} - ${end}</span>
+            <button class="edit-slot">Edit</button>
+            <button class="delete-slot">Delete</button>
+        `;
+
+        // EDIT SLOT
+        div.querySelector(".edit-slot").addEventListener("click", () => {
+            startTime.value = start;
+            endTime.value = end;
+            editingSlotId = row.id;
+        });
+
+        // DELETE SLOT
+        div.querySelector(".delete-slot").addEventListener("click", async () => {
+
+            if (!confirm("Delete this time slot?")) return;
+
+            const { error } = await supabase
+                .from("available_dates")
+                .delete()
+                .eq("id", row.id);
+
+            if (error) {
+                console.error(error);
+                alert("Delete failed");
+                return;
+            }
+
+            loadSavedTimes(selectedDate);
+            loadAvailability();
+        });
+
         savedTimes.appendChild(div);
     });
 }
 
-saveBtn.addEventListener("click", () => {
+saveBtn.addEventListener("click", async () => {
 
     if (!startTime.value || !endTime.value) {
-        alert("Please select start and end time.");
+        alert("Select start and end time");
         return;
     }
 
-    const timeRange = startTime.value + " - " + endTime.value;
-
-    if (!availability[selectedDateKey]) {
-        availability[selectedDateKey] = [];
+    if (startTime.value >= endTime.value) {
+        alert("End time must be after start time");
+        return;
     }
 
-    availability[selectedDateKey].push(timeRange);
+    // fetch existing slots for overlap check
+    const { data: existingSlots } = await supabase
+        .from("available_dates")
+        .select("*")
+        .eq("date", selectedDate);
+
+    if (isOverlapping(startTime.value, endTime.value, existingSlots)) {
+        alert("Time slot overlaps with an existing slot.");
+        return;
+    }
+
+    let response;
+
+    // UPDATE SLOT
+    if (editingSlotId) {
+
+        response = await supabase
+            .from("available_dates")
+            .update({
+                start_time: startTime.value,
+                end_time: endTime.value
+            })
+            .eq("id", editingSlotId);
+
+        editingSlotId = null;
+
+    } 
+    // INSERT SLOT
+    else {
+
+        response = await supabase
+            .from("available_dates")
+            .insert([{
+                date: selectedDate,
+                start_time: startTime.value,
+                end_time: endTime.value
+            }]);
+    }
+
+    if (response.error) {
+        console.error(response.error);
+        alert("Save failed");
+        return;
+    }
 
     startTime.value = "";
     endTime.value = "";
 
-    renderCalendar();
-    loadSavedTimes();
+    loadSavedTimes(selectedDate);
+    loadAvailability();
 });
+
+async function loadAvailability() {
+
+    const { data, error } = await supabase
+        .from("available_dates")
+        .select("date");
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    availableDates = new Set();
+
+    data.forEach(row => {
+        availableDates.add(row.date);
+    });
+
+    renderCalendar();
+}
+
+function isOverlapping(start, end, existingSlots) {
+
+    for (let slot of existingSlots) {
+
+        const s = slot.start_time;
+        const e = slot.end_time;
+
+        if (
+            (start >= s && start < e) ||
+            (end > s && end <= e) ||
+            (start <= s && end >= e)
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+loadAvailability();
 
 closeBtn.addEventListener("click", () => {
     modal.style.display = "none";
@@ -139,5 +271,3 @@ nextMonthBtn.addEventListener("click", () => {
     currentDate.setMonth(currentDate.getMonth() + 1);
     renderCalendar();
 });
-
-renderCalendar();

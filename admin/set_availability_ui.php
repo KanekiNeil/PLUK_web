@@ -106,6 +106,6 @@ $user_role = "Junior Unit Manager";
     </div>
 </div>
 
-<script src="../js/set_availability.js"></script>
+<script src="../js/set_availability.js" type="module"></script>
 </body>
 </html>
