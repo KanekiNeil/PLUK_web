@@ -5,8 +5,8 @@ include_once "../php/session.php";
 
 if (!isset($_SESSION['user_id'])) {
     // Not logged in
-    header("Location: admin_login.php");
-    exit;
+    //header("Location: admin_login.php");
+    //exit;
 }
 // $appointments = [
 //     ["2026-02-16", "7:00-8:00 AM", "Juan Dela Cruz", "Career", "Rescheduled"],
@@ -14,7 +14,9 @@ if (!isset($_SESSION['user_id'])) {
 //     ["2026-02-27", "3:00-4:00 PM", "Rizal Doe", "Sales", "Processing"],
 // ];
 
-$appointments = include_once "../php/get_appointment_list.php";
+$appointments = include "../php/get_appointment_list.php";
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -323,11 +325,72 @@ body::before {
     font-size: 18px;
 }
 
+.modal-input {
+    width: 60%;
+    padding: 8px 10px;
+    margin-top: 5px;
+    border-radius: 8px;
+    border:1px solid #ccc;
+    font-size:14px;
+}
+
+.modal-select {
+    width: 100%;
+    padding: 8px 10px;
+    margin-top:5px;
+    border-radius: 8px;
+    border:1px solid #ccc;
+    font-size:14px;
+}
+
+.modal-btn {
+    padding:8px 18px;
+    border:none;
+    border-radius:20px;
+    cursor:pointer;
+    font-weight:600;
+    transition:0.2s;
+}
+
+#editBtn {
+    background:#880318;
+    color:white;
+}
+
+.save-btn {
+    background:#155724;
+    color:white;
+}
+
+.cancel-btn {
+    background:#888;
+    color:white;
+}
+
+.modal-btn:hover {
+    opacity:0.85;
+}
+
+/* Status badges inside modal */
+.status-badge {
+    padding:4px 10px;
+    border-radius:15px;
+    font-size:13px;
+    font-weight:600;
+    display:inline-block;
+}
+.status-green { background:#d4edda; color:#155724; }
+.status-blue { background:#cce5ff; color:#004085; }
+.status-yellow { background:#fff3cd; color:#856404; }
+.status-red { background:#f8d7da; color:#721c24; }
+.status-lavender { background:#e6d4f5; color:#5a2d82; }
+
 .appointment-box {
     background: #f1f3f9;
-    padding: 15px;
+    padding: 20px;
     border-radius: 10px;
-    margin: 18px 0;
+    margin: 25px 0;
+    width: 50px;
 }
 
 .details p {
@@ -398,6 +461,7 @@ body::before {
 
 </style>
 </head>
+
 <body>
 
 <!-- HEADER -->
@@ -536,6 +600,7 @@ body::before {
         <?php endforeach; ?>
 
     </div>
+
 </div>
 
 <div class="modal-overlay" id="modalOverlay">
@@ -547,43 +612,42 @@ body::before {
 
         <div class="modal-content">
 
-            <h2 id="modalNameText"></h2>
-            <input type="text" id="modalNameInput" style="display:none; width:100%; padding:8px; margin-bottom:10px;">
+            <!-- Name -->
+            <label><strong>Full Name:</strong></label>
+            <input type="text" id="modalNameInput" class="modal-input" readonly>
 
-            <div class="appointment-box">
-                <p>
-                    <strong>Date:</strong> 
-                    <span id="modalDateText"></span>
-                    <input type="date" id="modalDateInput" style="display:none;">
-                </p>
-
-                <p>
-                    <strong>Time:</strong> 
-                    <span id="modalTimeText"></span>
-                    <input type="text" id="modalTimeInput" style="display:none;">
-                </p>
+            <!-- Date & Time -->
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <div style="flex:1">
+                    <label><strong>Date:</strong></label>
+                    <input type="date" id="modalDateInput" class="modal-input" readonly>
+                </div>
+                <div style="flex:1">
+                    <label><strong>Time:</strong></label>
+                    <input type="text" id="modalTimeInput" class="modal-input" readonly>
+                </div>
             </div>
 
-            <div class="details">
-                <p>
-                    <strong>Appointment Type:</strong> 
-                    <span id="modalApptTypeText"></span>
-                </p>
-
+            <!-- Appointment Type & Status -->
+            <div style="margin-top:15px;">
+                <p><strong>Appointment Type:</strong> <span id="modalApptTypeText"></span></p>
                 <p>
                     <strong>Status:</strong> 
-                    <span id="modalStatusText"></span>
+                    <span id="modalStatusText" class="status-badge"></span>
+                    <select id="modalStatusSelect" class="modal-select" style="display:none;"></select>
                 </p>
             </div>
 
-            <div>
-                <img id="modalFaceImage" src="" alt="Face Image" style="max-width: 100%; height: auto;">
+            <!-- Face Image -->
+            <div style="margin-top:15px; text-align:center;">
+                <img id="modalFaceImage" name="faceImage" src="" alt="Face Image" style="max-width:150px; border-radius:50%; border:2px solid #880318;">
             </div>
 
-            <div style="margin-top:20px; display:flex; gap:10px;">
-                <button class="close-modal-btn" onclick="enableEdit()">Edit</button>
-                <button class="close-modal-btn" id="saveBtn" onclick="saveChanges()" style="display:none; background:#155724;">Save</button>
-                <button class="close-modal-btn" onclick="closeModal()">Close</button>
+            <!-- Buttons -->
+            <div style="margin-top:20px; display:flex; gap:10px; justify-content:end;">
+                <button class="modal-btn" id="editBtn" onclick="enableEdit()">Edit</button>
+                <button class="modal-btn save-btn" id="saveBtn" onclick="saveChanges()" style="display:none;">Save</button>
+                <button class="modal-btn cancel-btn" onclick="closeModal()">Close</button>
             </div>
 
         </div>
@@ -627,50 +691,24 @@ function openModal(row) {
     const time = row.dataset.time;
     const name = row.dataset.name;
     const type = row.dataset.type;
-    const face = row.dataset.face;
+    const faceImage = row.dataset.face;
 
     const select = row.querySelector(".status-select");
     const status = select.value;
 
     document.getElementById("modalOverlay").style.display = "flex";
 
-    // TEXT MODE
-    document.getElementById("modalNameText").innerText = name;
-    document.getElementById("modalDateText").innerText = date;
-    document.getElementById("modalTimeText").innerText = time;
+    document.getElementById("modalNameInput").value = name;
+    document.getElementById("modalDateInput").value = new Date(date).toISOString().split("T")[0];
+    document.getElementById("modalTimeInput").value = time;
+
     document.getElementById("modalApptTypeText").innerText = type;
     document.getElementById("modalStatusText").innerText = status;
-    document.getElementById("modalFaceImage").src = "data:image/png;base64," + face;
 
     document.getElementById("modalType").innerText = type + " Details";
+    document.getElementById("modalFaceImage").src = "data:image/png;base64," + faceImage;
 
     disableEditMode();
-}
-
-function enableEdit() {
-
-    // Hide text
-    document.getElementById("modalNameText").style.display = "none";
-    document.getElementById("modalDateText").style.display = "none";
-    document.getElementById("modalTimeText").style.display = "none";
-
-    // Show inputs
-    document.getElementById("modalNameInput").style.display = "block";
-    document.getElementById("modalDateInput").style.display = "inline";
-    document.getElementById("modalTimeInput").style.display = "inline";
-
-    // Fill inputs
-    document.getElementById("modalNameInput").value =
-        document.getElementById("modalNameText").innerText;
-
-    document.getElementById("modalDateInput").value =
-        new Date(document.getElementById("modalDateText").innerText)
-            .toISOString().split('T')[0];
-
-    document.getElementById("modalTimeInput").value =
-        document.getElementById("modalTimeText").innerText;
-
-    document.getElementById("saveBtn").style.display = "inline-block";
 }
 
 function disableEditMode() {
@@ -686,33 +724,100 @@ function disableEditMode() {
     document.getElementById("saveBtn").style.display = "none";
 }
 
-function saveChanges() {
+function enableEdit() {
 
+    document.getElementById("modalNameInput").readOnly = false;
+    document.getElementById("modalDateInput").readOnly = false;
+    document.getElementById("modalTimeInput").readOnly = false;
+
+    const type = currentRow.dataset.type;
+
+    const statusSelect = document.getElementById("modalStatusSelect");
+    const currentStatus = currentRow.querySelector(".status-select").value;
+
+    let options = [];
+
+    if(type === "Career"){
+        options = [
+            "Attended BYB",
+            "Rescheduled",
+            "Waiting",
+            "Not Qualified"
+        ];
+    }
+
+    if(type === "Sales"){
+        options = [
+            "Set Appointment",
+            "Waiting for Reply",
+            "No Response",
+            "With Existing Insurance",
+            "No Budget"
+        ];
+    }
+
+    statusSelect.innerHTML = options.map(opt => 
+        `<option value="${opt}">${opt}</option>`
+    ).join("");
+
+    statusSelect.value = currentStatus;
+
+    document.getElementById("modalStatusText").style.display = "none";
+    statusSelect.style.display = "block";
+
+    document.getElementById("saveBtn").style.display = "inline-block";
+}
+
+function saveChanges() {
     const newName = document.getElementById("modalNameInput").value;
     const newDate = document.getElementById("modalDateInput").value;
     const newTime = document.getElementById("modalTimeInput").value;
+    const newStatus = document.getElementById("modalStatusSelect").value;
 
     // Update table row
-    currentRow.children[0].innerText =
-        new Date(newDate).toLocaleDateString("en-US");
-
+    currentRow.children[0].innerText = new Date(newDate).toLocaleDateString("en-US");
     currentRow.children[1].innerText = newTime;
     currentRow.children[2].innerText = newName;
 
-    // Update dataset
-    currentRow.dataset.name = newName;
-    currentRow.dataset.date =
-        new Date(newDate).toLocaleDateString("en-US");
+    const rowStatusSelect = currentRow.querySelector(".status-select");
+    rowStatusSelect.value = newStatus;
+    changeStatusColor(rowStatusSelect);
 
-    currentRow.dataset.time = newTime;
+    // Update modal
+    document.getElementById("modalNameInput").readOnly = true;
+    document.getElementById("modalDateInput").readOnly = true;
+    document.getElementById("modalTimeInput").readOnly = true;
 
-    // Update modal text
-    document.getElementById("modalNameText").innerText = newName;
-    document.getElementById("modalDateText").innerText =
-        new Date(newDate).toLocaleDateString("en-US");
-    document.getElementById("modalTimeText").innerText = newTime;
+    const badge = document.getElementById("modalStatusText");
+    badge.innerText = newStatus;
+    badge.style.display = "inline-block";
+    badge.className = "status-badge"; // reset
+    switch (newStatus) {
+        case "Attended BYB": case "Set Appointment": badge.classList.add("status-green"); break;
+        case "Rescheduled": case "No Budget": badge.classList.add("status-blue"); break;
+        case "Waiting": case "Waiting for Reply": badge.classList.add("status-yellow"); break;
+        case "Not Qualified": case "No Response": badge.classList.add("status-red"); break;
+        case "With Existing Insurance": badge.classList.add("status-lavender"); break;
+    }
 
-    disableEditMode();
+    // Hide select, show badge
+    document.getElementById("modalStatusSelect").style.display = "none";
+
+    // Toggle buttons
+    document.getElementById("editBtn").style.display = "inline-block";
+    document.getElementById("saveBtn").style.display = "none";
+}
+
+function disableEditMode(){
+
+    document.getElementById("modalNameInput").readOnly = true;
+    document.getElementById("modalDateInput").readOnly = true;
+    document.getElementById("modalTimeInput").readOnly = true;
+
+    document.getElementById("modalStatusSelect").style.display = "none";
+    document.getElementById("modalStatusText").style.display = "inline-block";
+
+    document.getElementById("saveBtn").style.display = "none";
 }
 
 function closeModal() {
@@ -851,6 +956,7 @@ document.getElementById("logout").addEventListener("click", function(e) {
         alert("Something went wrong");
     });
 });
+
 </script>
 </body>
 </html>
