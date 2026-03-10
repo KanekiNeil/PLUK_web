@@ -1,11 +1,13 @@
 <?php
 // Example: Fetch this from database in real usage
-$availableDates = [
-    "2026-03-01",
-    "2026-03-03",
-    "2026-03-05",
-    "2026-03-08"
-];
+// $availableDates = [
+//     "2026-03-01",
+//     "2026-03-03",
+//     "2026-03-05",
+//     "2026-03-08"
+// ];
+
+$availableDates = include '../php/get_available_dates.php';
 
 $fullDates = [
     "2026-03-02",
@@ -615,18 +617,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const btn = document.createElement("button");
             btn.className = "calendar-btn";
+            btn.type = "button";
             btn.textContent = day;
 
             const dateStr =
                 `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
 
             if (availableDates.includes(dateStr)) {
+
                 btn.classList.add("available");
+
+            } else {
+
+                btn.classList.add("unavailable");
+                btn.disabled = true;
+
             }
 
             if (fullDates.includes(dateStr)) {
+
+                btn.classList.remove("available");
                 btn.classList.add("full");
                 btn.disabled = true;
+
             }
 
             btn.addEventListener("click", () => {
