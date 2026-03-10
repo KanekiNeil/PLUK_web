@@ -82,7 +82,7 @@ closeModal.onclick = function(){
 
 window.onclick = function(e){
     if(e.target == modal){
-        modal.style.display = "none";
+        modal.style.display = "none"; 
     }
 }
 

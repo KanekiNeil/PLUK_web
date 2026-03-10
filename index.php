@@ -41,13 +41,9 @@
                     </ul>
                 </li>
 
-                <li class="dropdown">
+                <li>
                     <a href="#">Contact Us</a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#">Phone</a></li>
-                        <li><a href="#">Email Address</a></li>
-                        <li><a href="#">Address</a></li>
-                    </ul>
+                    <li><a href="#" id="contactsLink">Contact</a></li>
                 </li>
 
             </ul>
