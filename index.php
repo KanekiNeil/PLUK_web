@@ -32,11 +32,11 @@
                 </li>
 
                 <li ">
-                    <a href="#">Claim and Services</a>
+                    <a href="user/services.php">Claim and Services</a>
                 </li>
 
                 <li>
-                    <a href="#">Contact Us</a>
+                    <a href="user/contactus.php">Contact Us</a>
                 </li>
 
             </ul>

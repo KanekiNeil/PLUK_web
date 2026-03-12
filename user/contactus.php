@@ -343,7 +343,7 @@ font-weight:600;
 
         <nav class="top-nav">
             <ul>
-                <li><a href="#">Home</a></li>
+                <li><a href="../index.php">Home</a></li>
 
                 <li class="dropdown">
                     <a href="#">Work with Us</a>
@@ -354,11 +354,11 @@ font-weight:600;
                 </li>
 
                 <li ">
-                    <a href="#">Claim and Services</a>
+                    <a href="../user/services.php">Claim and Services</a>
                 </li>
 
                 <li>
-                    <a href="#" id="contactsLink" >Contact Us</a>
+                    <a href="../user/contactus.php">Contact Us</a>
                     
                 </li>
 

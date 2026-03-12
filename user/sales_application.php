@@ -1,5 +1,3 @@
-SALES FORM
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -386,16 +384,12 @@ input{
                 </li>
 
                 <li>
-                    <a href="#">Claim and Services</a>
+                    <a href="../user/services.php">Claim and Services</a>
                 </li>
 
-                <li class="dropdown">
-                    <a href="#">Contact Us</a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#">Phone</a></li>
-                        <li><a href="#">Email Address</a></li>
-                        <li><a href="#">Address</a></li>
-                    </ul>
+                <li >
+                    <a href="../user/contactus.php">Contact Us</a>
+                    
                 </li>
 
             </ul>

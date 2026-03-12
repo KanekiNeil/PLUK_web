@@ -154,6 +154,25 @@ header {
     margin-left: 4px;
     color: #8b0000;
 }
+
+/* HEADER */
+
+.header{
+background:#6b0f1a;
+color:white;
+text-align:center;
+padding:25px;
+font-size:28px;
+font-weight:bold;
+letter-spacing:1px;
+}
+
+.container{
+width:1100px;
+margin:auto;
+padding:50px 0;
+}
+
 /* ================= SERVICES SECTION ================= */
 
 .services-section{
@@ -262,7 +281,7 @@ text-decoration:underline;
 
 <ul>
 
-<li><a href="#">Home</a></li>
+<li><a href="../index.php">Home</a></li>
 
 <li class="dropdown">
 <a href="#">Work with Us</a>
@@ -276,13 +295,13 @@ text-decoration:underline;
 
 <li >
 
-<a href="#">Claim and Services</a>
+<a href="../user/services.php">Claim and Services</a>
 
 
 </li>
 
 <li>
-<a href="#">Contact Us</a>
+<a href="../user/contactus.php">Contact Us</a>
 </li>
 
 </ul>
@@ -292,6 +311,10 @@ text-decoration:underline;
 </div>
 
 </header>
+
+<div class="header">Claim and Services</div>
+<div class="container">
+
 
 <!-- ================= SERVICES SECTION ================= -->
 
