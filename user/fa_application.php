@@ -11,7 +11,6 @@ $availableDates = include '../php/get_available_dates.php';
 
 $fullDates = [
     "2026-03-02",
-    "2026-03-06"
 ];
 ?>
 
