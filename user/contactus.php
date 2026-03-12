@@ -353,14 +353,8 @@ font-weight:600;
                     </ul>
                 </li>
 
-                <li class="dropdown">
+                <li ">
                     <a href="#">Claim and Services</a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#">PRUServices</a></li>
-                        <li><a href="#">Make a Request</a></li>
-                        <li><a href="#">Claims</a></li>
-                        <li><a href="#">Policy Services Information</a></li>
-                    </ul>
                 </li>
 
                 <li>
