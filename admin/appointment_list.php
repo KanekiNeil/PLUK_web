@@ -16,6 +16,11 @@ if (!isset($_SESSION['user_id'])) {
 
 $appointments = include "../php/get_appointment_list.php";
 
+$user_name = "Levi De Guzman";
+$user_role = "Junior Unit Manager";
+$initials = strtoupper(substr($user_name, 0, 1)) .
+            strtoupper(substr(strrchr($user_name, " "), 1, 1));
+
 
 ?>
 <!DOCTYPE html>
@@ -24,6 +29,7 @@ $appointments = include "../php/get_appointment_list.php";
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link rel="stylesheet" href="../style/dashboard.css"> 
 <title>Appointment List</title>
 
 <style>
@@ -48,7 +54,7 @@ body::before {
 
 /* HEADER */
 
-.main-header{
+/* .main-header{
     display:flex;
     align-items:center;
     justify-content:space-between;
@@ -58,7 +64,7 @@ body::before {
     font-family: 'Segoe UI', sans-serif;
 }
 
-/* LOGO */
+
 
 .logo-section {
     display: flex;
@@ -79,7 +85,6 @@ body::before {
     font-weight: 700;
 }
 
-/* NAVIGATION */
 .nav-menu{
     display:flex;
     gap:35px;
@@ -104,7 +109,7 @@ body::before {
     border-bottom: 2px solid #8b0000;
 }
 
-/* USER SECTION */
+
 
 .user-section{
     display:flex;
@@ -145,7 +150,6 @@ body::before {
     color: #444;
 }
 
-/* PROFILE DROPDOWN */
 
 .user-section{
     position: relative;
@@ -181,7 +185,6 @@ body::before {
     background:#f5f5f5;
 }
 
-/* Notification Icon */
 .notification-icon {
     font-size: 22px;
     cursor: pointer;
@@ -191,10 +194,9 @@ body::before {
 
 .notification-icon:hover {
     color: #8b0000;
-}
+} */
 
-/* MAIN CONTENT */
-.container {
+.container-al {
     padding: 40px;
 }
 
@@ -464,48 +466,11 @@ body::before {
 
 <body>
 
-<!-- HEADER -->
-<header class="main-header">
-
-    <div class="logo-section">
-        <img src="../assets/logo.jpg" class="logo">
-        <span class="brand">ALPHA AQUILA</span>
-    </div>
-
-    <nav class="nav-menu">
-        <a href="dashboard.php">Home</a>
-        <a href="#">Insurance Inquiries</a>
-        <a href="#">Set Availability</a>
-        <a href="appointment_list.php" class="active">Appointment List</a>
-        <a href="#">Applicant List</a>
-    </nav>
-
-    <div class="user-section" onclick="toggleProfile()">
-
-        <span class="material-icons notification-icon">notifications</span>
-
-        <div class="user-info">
-            <strong>Levi De Guzman</strong>
-            <small>Junior Unit Manager</small>
-        </div>
-
-        <div class="avatar">LG</div>
-
-        <span class="arrow">▼</span>
-
-        <div class="profile-dropdown" id="profileDropdown">
-            <a href="#">Profile</a>
-            <a href="#">Settings</a>
-            <a href="#" id="logout">Logout</a>
-        </div>
-
-    </div>
-
-</header>
+<?php include "../header.php"; ?>
 
 
 <!-- CONTENT -->
-<div class="container">
+<div class="container-al">
     <div class="card">
 
         <div class="table-header">
