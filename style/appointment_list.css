@@ -1,0 +1,547 @@
+/* ================= HEADER (FROM LANDING PAGE STYLE) ================= */
+header {
+    background: #ffffff;
+    padding: 15px 40px;
+    border-bottom: 1px solid #ddd;
+    position: relative;
+    z-index: 1000;
+}
+
+/* Flex container */
+.header {
+    display: flex;
+    align-items: center;
+}
+
+.header-right {
+    margin-left: auto;   /* pushes nav + user to right */
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+/* ================= USER SECTION FIX ================= */
+.user-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* Notification Icon */
+.notification-icon {
+    font-size: 22px;
+    cursor: pointer;
+    color: #333;
+    transition: 0.2s ease;
+}
+
+.notification-icon:hover {
+    color: #8b0000;
+}
+
+
+/* ================= PROFILE WRAPPER ================= */
+.profile-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    position: relative; /* IMPORTANT for dropdown positioning */
+}
+
+/* Profile Circle Icon */
+.profile-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #1976d2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+
+
+/* ================= LOGO SECTION ================= */
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #8b0000;
+}
+
+.brand {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* ================= NAVIGATION ================= */
+.nav {
+    display: flex;
+    align-items: center;
+    gap: 50px;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: #8b0000;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 10px 0;
+    display: block;
+    transition: 0.3s ease;
+    cursor: pointer;
+}
+
+.nav-link:hover {
+    opacity: 0.8;
+}
+
+.nav-link.active {
+    border-bottom: 2px solid #8b0000;
+}
+
+/* ================= USER PROFILE (KEEPED AT RIGHT) ================= */
+.user-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.user-info strong {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.user-info small {
+    font-size: 12px;
+    color: #666;
+}
+
+/* Dropdown Arrow */
+.dropdown-arrow {
+    font-size: 10px;
+    color: #444;
+}
+
+/* ================= DROPDOWN MENU ================= */
+.profile-dropdown {
+    position: absolute;
+    top: 55px;
+    right: 0;
+    width: 180px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    display: none;
+    flex-direction: column;
+    padding: 8px 0;
+    z-index: 999;
+}
+
+/* Dropdown Links */
+.profile-dropdown a {
+    padding: 10px 15px;
+    text-decoration: none;
+    font-size: 13px;
+    color: #333;
+    transition: 0.2s ease;
+}
+
+.profile-dropdown a:hover {
+    background: #f3f3f3;
+    color: #8b0000;
+}
+
+/* Show dropdown when active */
+.profile-wrapper.active .profile-dropdown {
+    display: flex;
+}
+
+		
+.absolute-image {
+			position: absolute;
+			top: 0px;
+			left: 5px;
+			width: 86px;
+			height: 98px;
+			object-fit: fill;
+		}
+		.box {
+			flex: 1;
+			align-self: stretch;
+		}
+		.box2 {
+			width: 148px;
+			height: 1px;
+			background: #880318;
+			margin-bottom: 222px;
+			margin-left: 900px;
+		}
+		.box3 {
+			width: 110px;
+			height: 18px;
+			background: #FFFFFF;
+			margin-left: 515px;
+		}
+		.column {
+			align-self: stretch;
+			display: flex;
+			flex-direction: column;
+			align-items: flex-start;
+			position: relative;
+		}
+		.column2 {
+			align-self: stretch;
+		}
+		.column3 {
+			align-self: stretch;
+			align-items: flex-start;
+			padding-bottom: 411px;
+			background-image: url('https://storage.googleapis.com/tagjs-prod.appspot.com/v1/s6A0b3ZqTp/cc7g1jq0_expires_30_days.png');
+			background-size: 100% 100%;
+		}
+		.column4 {
+			max-width: 1234px;
+			box-sizing: border-box;
+			align-self: stretch;
+			display: flex;
+			flex-direction: column;
+			padding-top: 4px;
+			padding-bottom: 4px;
+			margin-bottom: 18px;
+			margin-left: 107px;
+			margin-right: 194px;
+			gap: 2px;
+		}
+		.column5 {
+			align-self: stretch;
+			background: #FFFDFD;
+			border: 1px solid #D9D9D9;
+			padding-top: 11px;
+			padding-left: 70px;
+			padding-right: 15px;
+		}
+		.contain {
+			display: flex;
+			flex-direction: column;
+			background: #FFFFFF;
+		}
+		.image {
+			width: 252px;
+			height: 38px;
+			margin-left: 91px;
+			object-fit: fill;
+		}
+		.image2 {
+			width: 36px;
+			height: 38px;
+			margin-right: 18px;
+			object-fit: fill;
+		}
+		.image3 {
+			width: 43px;
+			height: 43px;
+			margin-right: 50px;
+			object-fit: fill;
+		}
+		.image4 {
+			width: 9px;
+			height: 9px;
+			object-fit: fill;
+		}
+		.image5 {
+			width: 42px;
+			height: 39px;
+			margin-right: 91px;
+			object-fit: fill;
+		}
+		.image6 {
+			width: 42px;
+			height: 39px;
+			object-fit: fill;
+		}
+		.image7 {
+			width: 20px;
+			height: 18px;
+			margin-right: 9px;
+			object-fit: fill;
+		}
+		.image8 {
+			width: 21px;
+			height: 18px;
+			margin-right: 10px;
+			object-fit: fill;
+		}
+		.image9 {
+			width: 21px;
+			height: 18px;
+			margin-right: 11px;
+			object-fit: fill;
+		}
+		.row-view {
+			align-self: stretch;
+			display: flex;
+			align-items: center;
+			background: #FFFFFF;
+			border: 1px solid #00000040;
+			padding-top: 18px;
+			padding-bottom: 18px;
+			box-shadow: 0px 0px 4px #00000040;
+		}
+		.row-view2 {
+			max-width: 1039px;
+			align-self: stretch;
+			display: flex;
+			align-items: center;
+			margin-bottom: 2px;
+			margin-left: 465px;
+			margin-right: 31px;
+		}
+		.row-view3 {
+			align-self: stretch;
+			display: flex;
+			align-items: center;
+			margin-left: 89px;
+			margin-right: 24px;
+		}
+		.row-view4 {
+			align-self: stretch;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 21px;
+		}
+		.row-view5 {
+			flex-shrink: 0;
+			display: flex;
+			align-items: center;
+			background: #FE9E75;
+			border-radius: 15px;
+			padding-top: 5px;
+			padding-bottom: 5px;
+		}
+		.row-view6 {
+			align-self: stretch;
+			display: flex;
+			align-items: center;
+			margin-bottom: 27px;
+		}
+		.row-view7 {
+			flex-shrink: 0;
+			display: flex;
+			align-items: center;
+			background: #9FEB4D;
+			border-radius: 15px;
+			padding-top: 6px;
+			padding-bottom: 6px;
+		}
+		.row-view8 {
+			align-self: stretch;
+			display: flex;
+			align-items: flex-start;
+			margin-bottom: 63px;
+		}
+		.row-view9 {
+			flex-shrink: 0;
+			display: flex;
+			align-items: center;
+			background: #FCFF59;
+			border-radius: 15px;
+			padding-top: 5px;
+			padding-bottom: 5px;
+		}
+		.text {
+			color: #000000;
+			font-size: 17px;
+			margin-right: 20px;
+			width: 161px;
+		}
+		.text2 {
+			color: #000000;
+			font-size: 17px;
+			font-weight: bold;
+			margin-right: 40px;
+		}
+		.text3 {
+			color: #000000;
+			font-size: 17px;
+			font-weight: bold;
+			margin-right: 37px;
+		}
+		.text4 {
+			color: #000000;
+			font-size: 17px;
+			font-weight: bold;
+			margin-right: 39px;
+		}
+		.text5 {
+			color: #000000;
+			font-size: 17px;
+			font-weight: bold;
+		}
+		.text6 {
+			color: #FFFFFF;
+			font-size: 20px;
+			font-weight: bold;
+		}
+		.text7 {
+			color: #FFFFFF;
+			font-size: 20px;
+			font-weight: bold;
+			margin-right: 99px;
+		}
+		.text8 {
+			color: #FFFFFF;
+			font-size: 20px;
+			font-weight: bold;
+			margin-right: 3px;
+		}
+		.text9 {
+			color: #FFFFFF;
+			font-size: 20px;
+			font-weight: bold;
+			margin-right: 28px;
+		}
+		.text10 {
+			color: #000000;
+			font-size: 20px;
+		}
+		.text11 {
+			color: #000000;
+			font-size: 20px;
+			margin-left: 32px;
+			margin-right: 28px;
+		}
+		.text12 {
+			color: #000000;
+			font-size: 20px;
+			margin-right: 111px;
+		}
+		.text13 {
+			color: #000000;
+			font-size: 20px;
+			margin-left: 25px;
+			margin-right: 21px;
+		}
+		.text14 {
+			color: #000000;
+			font-size: 20px;
+			margin-right: 132px;
+		}
+		.text15 {
+			color: #000000;
+			font-size: 20px;
+			margin-right: 117px;
+		}
+		.text16 {
+			color: #000000;
+			font-size: 20px;
+			margin-left: 48px;
+			margin-right: 27px;
+		}
+		.view {
+			align-self: stretch;
+			background: #FFFFFF;
+			padding-bottom: 9px;
+		}
+
+        /* ================= BACKGROUND ================= */
+.appointment-wrapper {
+    min-height: 100vh;
+    background: url("../assets/logo.jpg") center center no-repeat;
+    background-size: 500px;
+    background-attachment: fixed;
+    background-opacity: 0.05;
+    display: flex;
+    justify-content: center;
+    padding-top: 80px;
+}
+
+/* Overlay effect */
+.appointment-wrapper::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.9);
+    z-index: -1;
+}
+
+/* ================= TABLE CARD ================= */
+.appointment-card {
+    width: 80%;
+    max-width: 1100px;
+    background: rgba(255,255,255,0.95);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+/* ================= TABLE ================= */
+.appointment-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.appointment-table thead {
+    background: #8b0000;
+    color: white;
+}
+
+.appointment-table th {
+    padding: 14px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.appointment-table td {
+    padding: 14px;
+    text-align: center;
+    font-size: 14px;
+    border-bottom: 1px solid #ddd;
+}
+
+/* ================= STATUS PILLS ================= */
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.status-pill span {
+    font-size: 18px;
+}
+
+/* Colors */
+.rescheduled {
+    background: #f4a261;
+}
+
+.attended {
+    background: #7ed957;
+}
+
+.processing {
+    background: #f4e04d;
+}
+
+/* Filter icon */
+.filter-icon {
+    font-size: 16px;
+    vertical-align: middle;
+}

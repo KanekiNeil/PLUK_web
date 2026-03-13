@@ -1,0 +1,326 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+    background: #f5f5f5;
+}
+
+/* HEADER */
+/* ================= HEADER (FROM LANDING PAGE STYLE) ================= */
+header {
+    background: #ffffff;
+    padding: 15px 40px;
+    border-bottom: 1px solid #ddd;
+    position: relative;
+    z-index: 1000;
+}
+
+/* Flex container */
+.header {
+    display: flex;
+    align-items: center;
+}
+
+.header-right {
+    margin-left: auto;   /* pushes nav + user to right */
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+/* ================= USER SECTION FIX ================= */
+.user-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* Notification Icon */
+.notification-icon {
+    font-size: 22px;
+    cursor: pointer;
+    color: #333;
+    transition: 0.2s ease;
+}
+
+.notification-icon:hover {
+    color: #8b0000;
+}
+
+
+/* ================= PROFILE WRAPPER ================= */
+.profile-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    position: relative; /* IMPORTANT for dropdown positioning */
+}
+
+/* Profile Circle Icon */
+.profile-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #1976d2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+
+
+/* ================= LOGO SECTION ================= */
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #8b0000;
+}
+
+.brand {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* ================= NAVIGATION ================= */
+.nav {
+    display: flex;
+    align-items: center;
+    gap: 50px;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: #8b0000;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 10px 0;
+    display: block;
+    transition: 0.3s ease;
+    cursor: pointer;
+}
+
+.nav-link:hover {
+    opacity: 0.8;
+}
+
+.nav-link.active {
+    border-bottom: 2px solid #8b0000;
+}
+
+/* ================= USER PROFILE (KEEPED AT RIGHT) ================= */
+.user-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.user-info strong {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.user-info small {
+    font-size: 12px;
+    color: #666;
+}
+
+/* Dropdown Arrow */
+.dropdown-arrow {
+    font-size: 10px;
+    color: #444;
+}
+
+/* ================= DROPDOWN MENU ================= */
+.profile-dropdown {
+    position: absolute;
+    top: 55px;
+    right: 0;
+    width: 180px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    display: none;
+    flex-direction: column;
+    padding: 8px 0;
+    z-index: 999;
+}
+
+/* Dropdown Links */
+.profile-dropdown a {
+    padding: 10px 15px;
+    text-decoration: none;
+    font-size: 13px;
+    color: #333;
+    transition: 0.2s ease;
+}
+
+.profile-dropdown a:hover {
+    background: #f3f3f3;
+    color: #8b0000;
+}
+
+/* Show dropdown when active */
+.profile-wrapper.active .profile-dropdown {
+    display: flex;
+}
+
+.calendar-container {
+    width: 100%;
+    max-width: 1000px;
+    margin: auto;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.calendar-header h1 {
+    color: #880318;
+    font-size: 28px;
+    margin: 0;
+}
+
+.calendar-header button {
+    background: #880318;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.calendar-header button:hover {
+    background: #a5041f;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: #880318;
+    color: white;
+    text-align: center;
+    padding: 12px 0;
+    font-weight: bold;
+    border-radius: 8px;
+}
+
+.calendar-dates {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 12px;
+    padding: 20px 0;
+}
+
+.date {
+    background: #E2DFDF;
+    padding: 18px;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: 0.2s;
+}
+
+.date:hover {
+    transform: scale(1.05);
+}
+
+.date.unavailable {
+    background: #880318;
+    color: white;
+}
+
+.date.available {
+    background: #37FF00;
+    color: black;
+    font-weight: bold;
+}
+
+/* ================= MODAL ================= */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background: white;
+    width: 400px;
+    padding: 25px;
+    border-radius: 15px;
+    position: relative;
+    margin: 120px auto;
+}
+
+.modal-content h2 {
+    margin-bottom: 15px;
+    color: #880318;
+}
+
+.modal-content input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+.modal-content button {
+    background: #880318;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.modal-content button:hover {
+    background: #a5041f;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+#savedTimes {
+    margin-top: 15px;
+}
+
+.saved-time-item {
+    background: #f3f3f3;
+    padding: 6px;
+    border-radius: 6px;
+    margin-top: 5px;
+    font-size: 13px;
+}

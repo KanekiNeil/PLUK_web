@@ -58,3 +58,52 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
+
+//!Modal Script for Priority Images
+const images = document.querySelectorAll(".priority-image");
+const modal = document.getElementById("priorityModal");
+const modalTitle = document.getElementById("modalTitle");
+const closeModal = document.querySelector(".close-modal");
+
+images.forEach(img => {
+    img.addEventListener("click", () => {
+
+        const title = img.getAttribute("data-title");
+
+        modalTitle.innerText = title;
+        modal.style.display = "flex";
+
+    });
+});
+
+closeModal.onclick = function(){
+    modal.style.display = "none";
+}
+
+window.onclick = function(e){
+    if(e.target == modal){
+        modal.style.display = "none"; 
+    }
+}
+
+
+const accordionItems = document.querySelectorAll(".accordion-item");
+
+accordionItems.forEach(item => {
+
+    const header = item.querySelector(".accordion-header");
+    const icon = item.querySelector(".toggle-icon");
+
+    header.addEventListener("click", () => {
+
+        item.classList.toggle("active");
+
+        if(item.classList.contains("active")){
+            icon.textContent = "−";
+        }else{
+            icon.textContent = "+";
+        }
+
+    });
+
+});

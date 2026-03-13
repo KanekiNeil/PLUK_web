@@ -31,23 +31,12 @@
                     </ul>
                 </li>
 
-                <li class="dropdown">
-                    <a href="#">Claim and Services</a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#">PRUServices</a></li>
-                        <li><a href="#">Make a Request</a></li>
-                        <li><a href="#">Claims</a></li>
-                        <li><a href="#">Policy Services Information</a></li>
-                    </ul>
+                <li ">
+                    <a href="user/services.php">Claim and Services</a>
                 </li>
 
-                <li class="dropdown">
-                    <a href="#">Contact Us</a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#">Phone</a></li>
-                        <li><a href="#">Email Address</a></li>
-                        <li><a href="#">Address</a></li>
-                    </ul>
+                <li>
+                    <a href="user/contactus.php">Contact Us</a>
                 </li>
 
             </ul>
@@ -94,7 +83,7 @@
 
 <!-- ================= PRIORITIES ================= -->
 <section class="priorities-container">
-    <h4>Priorities:</h4>
+    <h2>Priorities:</h2>
 
     <div class="carousel-wrapper">
         <button class="arrow left-arrow">&#10094;</button>
@@ -102,17 +91,20 @@
         <div class="priorities-carousel">
             <?php
             $priorities = [
-                "PROTECTION",
-                "EDUCATION",
-                "RETIREMENT",
-                "MEDIUM TO LONG TERM GOALS"
+                ["title" => "PROTECTION", "image" => "assets/Protection.png"],
+                ["title" => "EDUCATION", "image" => "assets/Education.png"],
+                ["title" => "RETIREMENT", "image" => "assets/Retirement.png"],
+                ["title" => "MEDIUM TO LONG TERM GOALS", "image" => "assets/Goals.png"]
             ];
 
-            foreach ($priorities as $title) {
+            foreach ($priorities as $priority) {
                 echo '
                 <div class="priority-card">
-                    <div class="image-placeholder"></div>
-                    <p><?php echo $title; ?></p>
+                    <img src="'.$priority['image'].'" 
+                         class="priority-image" 
+                         data-title="'.$priority['title'].'">
+
+                    <p>'.$priority['title'].'</p>
                 </div>
                 ';
             }
@@ -121,6 +113,113 @@
 
         <button class="arrow right-arrow">&#10095;</button>
     </div>
+</section>
+
+<section>
+<!-- PRIORITY MODAL -->
+<div id="priorityModal" class="priority-modal">
+
+  <div class="priority-modal-content">
+
+    <span class="close-modal">&times;</span>
+
+    <!-- HEADER -->
+    <div class="priority-header">
+
+        <div class="priority-text">
+            <h3 id="modalTitle">PROTECTION</h3>
+
+            <p id="modalDesc">
+            A 2-year pay investment-linked insurance plan designed
+            to protect high potential individuals in their prime
+            investment flexibility for long-term security.
+            </p>
+
+            <button class="info-btn">See for more info</button>
+        </div>
+
+        <img id="modalImage" src="assets/protection.png">
+
+    </div>
+
+
+    <!-- ACCORDION PRODUCTS -->
+    <div class="accordion">
+
+    <!-- ITEM 1 -->
+    <div class="accordion-item">
+
+        <div class="accordion-header">
+            PRULove for Life
+            <span class="toggle-icon">+</span>
+        </div>
+
+        <div class="accordion-body">
+            <p>
+                Affordable premiums, payable in as easy as 5 years.
+                Whole life insurance with guaranteed coverage up to age 100.
+                This plan provides lifetime protection and financial security
+                for you and your family.
+            </p>
+        </div>
+
+    </div>
+
+
+    <!-- ITEM 2 -->
+    <div class="accordion-item">
+
+        <div class="accordion-header">
+            PRULifetime Income
+            <span class="toggle-icon">+</span>
+        </div>
+
+        <div class="accordion-body">
+            <p>
+                A plan that provides guaranteed yearly income while
+                maintaining protection and savings benefits.
+            </p>
+        </div>
+
+    </div>
+
+
+    <!-- ITEM 3 -->
+    <div class="accordion-item">
+
+        <div class="accordion-header">
+            PRUSteady Income
+            <span class="toggle-icon">+</span>
+        </div>
+
+        <div class="accordion-body">
+            <p>
+                Designed to help build a steady source of income for
+                future financial needs.
+            </p>
+        </div>
+
+    </div>
+
+
+    <!-- ITEM 4 -->
+    <div class="accordion-item">
+
+        <div class="accordion-header">
+            PRUWealth 10
+            <span class="toggle-icon">+</span>
+        </div>
+
+        <div class="accordion-body">
+            <p>
+                A 10-year investment-linked plan designed to help grow
+                your wealth while keeping you protected.
+            </p>
+        </div>
+
+    </div>
+
+</div>
 </section>
 
 <!-- ================= VIDEO SECTION ================= -->

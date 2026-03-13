@@ -19,6 +19,8 @@ document.addEventListener("click", function (e) {
     }
 });
 
+// filter calendar 
+
 const filterBtn = document.querySelector(".filter-calendar");
 const dateInput = document.getElementById("overviewDate");
 

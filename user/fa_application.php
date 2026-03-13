@@ -1,15 +1,16 @@
 <?php
 // Example: Fetch this from database in real usage
-$availableDates = [
-    "2026-03-01",
-    "2026-03-03",
-    "2026-03-05",
-    "2026-03-08"
-];
+// $availableDates = [
+//     "2026-03-01",
+//     "2026-03-03",
+//     "2026-03-05",
+//     "2026-03-08"
+// ];
+
+$availableDates = include '../php/get_available_dates.php';
 
 $fullDates = [
     "2026-03-02",
-    "2026-03-06"
 ];
 ?>
 
@@ -401,7 +402,7 @@ $fullDates = [
 
         <nav class="top-nav">
             <ul>
-                <li><a href="#">Home</a></li>
+                <li><a href="../index.php">Home</a></li>
 
                 <li class="dropdown">
                     <a href="#">Work with Us</a>
@@ -411,23 +412,13 @@ $fullDates = [
                     </ul>
                 </li>
 
-                <li class="dropdown">
-                    <a href="#">Claim and Services</a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#">PRUServices</a></li>
-                        <li><a href="#">Make a Request</a></li>
-                        <li><a href="#">Claims</a></li>
-                        <li><a href="#">Policy Services Information</a></li>
-                    </ul>
+                <li >
+                    <a href="../user/services.php">Claim and Services</a>
                 </li>
 
-                <li class="dropdown">
-                    <a href="#">Contact Us</a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#">Phone</a></li>
-                        <li><a href="#">Email Address</a></li>
-                        <li><a href="#">Address</a></li>
-                    </ul>
+                <li >
+                    <a href="../user/contactus.php">Contact Us</a>
+                    
                 </li>
 
             </ul>
@@ -615,18 +606,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const btn = document.createElement("button");
             btn.className = "calendar-btn";
+            btn.type = "button";
             btn.textContent = day;
 
             const dateStr =
                 `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
 
             if (availableDates.includes(dateStr)) {
+
                 btn.classList.add("available");
+
+            } else {
+
+                btn.classList.add("unavailable");
+                btn.disabled = true;
+
             }
 
             if (fullDates.includes(dateStr)) {
+
+                btn.classList.remove("available");
                 btn.classList.add("full");
                 btn.disabled = true;
+
             }
 
             btn.addEventListener("click", () => {
