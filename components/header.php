@@ -3,6 +3,11 @@
 .header {
     display: flex;
     align-items: center;
+    background: #ffffff;
+    padding: 15px 40px;
+    border-bottom: 1px solid #ddd;
+    position: relative;
+    z-index: 1000;
 }
 
 .header-right {
@@ -158,6 +163,7 @@
     display: flex;
 }
 </style>
+<?php $current_page = basename($_SERVER['PHP_SELF']); ?>
 <header>
 <div class="header">
 
@@ -170,11 +176,11 @@
 
         <!-- Navigation -->
         <nav class="nav">
-            <a href="#" class="nav-link active">Home</a>
+            <a href="dashboard.php" class="nav-link <?= $current_page === 'dashboard.php' ? 'active' : '' ?>">Home</a>
             <a href="#" class="nav-link">Insurance Inquiries</a>
-            <a href="set_availability_ui.php" class="nav-link"> Set Availability </a>
-            <a href="appointment_list.php" class="nav-link">Appointment List</a>
-            <a href="applicant_list.php" class="nav-link">Applicant List</a>
+            <a href="set_availability_ui.php" class="nav-link <?= $current_page === 'set_availability_ui.php' ? 'active' : '' ?>"> Set Availability </a>
+            <a href="appointment_list.php" class="nav-link <?= $current_page === 'appointment_list.php' ? 'active' : '' ?>">Appointment List</a>
+            <a href="applicant_list.php" class="nav-link <?= $current_page === 'applicant_list.php' ? 'active' : '' ?>">Applicant List</a>
         </nav>
 
         <!-- User Section -->

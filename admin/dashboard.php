@@ -47,7 +47,7 @@ $initials = strtoupper(substr($user_name, 0, 1)) .
 <!-- ==============================
 HEADER
 ================================-->
-<?php include "../header.php"; ?>
+<?php include "../components/header.php"; ?>
 
 
 <!-- ==============================
