@@ -18,6 +18,11 @@ $schoolGraduated = trim($_POST['school_graduated'] ?? '');
 $faceImage       = $_POST['face_image'] ?? '';
 $appointmentDate = trim($_POST['appointment_date'] ?? '');
 
+if ($appointmentDate) {
+    $dateTime = new DateTime($appointmentDate . ' 08:00 PM');
+    $appointmentDate = $dateTime->format('Y-m-d H:i:s');
+}
+
 // ---------------------------
 // 2️⃣ BASIC VALIDATION
 // ---------------------------

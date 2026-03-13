@@ -11,7 +11,6 @@ $availableDates = include '../php/get_available_dates.php';
 
 $fullDates = [
     "2026-03-02",
-    "2026-03-06"
 ];
 ?>
 
@@ -403,7 +402,7 @@ $fullDates = [
 
         <nav class="top-nav">
             <ul>
-                <li><a href="#">Home</a></li>
+                <li><a href="../index.php">Home</a></li>
 
                 <li class="dropdown">
                     <a href="#">Work with Us</a>
@@ -413,23 +412,13 @@ $fullDates = [
                     </ul>
                 </li>
 
-                <li class="dropdown">
-                    <a href="#">Claim and Services</a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#">PRUServices</a></li>
-                        <li><a href="#">Make a Request</a></li>
-                        <li><a href="#">Claims</a></li>
-                        <li><a href="#">Policy Services Information</a></li>
-                    </ul>
+                <li >
+                    <a href="../user/services.php">Claim and Services</a>
                 </li>
 
-                <li class="dropdown">
-                    <a href="#">Contact Us</a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#">Phone</a></li>
-                        <li><a href="#">Email Address</a></li>
-                        <li><a href="#">Address</a></li>
-                    </ul>
+                <li >
+                    <a href="../user/contactus.php">Contact Us</a>
+                    
                 </li>
 
             </ul>

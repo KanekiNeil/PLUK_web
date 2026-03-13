@@ -47,56 +47,7 @@ $initials = strtoupper(substr($user_name, 0, 1)) .
 <!-- ==============================
 HEADER
 ================================-->
-<header>
-<div class="header">
-
-    <div class="logo-section">
-        <img src="../assets/logo.jpg" class="logo" alt="Alpha Aquila Logo">
-        <h2 class="brand">ALPHA AQUILA</h2>
-    </div>
-
-    <div class="header-right">
-
-        <!-- Navigation -->
-        <nav class="nav">
-            <a href="#" class="nav-link active">Home</a>
-            <a href="#" class="nav-link">Insurance Inquiries</a>
-            <a href="set_availability_ui.php" class="nav-link"> Set Availability </a>
-            <a href="appointment_list.php" class="nav-link">Appointment List</a>
-            <a href="applicant_list.php" class="nav-link">Applicant List</a>
-        </nav>
-
-        <!-- User Section -->
-        <div class="user-section">
-
-            <span class="material-icons notification-icon">notifications</span>
-
-            <div class="profile-wrapper" id="profileToggle">
-
-                <div class="user-info">
-                    <strong><?= htmlspecialchars($user_name) ?></strong>
-                    <small><?= htmlspecialchars($user_role) ?></small>
-                </div>
-
-                <div class="profile-avatar">
-                    <?= $initials ?>
-                </div>
-
-                <span class="dropdown-arrow">▼</span>
-
-                <div class="profile-dropdown">
-                    <a href="#">Profile</a>
-                    <a href="#">Settings</a>
-                    <a href="#" id="logout">Logout</a>
-                </div>
-
-            </div>
-        </div>
-
-    </div>
-
-</div>
-</header>
+<?php include "../header.php"; ?>
 
 
 <!-- ==============================

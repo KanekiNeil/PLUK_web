@@ -290,6 +290,74 @@ input{
     }
 }
 
+/* ================= MODAL ================= */
+
+.modal-overlay{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.4);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
+
+.modal-box{
+    background:white;
+    width:420px;
+    padding:30px;
+    border-radius:16px;
+    border:3px solid #3b82f6;
+    position:relative;
+}
+
+.modal-box h3{
+    margin-bottom:10px;
+}
+
+.modal-box h4{
+    margin-top:15px;
+    margin-bottom:5px;
+}
+
+.modal-box ul{
+    padding-left:18px;
+}
+
+.modal-box li{
+    font-size:14px;
+    margin-bottom:4px;
+}
+
+.close-btn{
+    position:absolute;
+    top:10px;
+    right:15px;
+    font-size:20px;
+    cursor:pointer;
+}
+
+.apply-btn{
+    margin-top:20px;
+    width:100%;
+    padding:10px;
+    border:none;
+    border-radius:20px;
+    background:#880318;
+    color:white;
+    font-weight:600;
+    cursor:pointer;
+}
+
+.apply-btn:hover{
+    opacity:0.9;
+}
+
+
+
 </style>
 </head>
 <body>
@@ -315,23 +383,13 @@ input{
                     </ul>
                 </li>
 
-                <li class="dropdown">
-                    <a href="#">Claim and Services</a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#">PRUServices</a></li>
-                        <li><a href="#">Make a Request</a></li>
-                        <li><a href="#">Claims</a></li>
-                        <li><a href="#">Policy Services Information</a></li>
-                    </ul>
+                <li>
+                    <a href="../user/services.php">Claim and Services</a>
                 </li>
 
-                <li class="dropdown">
-                    <a href="#">Contact Us</a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#">Phone</a></li>
-                        <li><a href="#">Email Address</a></li>
-                        <li><a href="#">Address</a></li>
-                    </ul>
+                <li >
+                    <a href="../user/contactus.php">Contact Us</a>
+                    
                 </li>
 
             </ul>
@@ -339,6 +397,46 @@ input{
 
     </div>
 </header>
+
+
+<!-- ================= APPLICATION MODAL ================= -->
+<div class="modal-overlay" id="applyModal">
+
+    <div class="modal-box">
+
+        <span class="close-btn" id="closeModal">&times;</span>
+
+        <h3>Welcome, Applicants!</h3>
+
+        <p>
+        Take the next step toward a rewarding and flexible career opportunity. 
+        Check the qualifications and exciting benefits below:
+        </p>
+
+        <h4>Qualifications</h4>
+        <ul>
+            <li>Not more than 45 years old</li>
+            <li>At least Fourth Year Graduate</li>
+            <li>Open to applicants nationwide</li>
+            <li>Willing to learn and grow</li>
+        </ul>
+
+        <h4>Perks and Benefits</h4>
+        <ul>
+            <li>Fun and supportive work culture</li>
+            <li>45% commission-based income</li>
+            <li>HMO coverage</li>
+            <li>Opportunity to build your own business</li>
+            <li>Chance to lead a team in the future</li>
+            <li>Potential monthly income of ₱30,000–₱50,000+</li>
+            <li>Qualification for local and international travel incentives</li>
+        </ul>
+
+        <button class="apply-btn" id="applyNow">Apply</button>
+
+    </div>
+
+</div>
 
 <!-- ================= FORM ================= -->
 <div class="container">
@@ -423,6 +521,22 @@ buttons.forEach(btn=>{
         buttons.forEach(b=>b.classList.remove("active"));
         btn.classList.add("active");
     });
+});
+
+const modal = document.getElementById("applyModal");
+const applyBtn = document.getElementById("applyNow");
+const closeBtn = document.getElementById("closeModal");
+const form = document.getElementById("applicationForm");
+
+// Apply button
+applyBtn.addEventListener("click", () => {
+    modal.style.display = "none";
+    form.style.display = "block";
+});
+
+// Close modal
+closeBtn.addEventListener("click", () => {
+    modal.style.display = "none";
 });
 </script>
 

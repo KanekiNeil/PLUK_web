@@ -31,19 +31,12 @@
                     </ul>
                 </li>
 
-                <li class="dropdown">
-                    <a href="#">Claim and Services</a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#">PRUServices</a></li>
-                        <li><a href="#">Make a Request</a></li>
-                        <li><a href="#">Claims</a></li>
-                        <li><a href="#">Policy Services Information</a></li>
-                    </ul>
+                <li ">
+                    <a href="user/services.php">Claim and Services</a>
                 </li>
 
                 <li>
-                    <a href="#">Contact Us</a>
-                    <li><a href="#" id="contactsLink">Contact</a></li>
+                    <a href="user/contactus.php">Contact Us</a>
                 </li>
 
             </ul>

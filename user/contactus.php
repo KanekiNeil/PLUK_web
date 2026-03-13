@@ -343,7 +343,7 @@ font-weight:600;
 
         <nav class="top-nav">
             <ul>
-                <li><a href="#">Home</a></li>
+                <li><a href="../index.php">Home</a></li>
 
                 <li class="dropdown">
                     <a href="#">Work with Us</a>
@@ -353,18 +353,12 @@ font-weight:600;
                     </ul>
                 </li>
 
-                <li class="dropdown">
-                    <a href="#">Claim and Services</a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#">PRUServices</a></li>
-                        <li><a href="#">Make a Request</a></li>
-                        <li><a href="#">Claims</a></li>
-                        <li><a href="#">Policy Services Information</a></li>
-                    </ul>
+                <li ">
+                    <a href="../user/services.php">Claim and Services</a>
                 </li>
 
                 <li>
-                    <a href="#" id="contactsLink" >Contact Us</a>
+                    <a href="../user/contactus.php">Contact Us</a>
                     
                 </li>
 
