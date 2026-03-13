@@ -477,7 +477,7 @@ body::before {
         <a href="#">Insurance Inquiries</a>
         <a href="#">Set Availability</a>
         <a href="appointment_list.php" class="active">Appointment List</a>
-        <a href="#">Applicant List</a>
+        <a href="applicant_list.php">Applicant List</a>
     </nav>
 
     <div class="user-section" onclick="toggleProfile()">
