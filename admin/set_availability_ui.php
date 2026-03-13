@@ -8,6 +8,8 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_name = "Levi De Guzman";
 $user_role = "Junior Unit Manager";
+$initials = strtoupper(substr($user_name, 0, 1)) .
+            strtoupper(substr(strrchr($user_name, " "), 1, 1));
 ?>
 
 <!DOCTYPE html>
@@ -20,49 +22,16 @@ $user_role = "Junior Unit Manager";
     <link rel="stylesheet" href="../style/set_availability.css">
 </head>
 <body>
-<header>
-<div class="header">
-    <div class="logo-section">
-        <img src="../assets/logo.jpg" class="logo">
-        <h2 class="brand">ALPHA AQUILA</h2>
-    </div>
 
-    <div class="header-right">
-        <nav class="nav">
-            <a href="dashboard.php" class="nav-link">Home</a>
-            <a href="#" class="nav-link">Insurance Inquiries</a>
-            <a href="set_availability_ui.php" class="nav-link active">Set Availability</a>
-            <a href="appointment_list.php" class="nav-link">Appointment List</a>
-            <a href="applicant_list.php" class="nav-link">Applicant List</a>
-        </nav>
-
-        <div class="user-section">
-            <span class="material-icons notification-icon">notifications</span>
-            <div class="profile-wrapper" id="profileToggle">
-                <div class="user-info">
-                    <strong><?php echo $user_name; ?></strong>
-                    <small><?php echo $user_role; ?></small>
-                </div>
-                <div class="profile-avatar">LD</div>
-                <span class="dropdown-arrow">▼</span>
-                <div class="profile-dropdown">
-                    <a href="#">Profile</a>
-                    <a href="#">Settings</a>
-                    <a href="#" id="logout">Logout</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-</header>
+<?php include_once "../components/header.php"; ?>
 
 <!-- Tabs -->
-<ul class="nav nav-tabs justify-content-center mb-3" id="calendarTabs">
+<ul class="nav nav-tabs justify-content-center mb-4 availability-tabs" id="calendarTabs" role="tablist" aria-label="Availability type">
     <li class="nav-item">
-        <button class="nav-link active" data-type="client">Client</button>
+        <button class="nav-link active" data-type="client" type="button" role="tab" aria-selected="true">Client</button>
     </li>
     <li class="nav-item">
-        <button class="nav-link" data-type="applicant">Applicant</button>
+        <button class="nav-link" data-type="applicant" type="button" role="tab" aria-selected="false">Applicant</button>
     </li>
 </ul>
 
@@ -105,20 +74,5 @@ $user_role = "Junior Unit Manager";
 </div>
 
 <script src="../js/set_availability.js" type="module"></script>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const tabs = document.querySelectorAll("#calendarTabs .nav-link")
-    tabs.forEach(tab => {
-        tab.addEventListener("click", () => {
-            tabs.forEach(t => t.classList.remove("active"))
-            tab.classList.add("active")
-            
-            const type = tab.dataset.type
-            currentAppointmentType = type
-            loadAvailability(type)
-        })
-    })
-})
-</script>
 </body>
 </html>
