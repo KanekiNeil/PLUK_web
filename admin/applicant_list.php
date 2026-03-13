@@ -6,6 +6,11 @@ $appointments = [
     ["Ana Lopez", "09555555555", "UPLB", "Doctor", "Tondo", "Cancelled"],
     ["Carlo Mendoza", "09444444444", "BSU", "N/A", "Davao", "Approved"]
 ];
+
+$user_name = "Levi De Guzman";
+$user_role = "Junior Unit Manager";
+$initials = strtoupper(substr($user_name, 0, 1)) .
+            strtoupper(substr(strrchr($user_name, " "), 1, 1));
 ?>
 
 <!DOCTYPE html>
@@ -113,93 +118,6 @@ body::before {
     border:1px solid #ddd;
 }
 
-.main-header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    background:#ffffff;
-    padding:15px 40px;
-    border-bottom:1px solid #ddd;
-    font-family: 'Segoe UI', sans-serif;
-}
-
-.logo-section {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.logo {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 50%;
-    border: 2px solid #8b0000;
-}
-
-.brand {
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.nav-menu{
-    display:flex;
-    gap:35px;
-}
-
-.nav-menu a{
-    text-decoration: none;
-    color: #8b0000;
-    font-weight: 600;
-    font-size: 14px;
-    padding: 10px 0;
-    display: block;
-    transition: 0.3s ease;
-    cursor: pointer;
-}
-
-.nav-menu a:hover{
-    opacity: 0.8;
-}
-
-.nav-menu a.active{
-    border-bottom: 2px solid #8b0000;
-}
-
-.user-section{
-    position: relative;
-    display:flex;
-    align-items:center;
-    gap:12px;
-    cursor:pointer;
-}
-
-.profile-dropdown{
-    position:absolute;
-    top:55px;
-    right:0;
-    background:white;
-    border-radius:10px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.15);
-    display:none;
-    flex-direction:column;
-    min-width:160px;
-    z-index:999;
-    overflow:hidden;
-}
-
-.profile-dropdown a{
-    padding:12px 15px;
-    text-decoration:none;
-    color:#333;
-    font-size:14px;
-    transition:0.2s;
-}
-
-.profile-dropdown a:hover{
-    background:#f5f5f5;
-}
-
 /* Notification Icon */
 
 .notification-icon {
@@ -262,43 +180,7 @@ cursor:pointer;
 <body>
 
 <!-- HEADER -->
-<header class="main-header">
-
-    <div class="logo-section">
-        <img src="../assets/logo.jpg" class="logo">
-        <span class="brand">ALPHA AQUILA</span>
-    </div>
-
-    <nav class="nav-menu">
-        <a href="dashboard.php">Home</a>
-        <a href="#">Insurance Inquiries</a>
-        <a href="#">Set Availability</a>
-        <a href="appointment_list.php">Appointment List</a>
-        <a href="applicant_list.php" class="active">Applicant List</a>
-    </nav>
-
-    <div class="user-section" onclick="toggleProfile()">
-
-        <span class="material-icons notification-icon">notifications</span>
-
-        <div class="user-info">
-            <strong>Levi De Guzman</strong>
-            <small>Junior Unit Manager</small>
-        </div>
-
-        <div class="avatar">LG</div>
-
-        <span class="arrow">▼</span>
-
-        <div class="profile-dropdown" id="profileDropdown">
-            <a href="#">Profile</a>
-            <a href="#">Settings</a>
-            <a href="#" id="logout">Logout</a>
-        </div>
-
-    </div>
-
-</header>
+<?php include '../components/header.php'; ?>
 
 <div class="container mt-5">
 
@@ -358,6 +240,18 @@ default => "bg-secondary"
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+
+    const profile = document.getElementById("profileToggle");
+
+    profile.addEventListener("click", function () {
+        this.classList.toggle("active");
+    });
+
+    document.addEventListener("click", function (e) {
+        if (!profile.contains(e.target)) {
+            profile.classList.remove("active");
+        }
+    });
 
 function toggleProfile() {
 
