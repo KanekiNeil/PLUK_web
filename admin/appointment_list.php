@@ -466,7 +466,44 @@ body::before {
 
 <body>
 
-<?php include "../header.php"; ?>
+<!-- HEADER -->
+<header class="main-header">
+
+    <div class="logo-section">
+        <img src="../assets/logo.jpg" class="logo">
+        <span class="brand">ALPHA AQUILA</span>
+    </div>
+
+    <nav class="nav-menu">
+        <a href="dashboard.php">Home</a>
+        <a href="#">Insurance Inquiries</a>
+        <a href="#">Set Availability</a>
+        <a href="appointment_list.php" class="active">Appointment List</a>
+        <a href="applicant_list.php">Applicant List</a>
+    </nav>
+
+    <div class="user-section" onclick="toggleProfile()">
+
+        <span class="material-icons notification-icon">notifications</span>
+
+        <div class="user-info">
+            <strong>Levi De Guzman</strong>
+            <small>Junior Unit Manager</small>
+        </div>
+
+        <div class="avatar">LG</div>
+
+        <span class="arrow">▼</span>
+
+        <div class="profile-dropdown" id="profileDropdown">
+            <a href="#">Profile</a>
+            <a href="#">Settings</a>
+            <a href="#" id="logout">Logout</a>
+        </div>
+
+    </div>
+
+</header>
 
 
 <!-- CONTENT -->
