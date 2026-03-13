@@ -7,13 +7,15 @@ const supabase = createClient(
 
 let currentDate = new Date()
 let availableDates = new Set()
-let selectedDate = null
+let selectedDates = new Set()
+let previewDate = null
 let editingSlotId = null
 let currentAppointmentType = "client" // default
 
 // ELEMENTS
 const modal = document.getElementById("availabilityModal")
 const closeBtn = document.querySelector(".close-btn")
+const modalDateTitle = document.getElementById("modalDateTitle")
 const startTime = document.getElementById("startTime")
 const endTime = document.getElementById("endTime")
 const saveBtn = document.getElementById("saveAvailability")
@@ -25,13 +27,87 @@ const calendarDates = document.getElementById("calendarDates")
 const prevMonth = document.getElementById("prevMonth")
 const nextMonth = document.getElementById("nextMonth")
 
+function animateCalendarSwitch() {
+  calendarDates.classList.remove("switching")
+  void calendarDates.offsetWidth
+  calendarDates.classList.add("switching")
+  setTimeout(() => calendarDates.classList.remove("switching"), 280)
+}
+
+function getSortedSelectedDates() {
+  return [...selectedDates].sort()
+}
+
+function toMinutes(timeValue) {
+  const [hours, minutes] = timeValue.split(":").map(Number)
+  return (hours * 60) + minutes
+}
+
+function toTimeString(totalMinutes) {
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`
+}
+
+function overlapsLunchBreak(startTimeValue, endTimeValue) {
+  const lunchStart = 12 * 60
+  const lunchEnd = 13 * 60
+  const start = toMinutes(startTimeValue)
+  const end = toMinutes(endTimeValue)
+  return start < lunchEnd && end > lunchStart
+}
+
+function buildClientHourlySlots(startTimeValue, endTimeValue) {
+  const start = toMinutes(startTimeValue)
+  const end = toMinutes(endTimeValue)
+  const slots = []
+
+  for (let current = start; current + 60 <= end; current += 60) {
+    const next = current + 60
+    const slotStart = toTimeString(current)
+    const slotEnd = toTimeString(next)
+
+    if (overlapsLunchBreak(slotStart, slotEnd)) continue
+
+    slots.push({ start_time: slotStart, end_time: slotEnd })
+  }
+
+  return slots
+}
+
+function updateModalDateTitle() {
+  const selectedList = getSortedSelectedDates()
+  if (!selectedList.length) {
+    modalDateTitle.innerText = "Select date(s)"
+    return
+  }
+
+  if (selectedList.length === 1) {
+    modalDateTitle.innerText = `Availability for ${selectedList[0]}`
+    return
+  }
+
+  modalDateTitle.innerText = `${selectedList.length} dates selected`
+}
+
 // NAV TABS
-document.querySelectorAll(".nav-link").forEach(link => {
+document.querySelectorAll("#calendarTabs .nav-link").forEach(link => {
   link.addEventListener("click", function () {
-    document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"))
+    document.querySelectorAll("#calendarTabs .nav-link").forEach(l => {
+      l.classList.remove("active")
+      l.setAttribute("aria-selected", "false")
+    })
     this.classList.add("active")
+    this.setAttribute("aria-selected", "true")
     
     currentAppointmentType = this.dataset.type
+    selectedDates.clear()
+    previewDate = null
+    editingSlotId = null
+    savedTimes.innerHTML = ""
+    updateModalDateTitle()
+    modal.style.display = "none"
+    animateCalendarSwitch()
     loadAvailability(currentAppointmentType)
   })
 })
@@ -65,10 +141,27 @@ function renderCalendar() {
 
     const dateString = `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`
     if (availableDates.has(dateString)) dateDiv.classList.add("available")
+    if (selectedDates.has(dateString)) dateDiv.classList.add("selected")
 
     dateDiv.addEventListener("click", () => {
-      selectedDate = dateString
-      loadSavedTimes(dateString)
+      if (selectedDates.has(dateString)) {
+        selectedDates.delete(dateString)
+        if (previewDate === dateString) previewDate = getSortedSelectedDates()[0] || null
+      } else {
+        selectedDates.add(dateString)
+        previewDate = dateString
+      }
+
+      renderCalendar()
+      updateModalDateTitle()
+
+      if (!selectedDates.size) {
+        savedTimes.innerHTML = ""
+        modal.style.display = "none"
+        return
+      }
+
+      if (previewDate) loadSavedTimes(previewDate)
       modal.style.display = "block"
     })
 
@@ -79,6 +172,8 @@ function renderCalendar() {
 // LOAD SAVED TIMES
 async function loadSavedTimes(date) {
   savedTimes.innerHTML = ""
+  if (!date) return
+
   const { data, error } = await supabase
     .from("available_dates")
     .select("*")
@@ -109,7 +204,7 @@ async function loadSavedTimes(date) {
       if (!confirm("Delete this time slot?")) return
       const { error } = await supabase.from("available_dates").delete().eq("id", row.id)
       if (error) return alert("Delete failed")
-      loadSavedTimes(selectedDate)
+      loadSavedTimes(previewDate)
       loadAvailability(currentAppointmentType)
     })
 
@@ -119,29 +214,74 @@ async function loadSavedTimes(date) {
 
 // SAVE TIME SLOT
 saveBtn.addEventListener("click", async () => {
+  const selectedList = getSortedSelectedDates()
+  if (!selectedList.length) return alert("Select at least one date")
   if (!startTime.value || !endTime.value) return alert("Select start and end time")
   if (startTime.value >= endTime.value) return alert("End time must be after start time")
 
-  const { data: existingSlots } = await supabase.from("available_dates").select("*").eq("date", selectedDate).eq("appointment_type", currentAppointmentType)
-  if (isOverlapping(startTime.value,endTime.value,existingSlots)) return alert("Time slot overlaps with existing slot")
+  if (editingSlotId && selectedList.length > 1) {
+    return alert("Edit is only available when one date is selected")
+  }
+
+  const slotsToSave = (!editingSlotId && currentAppointmentType === "client")
+    ? buildClientHourlySlots(startTime.value, endTime.value)
+    : [{ start_time: startTime.value, end_time: endTime.value }]
+
+  if (!slotsToSave.length) {
+    return alert("No valid 1-hour slots found in selected range")
+  }
+
+  const overlapDates = []
+  for (const date of selectedList) {
+    const { data: existingSlots, error } = await supabase
+      .from("available_dates")
+      .select("*")
+      .eq("date", date)
+      .eq("appointment_type", currentAppointmentType)
+
+    if (error) return alert("Failed to validate selected dates")
+
+    const slotsToCheck = editingSlotId
+      ? existingSlots.filter(slot => slot.id !== editingSlotId)
+      : existingSlots
+
+    const hasOverlap = slotsToSave.some(slot =>
+      isOverlapping(slot.start_time, slot.end_time, slotsToCheck)
+    )
+
+    if (hasOverlap) {
+      overlapDates.push(date)
+    }
+  }
+
+  if (overlapDates.length) {
+    return alert(`Time slot overlaps on: ${overlapDates.join(", ")}`)
+  }
 
   let response
   if (editingSlotId) {
-    response = await supabase.from("available_dates").update({start_time:startTime.value,end_time:endTime.value}).eq("id",editingSlotId)
+    response = await supabase
+      .from("available_dates")
+      .update({ start_time: startTime.value, end_time: endTime.value })
+      .eq("id", editingSlotId)
     editingSlotId = null
   } else {
-    response = await supabase.from("available_dates").insert([{
-      date:selectedDate,
-      start_time:startTime.value,
-      end_time:endTime.value,
-      appointment_type: currentAppointmentType
-    }])
+    const rowsToInsert = selectedList.flatMap(date =>
+      slotsToSave.map(slot => ({
+        date,
+        start_time: slot.start_time,
+        end_time: slot.end_time,
+        appointment_type: currentAppointmentType
+      }))
+    )
+
+    response = await supabase.from("available_dates").insert(rowsToInsert)
   }
 
   if (response.error) return alert("Save failed")
   startTime.value = ""
   endTime.value = ""
-  loadSavedTimes(selectedDate)
+  loadSavedTimes(previewDate)
   loadAvailability(currentAppointmentType)
 })
 
@@ -170,4 +310,5 @@ closeBtn.addEventListener("click", () => modal.style.display = "none")
 window.addEventListener("click", e => { if(e.target === modal) modal.style.display = "none" })
 
 // INITIAL LOAD
+updateModalDateTitle()
 loadAvailability(currentAppointmentType)        
