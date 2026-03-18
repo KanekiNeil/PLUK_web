@@ -11,6 +11,11 @@ $url = $supabaseUrl . "/rest/v1/available_dates?select=*";
 if ($aiid) {
     $url .= "&aiid=eq." . urlencode($aiid);
 }
+if (isset($_GET['type']) && $_GET['type'] === 'applicant') {
+    $url .= "&appointment_type=eq.applicant";
+}elseif (isset($_GET['type']) && $_GET['type'] === 'client') {
+    $url .= "&appointment_type=eq.client";
+}
 
 $ch = curl_init($url);
 
