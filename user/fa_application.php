@@ -506,6 +506,7 @@ $fullDates = [
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.34.0/dist/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
@@ -614,7 +615,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 appointmentInput.value = dateStr;
 
-                alert("Selected Date: " + dateStr);
+                Swal.fire({
+                    icon: "info",
+                    title: "Date Selected",
+                    text: "Selected Date: " + dateStr,
+                    timer: 1400,
+                    showConfirmButton: false
+                });
             });
 
             calendarDates.appendChild(btn);
@@ -656,7 +663,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } catch (err) {
             console.error(err);
-            alert("Camera access denied or not supported.");
+            Swal.fire({
+                icon: "error",
+                title: "Camera Error",
+                text: "Camera access denied or not supported."
+            });
         }
     }
 
@@ -667,7 +678,11 @@ document.addEventListener("DOMContentLoaded", () => {
         captureBtn.addEventListener("click", () => {
 
             if (!video.videoWidth) {
-                alert("Camera not ready yet.");
+                Swal.fire({
+                    icon: "warning",
+                    title: "Camera Not Ready",
+                    text: "Camera not ready yet."
+                });
                 return;
             }
 
@@ -707,7 +722,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const appointmentDate = appointmentInput.value;
 
             if (!appointmentDate) {
-                alert("Please select an appointment date.");
+                Swal.fire({
+                    icon: "warning",
+                    title: "Missing Appointment",
+                    text: "Please select an appointment date."
+                });
                 return;
             }
 
@@ -729,7 +748,51 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (data.status === "success") {
 
-                    alert(data.message);
+                    const applicationId = data.application_id || "";
+
+                    const copyText = async (text) => {
+                        if (navigator.clipboard && window.isSecureContext) {
+                            await navigator.clipboard.writeText(text);
+                            return;
+                        }
+
+                        const tempInput = document.createElement("textarea");
+                        tempInput.value = text;
+                        tempInput.style.position = "fixed";
+                        tempInput.style.left = "-9999px";
+                        document.body.appendChild(tempInput);
+                        tempInput.focus();
+                        tempInput.select();
+                        document.execCommand("copy");
+                        document.body.removeChild(tempInput);
+                    };
+
+                    const swalConfig = {
+                        icon: "success",
+                        title: "Submitted",
+                        text: data.message
+                    };
+
+                    if (applicationId) {
+                        swalConfig.html = `
+                            <p>${data.message}</p>
+                            <p style="margin-top:8px;"><strong>Application ID:</strong><br>${applicationId}</p>
+                        `;
+                        swalConfig.showDenyButton = true;
+                        swalConfig.denyButtonText = "Copy ID";
+                        swalConfig.confirmButtonText = "Done";
+                    }
+
+                    const swalResult = await Swal.fire(swalConfig);
+
+                    if (applicationId && swalResult.isDenied) {
+                        await copyText(applicationId);
+                        await Swal.fire({
+                            icon: "success",
+                            title: "Copied",
+                            text: "Application ID copied to clipboard."
+                        });
+                    }
 
                     form.reset();
                     appointmentInput.value = "";
@@ -737,13 +800,21 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (preview) preview.style.display = "none";
 
                 } else {
-                    alert("Error: " + data.message);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Submission Error",
+                        text: data.message
+                    });
                 }
 
             } catch (err) {
 
                 console.error(err);
-                alert("Something went wrong. Please try again.");
+                Swal.fire({
+                    icon: "error",
+                    title: "Request Failed",
+                    text: "Something went wrong. Please try again."
+                });
 
             }
 
