@@ -84,31 +84,98 @@ body {
 }
 
 /* PIE */
-.pie {
-    width: 200px;
-    height: 200px;
-    margin: auto;
-    border-radius: 50%;
-    background: conic-gradient(
-        #ff4d4d 0% 40%,
-        #00bcd4 40% 70%,
-        #ffc107 70% 100%
-    );
+.pie-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 20px;
 }
 
-/* BARS */
+/* PIE */
+.pie {
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    position: relative;
+}
+
+/* CENTER TEXT */
+.pie-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* LEGEND */
+.pie-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+/* ================= BARS ================= */
+.bar-wrapper {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+/* LEFT NUMBERS */
+.bar-yaxis {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 200px;
+    font-size: 12px;
+    color: #666;
+}
+
+/* YOUR BAR AREA */
 .bars {
     display: flex;
     align-items: flex-end;
-    justify-content: center;
-    gap: 15px;
+    gap: 10px;
     height: 200px;
+    width: 100%;
+    background: #f5f5f5;
+    padding: 10px;
+    border-radius: 12px;
+}
+.bar {
+    width: 40px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    color: white;
+    font-size: 10px;
+    border-radius: 6px 6px 0 0;
+    position: relative;
 }
 
-.bar {
-    width: 35px;
-    border-radius: 5px;
+/* labels */
+.bar span {
+    position: absolute;
+    bottom: -18px;
+    font-size: 10px;
+    color: #333;
+    white-space: nowrap;
 }
+
 
 .red { height: 170px; background: #c62828; }
 .blue { height: 140px; background: #0288d1; }

@@ -103,3 +103,104 @@ new Chart(ctx, {
         maintainAspectRatio: false
     }
 });
+
+
+async function loadDashboard() {
+    const res = await fetch("../php/fetch_pie_and_bar_dashboard.php");
+    const data = await res.json();
+
+    console.log(data);
+
+    renderPriorities(data.priorities);
+    renderJobs(data.jobs);
+}
+
+// PIE
+function renderPriorities(data) {
+    const pie = document.querySelector(".pie");
+    const legend = document.querySelector(".pie-legend");
+
+    pie.innerHTML = "";
+    legend.innerHTML = "";
+
+    const total = data.reduce((a,b) => a + Number(b.count), 0) || 1;
+
+    const colors = ["#4e73df", "#e74a3b", "#1cc88a", "#f6c23e", "#36b9cc"];
+
+    // build gradient
+    let gradient = "";
+    let start = 0;
+
+    data.forEach((item, index) => {
+        const percent = (item.count / total) * 100;
+        const end = start + percent;
+
+        gradient += `${colors[index % colors.length]} ${start}% ${end}%`;
+        if (index < data.length - 1) gradient += ", ";
+
+        start = end;
+
+        // LEGEND ITEM
+        const legendItem = document.createElement("div");
+        legendItem.className = "legend-item";
+
+        legendItem.innerHTML = `
+            <div class="legend-color" style="background:${colors[index % colors.length]}"></div>
+            <span>${item.priority} (${item.count})</span>
+        `;
+
+        legend.appendChild(legendItem);
+    });
+
+    pie.style.background = `conic-gradient(${gradient})`;
+
+    // optional center label
+    const center = document.createElement("div");
+    center.className = "pie-center";
+    center.innerText = "Priorities";
+
+    pie.appendChild(center);
+}
+
+// BAR
+function renderJobs(data) {
+    const bars = document.querySelector(".bars");
+    const yAxis = document.querySelector(".bar-yaxis");
+
+    bars.innerHTML = "";
+    yAxis.innerHTML = "";
+
+    const max = Math.max(...data.map(d => Number(d.count))) || 1;
+
+    // =====================
+    // CREATE Y AXIS LABELS
+    // =====================
+    const steps = 5;
+
+    for (let i = steps; i >= 0; i--) {
+        const value = Math.round((max / steps) * i);
+
+        const label = document.createElement("div");
+        label.innerText = value;
+
+        yAxis.appendChild(label);
+    }
+
+    // =====================
+    // CREATE BARS
+    // =====================
+    const colors = ["red", "blue", "teal", "orange", "yellow"];
+
+    data.forEach((item, index) => {
+        const bar = document.createElement("div");
+        bar.className = "bar " + colors[index % colors.length];
+
+        bar.style.height = (item.count / max) * 100 + "%";
+
+        bar.innerHTML = `<span>${item.job}</span>`;
+
+        bars.appendChild(bar);
+    });
+}
+
+document.addEventListener("DOMContentLoaded", loadDashboard);

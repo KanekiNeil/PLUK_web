@@ -99,18 +99,18 @@ MAIN CONTENT
 
     <div class="card equal-card">
         <h3>Priorities</h3>
-        <div class="pie"></div>
+        <div class="pie-wrapper">
+            <div class="pie"></div>
+            <div class="pie-legend"></div>
+        </div>
     </div>
 
     <div class="card equal-card">
         <h3>Past Job</h3>
 
-        <div class="bars">
-            <div class="bar red"></div>
-            <div class="bar blue"></div>
-            <div class="bar teal"></div>
-            <div class="bar orange"></div>
-            <div class="bar yellow"></div>
+        <div class="bar-wrapper">
+            <div class="bar-yaxis"></div>
+            <div class="bars"></div>
         </div>
 
     </div>
