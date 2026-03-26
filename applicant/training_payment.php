@@ -121,6 +121,21 @@
 			transform: scale(1.1);
 		}
 		
+		.step.locked {
+			cursor: not-allowed;
+			opacity: 0.5;
+		}
+		
+		.step.locked:hover .step-number {
+			transform: none;
+		}
+		
+		.step.locked .step-number {
+			background: #e0e0e0;
+			border-color: #ccc;
+			color: #999;
+		}
+		
 		.step.completed .step-number {
 			background: #8B3A3A;
 			color: white;
@@ -258,28 +273,23 @@
 	<div class="container">
 		<!-- Progress Steps -->
 		<div class="steps-progress">
-			<div class="step completed" onclick="navigateToStep(1)">
+			<div class="step completed" data-step="1">
 				<div class="step-number">1</div>
-				<div class="step-label">Verify Email</div>
-			</div>
-			
-			<div class="step completed" onclick="navigateToStep(2)">
-				<div class="step-number">2</div>
 				<div class="step-label">Exam Payment</div>
 			</div>
 			
-			<div class="step completed" onclick="navigateToStep(3)">
-				<div class="step-number">3</div>
+			<div class="step completed" data-step="2">
+				<div class="step-number">2</div>
 				<div class="step-label">Training Registration</div>
 			</div>
 			
-			<div class="step active" onclick="navigateToStep(4)">
-				<div class="step-number">4</div>
+			<div class="step active" data-step="3">
+				<div class="step-number">3</div>
 				<div class="step-label">Training Payment</div>
 			</div>
 			
-			<div class="step" onclick="navigateToStep(5)">
-				<div class="step-number">5</div>
+			<div class="step locked" data-step="4">
+				<div class="step-number">4</div>
 				<div class="step-label">Review</div>
 			</div>
 		</div>
@@ -327,16 +337,62 @@
 		const currentStep = 4;
 		const pages = ['verify_email.php', 'exam_payment.php', 'training_registration.php', 'training_payment.php', 'review.php'];
 		
+		// Get completed steps from localStorage
+		function getCompletedSteps() {
+			const completed = localStorage.getItem('completedSteps');
+			return completed ? JSON.parse(completed) : [];
+		}
+		
+		// Save completed step to localStorage
+		function completeStep(step) {
+			const completed = getCompletedSteps();
+			if (!completed.includes(step)) {
+				completed.push(step);
+				localStorage.setItem('completedSteps', JSON.stringify(completed));
+			}
+		}
+		
+		// Initialize step states based on completed steps
+		function initializeSteps() {
+			const completed = getCompletedSteps();
+			const steps = document.querySelectorAll('.step');
+			
+			steps.forEach(step => {
+				const stepNum = parseInt(step.dataset.step);
+				
+				// Unlock if step is completed or is the next available step
+				if (completed.includes(stepNum) || stepNum <= Math.max(...completed, 0) + 1) {
+					step.classList.remove('locked');
+					step.onclick = () => navigateToStep(stepNum);
+					
+					if (completed.includes(stepNum) && stepNum < currentStep) {
+						step.classList.add('completed');
+					}
+				}
+			});
+		}
+		
 		function navigateToStep(targetStep) {
 			if (targetStep === currentStep) return;
-			window.location.href = pages[targetStep - 1];
+			const completed = getCompletedSteps();
+			// Can only navigate to completed steps or current step
+			if (completed.includes(targetStep) || targetStep <= Math.max(...completed, 0) + 1) {
+				window.location.href = pages[targetStep - 1];
+			}
 		}
 		
 		function sendConfirmation() {
+			// Mark step 4 as completed
+			completeStep(4);
+			
 			// TODO: Send confirmation to admin
 			alert('Confirmation sent to admin for review.');
 			console.log('Training payment confirmation sent');
+			window.location.href = 'review.php';
 		}
+		
+		// Initialize on page load
+		initializeSteps();
 	</script>
 </body>
 </html>

@@ -1,3 +1,72 @@
+<?php
+session_start();
+
+$supabaseUrl = "https://ncsobcjlvytbivoxezfd.supabase.co";
+$supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jc29iY2psdnl0Yml2b3hlemZkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTU2ODc3NiwiZXhwIjoyMDg3MTQ0Nzc2fQ.TLktUWOmr-iAZTy4Vm0F_ihUa2q_tQuP83RLTodPcEY";
+
+// Handle form submission
+if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'register_training') {
+    header('Content-Type: application/json');
+    
+    $training_type = $_POST['training_type'] ?? '';
+    $date = $_POST['date'] ?? '';
+    $time = $_POST['time'] ?? '';
+    $email = $_POST['email'] ?? '';
+    
+    // If whole day, set automatic time to 9 AM - 6 PM
+    if (strpos($training_type, 'Whole Day') !== false) {
+        $start_time = '09:00:00';
+        $end_time = '18:00:00';
+    } else {
+        // Extract start and end time from combo box value (e.g., "08:00-11:00")
+        $times = explode('-', $time);
+        $start_time = $times[0] . ':00';
+        $end_time = isset($times[1]) ? $times[1] . ':00' : $times[0] . ':00';
+    }
+    
+    if (empty($training_type) || empty($date)) {
+        echo json_encode(['success' => false, 'message' => 'Required fields are missing']);
+        exit;
+    }
+    
+    // Insert using Supabase REST API
+    $postData = [
+        'email' => $email,
+        'training_type' => $training_type,
+        'date' => $date,
+        'start_time' => $start_time,
+        'end_time' => $end_time
+    ];
+    
+    $ch = curl_init($supabaseUrl . "/rest/v1/training_sched");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "apikey: $supabaseKey",
+        "Authorization: Bearer $supabaseKey",
+        "Content-Type: application/json",
+        "Prefer: return=representation"
+    ]);
+    
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
+    curl_close($ch);
+    
+    if ($curlError) {
+        echo json_encode(['success' => false, 'message' => 'Connection error: ' . $curlError]);
+    } else if ($httpCode >= 200 && $httpCode < 300) {
+        echo json_encode(['success' => true, 'message' => 'Training registered successfully!']);
+    } else {
+        $error = json_decode($response, true);
+        $errorMsg = isset($error['message']) ? $error['message'] : ('HTTP ' . $httpCode . ': ' . $response);
+        // Include sent data for debugging
+        echo json_encode(['success' => false, 'message' => $errorMsg, 'debug' => $postData]);
+    }
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -121,6 +190,21 @@
 			transform: scale(1.1);
 		}
 		
+		.step.locked {
+			cursor: not-allowed;
+			opacity: 0.5;
+		}
+		
+		.step.locked:hover .step-number {
+			transform: none;
+		}
+		
+		.step.locked .step-number {
+			background: #e0e0e0;
+			border-color: #ccc;
+			color: #999;
+		}
+		
 		.step.completed .step-number {
 			background: #8B3A3A;
 			color: white;
@@ -172,46 +256,6 @@
 			text-decoration: underline;
 		}
 		
-		.select-schedule-title {
-			text-align: left;
-			font-size: 14px;
-			font-weight: 600;
-			color: #333;
-			margin-bottom: 20px;
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-		}
-		
-		.schedule-dropdown {
-			padding: 8px 12px;
-			border: none;
-			background: none;
-			font-size: 16px;
-			font-weight: 600;
-			color: #8B3A3A;
-			cursor: pointer;
-			appearance: none;
-			-webkit-appearance: none;
-			-moz-appearance: none;
-			background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238B3A3A' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
-			background-repeat: no-repeat;
-			background-position: right 0 center;
-			padding-right: 20px;
-			border-bottom: 2px solid #8B3A3A;
-		}
-		
-		.schedule-dropdown:focus {
-			outline: none;
-		}
-		
-		.schedule-dropdown option {
-			padding: 8px 12px;
-			color: #8B3A3A;
-			background: white;
-			border-bottom: 2px solid #8B3A3A;
-		}
-		
 		.training-schedule {
 			margin-bottom: 30px;
 			padding-bottom: 20px;
@@ -225,23 +269,6 @@
 			background: #f9f9f9;
 			border-radius: 6px;
 			margin-bottom: 15px;
-		}
-		
-		.training-item.whole-day-item {
-			justify-content: center;
-			padding: 25px 15px;
-		}
-		
-		.training-item.whole-day-item .training-label {
-			flex: none;
-		}
-		
-		.training-item.whole-day-item .training-inputs {
-			flex: none;
-		}
-		
-		.training-item.whole-day-item .input-group {
-			min-width: 200px;
 		}
 		
 		.training-label {
@@ -336,28 +363,23 @@
 	<div class="container">
 		<!-- Progress Steps -->
 		<div class="steps-progress">
-			<div class="step completed" onclick="navigateToStep(1)">
+			<div class="step completed" data-step="1">
 				<div class="step-number">1</div>
-				<div class="step-label">Verify Email</div>
-			</div>
-			
-			<div class="step completed" onclick="navigateToStep(2)">
-				<div class="step-number">2</div>
 				<div class="step-label">Exam Payment</div>
 			</div>
 			
-			<div class="step active" onclick="navigateToStep(3)">
-				<div class="step-number">3</div>
+			<div class="step active" data-step="2">
+				<div class="step-number">2</div>
 				<div class="step-label">Training Registration</div>
 			</div>
 			
-			<div class="step" onclick="navigateToStep(4)">
-				<div class="step-number">4</div>
+			<div class="step locked" data-step="3">
+				<div class="step-number">3</div>
 				<div class="step-label">Training Payment</div>
 			</div>
 			
-			<div class="step" onclick="navigateToStep(5)">
-				<div class="step-number">5</div>
+			<div class="step locked" data-step="4">
+				<div class="step-number">4</div>
 				<div class="step-label">Review</div>
 			</div>
 		</div>
@@ -370,56 +392,60 @@
 			<!-- Info Text -->
 			<div class="info-text">
 				To register for Instruction-Led Training. Click this link 
-				<a href="#" class="https://joinpru.com.ph/our-proposals">-JoinPRU</a>
-			</div>
-			
-			<!-- Select Schedule -->
-			<div class="select-schedule-title">
-				<span>Select Schedule</span>
-				<select class="schedule-dropdown" id="scheduleType">
-					<option value="separated">Separated</option>
-					<option value="whole-day">Whole Day</option>
-				</select>
+				<a href="https://joinpru.com.ph/our-proposals" class="joinpru-link">JoinPRU</a>
 			</div>
 			
 			<div class="training-schedule">
-				<!-- Whole Day Schedule (shown when whole-day is selected) -->
-				<div class="training-item whole-day-item" id="wholeDayItem" style="display: none;">
-					<div class="training-label">Instruction-Led Training (Whole Day)</div>
+				<!-- Training Type Selection -->
+				<div class="training-item">
+					<div class="training-label">Training Type</div>
 					<div class="training-inputs">
 						<div class="input-group">
-							<label>Date</label>
-							<input type="date" id="wholeDayDate">
+							<label>Select Training</label>
+							<select id="trainingType" style="padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; color: #333;">
+								<option value="">-- Select --</option>
+								<option value="Instruction-Led Training 1">Instruction-Led Training 1</option>
+								<option value="Instruction-Led Training 2">Instruction-Led Training 2</option>
+								<option value="Whole Day (Training 1 & 2)">Whole Day (Training 1 & 2)</option>
+							</select>
 						</div>
 					</div>
 				</div>
 				
-				<!-- Training 1 (shown when separated is selected) -->
-				<div class="training-item separated-item" id="training1Item">
-					<div class="training-label">Instruction-Led Training 1</div>
+				<!-- Schedule Selection (shown after training type is selected) -->
+				<div class="training-item" id="scheduleItem" style="display: none;">
+					<div class="training-label" id="scheduleLabel">Schedule</div>
 					<div class="training-inputs">
 						<div class="input-group">
 							<label>Date</label>
-							<input type="date" id="date1">
+							<input type="date" id="trainingDate">
 						</div>
 						<div class="input-group">
-							<label>Time</label>
-							<input type="time" id="time1">
+							<label>Time (3-hour session)</label>
+							<select id="trainingTime" style="padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; color: #333;">
+								<option value="">-- Select Time --</option>
+								<option value="08:00-11:00">8:00 AM - 11:00 AM</option>
+								<option value="09:00-12:00">9:00 AM - 12:00 PM</option>
+								<option value="13:00-16:00">1:00 PM - 4:00 PM</option>
+								<option value="14:00-17:00">2:00 PM - 5:00 PM</option>
+								<option value="15:00-18:00">3:00 PM - 6:00 PM</option>
+								<option value="16:00-19:00">4:00 PM - 7:00 PM</option>
+								<option value="17:00-20:00">5:00 PM - 8:00 PM</option>
+								<option value="18:00-21:00">6:00 PM - 9:00 PM</option>
+								<option value="19:00-22:00">7:00 PM - 10:00 PM</option>
+								<option value="20:00-23:00">8:00 PM - 11:00 PM</option>
+								<option value="21:00-00:00">9:00 PM - 12:00 AM</option>
+							</select>
 						</div>
 					</div>
 				</div>
 				
-				<!-- Training 2 (shown when separated is selected) -->
-				<div class="training-item separated-item" id="training2Item">
-					<div class="training-label">Instruction-Led Training 2</div>
+				<!-- Schedule Info (shown when schedule is set) -->
+				<div class="training-item" id="scheduleInfo" style="display: none; background: #e8f5e9;">
+					<div class="training-label">Selected Schedule</div>
 					<div class="training-inputs">
 						<div class="input-group">
-							<label>Date</label>
-							<input type="date" id="date2">
-						</div>
-						<div class="input-group">
-							<label>Time</label>
-							<input type="time" id="time2">
+							<span id="scheduleInfoText" style="font-size: 14px; color: #333;"></span>
 						</div>
 					</div>
 				</div>
@@ -434,31 +460,156 @@
 		const currentStep = 3;
 		const pages = ['verify_email.php', 'exam_payment.php', 'training_registration.php', 'training_payment.php', 'review.php'];
 		
-		function navigateToStep(targetStep) {
-			if (targetStep === currentStep) return;
-			window.location.href = pages[targetStep - 1];
+		// Get completed steps from localStorage
+		function getCompletedSteps() {
+			const completed = localStorage.getItem('completedSteps');
+			return completed ? JSON.parse(completed) : [];
 		}
 		
-		// Handle schedule type change
-		document.getElementById('scheduleType').addEventListener('change', function() {
-			const wholeDayItem = document.getElementById('wholeDayItem');
-			const training1Item = document.getElementById('training1Item');
-			const training2Item = document.getElementById('training2Item');
+		// Save completed step to localStorage
+		function completeStep(step) {
+			const completed = getCompletedSteps();
+			if (!completed.includes(step)) {
+				completed.push(step);
+				localStorage.setItem('completedSteps', JSON.stringify(completed));
+			}
+		}
+		
+		// Initialize step states based on completed steps
+		function initializeSteps() {
+			const completed = getCompletedSteps();
+			const steps = document.querySelectorAll('.step');
 			
-			if (this.value === 'whole-day') {
-				wholeDayItem.style.display = 'flex';
-				training1Item.style.display = 'none';
-				training2Item.style.display = 'none';
+			steps.forEach(step => {
+				const stepNum = parseInt(step.dataset.step);
+				
+				// Unlock if step is completed or is the next available step
+				if (completed.includes(stepNum) || stepNum <= Math.max(...completed, 0) + 1) {
+					step.classList.remove('locked');
+					step.onclick = () => navigateToStep(stepNum);
+					
+					if (completed.includes(stepNum) && stepNum < currentStep) {
+						step.classList.add('completed');
+					}
+				}
+			});
+		}
+		
+		function navigateToStep(targetStep) {
+			if (targetStep === currentStep) return;
+			const completed = getCompletedSteps();
+			// Can only navigate to completed steps or current step
+			if (completed.includes(targetStep) || targetStep <= Math.max(...completed, 0) + 1) {
+				window.location.href = pages[targetStep - 1];
+			}
+		}
+		
+		// Initialize on page load
+		initializeSteps();
+		
+		// Handle training type selection
+		document.getElementById('trainingType').addEventListener('change', function() {
+			const scheduleItem = document.getElementById('scheduleItem');
+			const scheduleLabel = document.getElementById('scheduleLabel');
+			const timeGroup = document.getElementById('trainingTime').closest('.input-group');
+			
+			if (this.value) {
+				scheduleItem.style.display = 'flex';
+				if (this.value.includes('Whole Day')) {
+					scheduleLabel.textContent = 'Whole Day Schedule';
+					timeGroup.style.display = 'none';
+				} else {
+					scheduleLabel.textContent = this.value + ' Schedule';
+					timeGroup.style.display = 'flex';
+				}
+				// Update schedule info if date and time are already set
+				updateScheduleInfo();
 			} else {
-				wholeDayItem.style.display = 'none';
-				training1Item.style.display = 'flex';
-				training2Item.style.display = 'flex';
+				scheduleItem.style.display = 'none';
 			}
 		});
 		
+		// Show schedule info when date and time are set
+		document.getElementById('trainingDate').addEventListener('change', updateScheduleInfo);
+		document.getElementById('trainingTime').addEventListener('change', updateScheduleInfo);
+		
+		function updateScheduleInfo() {
+			const trainingType = document.getElementById('trainingType').value;
+			const date = document.getElementById('trainingDate').value;
+			const timeSelect = document.getElementById('trainingTime');
+			const time = timeSelect.value;
+			const scheduleInfo = document.getElementById('scheduleInfo');
+			const scheduleInfoText = document.getElementById('scheduleInfoText');
+			
+			const formattedDate = date ? new Date(date).toLocaleDateString('en-US', { 
+				weekday: 'long', 
+				year: 'numeric', 
+				month: 'long', 
+				day: 'numeric' 
+			}) : '';
+			
+			if (trainingType.includes('Whole Day') && date) {
+				scheduleInfoText.innerHTML = 'ILT 1 - ' + formattedDate + ' (9:00 AM - 6:00 PM)<br>ILT 2 - ' + formattedDate + ' (9:00 AM - 6:00 PM)';
+				scheduleInfo.style.display = 'flex';
+			} else if (trainingType && !trainingType.includes('Whole Day') && date && time) {
+				// Get the display text from the selected option
+				const timeText = timeSelect.options[timeSelect.selectedIndex].text;
+				scheduleInfoText.textContent = trainingType + ' - ' + formattedDate + ' (' + timeText + ')';
+				scheduleInfo.style.display = 'flex';
+			} else {
+				scheduleInfo.style.display = 'none';
+			}
+		}
+		
 		function registerTraining() {
-			alert('Training registered successfully!');
-			window.location.href = 'training_payment.php';
+			const trainingType = document.getElementById('trainingType').value;
+			const date = document.getElementById('trainingDate').value;
+			const time = document.getElementById('trainingTime').value;
+			
+			if (!trainingType) {
+				alert('Please select a training type');
+				return;
+			}
+			if (!date) {
+				alert('Please select a date');
+				return;
+			}
+			if (!trainingType.includes('Whole Day') && !time) {
+				alert('Please select a time');
+				return;
+			}
+			
+			// Send data to server
+			const formData = new FormData();
+			formData.append('action', 'register_training');
+			formData.append('email', '<?php echo isset($_SESSION["email"]) ? $_SESSION["email"] : ""; ?>');
+			formData.append('training_type', trainingType);
+			formData.append('date', date);
+			formData.append('time', trainingType.includes('Whole Day') ? '09:00-18:00' : time);
+			
+			fetch('training_registration.php', {
+				method: 'POST',
+				body: formData
+			})
+			.then(response => response.json())
+			.then(data => {
+				if (data.success) {
+					// Mark step 3 as completed
+					completeStep(3);
+					alert(data.message);
+					window.location.href = 'training_payment.php';
+				} else {
+					let errorMsg = 'Error: ' + data.message;
+					if (data.debug) {
+						errorMsg += '\n\nData sent: ' + JSON.stringify(data.debug);
+					}
+					alert(errorMsg);
+				}
+			})
+			.catch(error => {
+				console.error('Error:', error);
+				alert('An error occurred. Please try again.');
+			});
 		}
 	</script>
 </body>
