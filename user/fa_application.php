@@ -6,7 +6,7 @@
 //     "2026-03-05",
 //     "2026-03-08"
 // ];
-
+$_GET['type'] = 'applicant';
 $availableDates = include '../php/get_available_dates.php';
 
 $fullDates = [
@@ -350,39 +350,9 @@ $fullDates = [
     cursor:not-allowed;
 }
 
-/* ===== MONTH & YEAR DROPDOWN ===== */
-.calendar-selectors{
-    display:flex;
-    justify-content:center;
-    gap:15px;
-    margin-bottom:15px;
-}
-
-.calendar-selectors select{
-    padding:8px 12px;
-    border-radius:8px;
-    border:1px solid #ccc;
-    font-size:14px;
-    cursor:pointer;
-    outline:none;
-    background:#f5f5f5;
-    transition:0.2s;
-}
-
-/* Hover */
-.calendar-selectors select:hover{
-    border-color:#880318;
-}
-
-/* Focus */
-.calendar-selectors select:focus{
-    border-color:#880318;
-    box-shadow:0 0 4px rgba(136,3,24,0.3);
-}
-
-/* Optional: make it cleaner */
-.calendar-selectors select option{
-    background:white;
+.calendar-nav{
+    text-align:center;
+    margin-bottom:10px;
 }
 
 
@@ -427,7 +397,7 @@ $fullDates = [
     </div>
 </header>
 
-    <div class="container form-container">
+<div class="container form-container">
     <div class="card shadow p-4">
         <h3 class="mb-4 text-center">Personal Information Form</h3>
 
@@ -502,42 +472,22 @@ $fullDates = [
                 <hr>
 
             <div class="calendar-container">
+                <div class="calendar-header" id="calendarHeader"></div>
+                <div class="calendar-nav">
+                    <button type="button" id="toggleMonthBtn" class="btn btn-outline-secondary btn-sm" style="display:none;"></button>
+                </div>
 
-    <div style="display:flex; justify-content:center; gap:10px; margin-bottom:10px;">
-        <select id="monthSelect" class="form-select" style="width:150px;">
-            <option value="1">January</option>
-            <option value="2">February</option>
-            <option value="3" selected>March</option>
-            <option value="4">April</option>
-            <option value="5">May</option>
-            <option value="6">June</option>
-            <option value="7">July</option>
-            <option value="8">August</option>
-            <option value="9">September</option>
-            <option value="10">October</option>
-            <option value="11">November</option>
-            <option value="12">December</option>
-        </select>
+                <div class="calendar-days">
+                    <div>SUN</div><div>MON</div><div>TUE</div>
+                    <div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
+                </div>
 
-        <select id="yearSelect" class="form-select" style="width:120px;">
-            <option>2025</option>
-            <option selected>2026</option>
-            <option>2027</option>
-        </select>
-    </div>
+                <div class="calendar-dates" id="calendarDates"></div>
 
-    <div class="calendar-header" id="calendarHeader"></div>
+            </div>
 
-    <div class="calendar-days">
-        <div>SUN</div><div>MON</div><div>TUE</div>
-        <div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
-    </div>
-
-    <div class="calendar-dates" id="calendarDates"></div>
-
-</div>
-
-<input type="hidden" name="appointment_date" id="appointmentDate">
+            <input type="hidden" name="appointment_date" id="appointmentDate">
+            <input type="hidden" name="application_type" value="applicant">
 
             <div class="text-center">
                 <button type="submit" class="btn "id="submitBtn">
@@ -556,13 +506,7 @@ $fullDates = [
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.34.0/dist/supabase.min.js"></script>
-
-<script>
-  const SUPABASE_URL = "https://ncsobcjlvytbivoxezfd.supabase.co"; // your project URL
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jc29iY2psdnl0Yml2b3hlemZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1Njg3NzYsImV4cCI6MjA4NzE0NDc3Nn0.LWELQVNAh5GzjU-YUSrO5O3b3Gj-lP7pUB3A_D-vNfA"; // your anon/public API key
-
-  const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
@@ -576,16 +520,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const calendarDates = document.getElementById("calendarDates");
     const header = document.getElementById("calendarHeader");
-    const monthSelect = document.getElementById("monthSelect");
-    const yearSelect = document.getElementById("yearSelect");
+    const toggleMonthBtn = document.getElementById("toggleMonthBtn");
     const appointmentInput = document.getElementById("appointmentDate");
 
     let selectedBtn = null;
+    const today = new Date();
+
+    function isLastWeekOfCurrentMonth(date) {
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        const lastDay = new Date(year, month + 1, 0).getDate();
+        return date.getDate() > (lastDay - 7);
+    }
+
+    const canViewNextMonth = isLastWeekOfCurrentMonth(today);
+    let monthOffset = 0;
+
+    if (canViewNextMonth && toggleMonthBtn) {
+        toggleMonthBtn.style.display = "inline-block";
+    }
 
     function renderCalendar() {
-
-        const month = parseInt(monthSelect.value);
-        const year = parseInt(yearSelect.value);
+        const displayDate = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1);
+        const month = displayDate.getMonth() + 1;
+        const year = displayDate.getFullYear();
 
         const firstDay = new Date(year, month - 1, 1).getDay();
         const totalDays = new Date(year, month, 0).getDate();
@@ -596,7 +554,13 @@ document.addEventListener("DOMContentLoaded", () => {
         ];
 
         header.textContent = `${monthNames[month-1]} ${year}`;
+        if (toggleMonthBtn) {
+            toggleMonthBtn.textContent = monthOffset === 0 ? "Show Next Month" : "Show Current Month";
+        }
+
         calendarDates.innerHTML = "";
+        selectedBtn = null;
+        appointmentInput.value = "";
 
         for (let i = 0; i < firstDay; i++) {
             calendarDates.appendChild(document.createElement("div"));
@@ -611,6 +575,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const dateStr =
                 `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+            const cellDate = new Date(year, month - 1, day);
+            const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const isPastDate = cellDate < todayStart;
 
             if (availableDates.includes(dateStr)) {
 
@@ -631,6 +598,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             }
 
+            if (isPastDate) {
+                btn.classList.remove("available");
+                btn.classList.add("unavailable");
+                btn.disabled = true;
+            }
+
             btn.addEventListener("click", () => {
 
                 if (selectedBtn) {
@@ -642,18 +615,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 appointmentInput.value = dateStr;
 
-                alert("Selected Date: " + dateStr);
+                Swal.fire({
+                    icon: "info",
+                    title: "Date Selected",
+                    text: "Selected Date: " + dateStr,
+                    timer: 1400,
+                    showConfirmButton: false
+                });
             });
 
             calendarDates.appendChild(btn);
         }
     }
 
-    if (monthSelect && yearSelect) {
-        monthSelect.addEventListener("change", renderCalendar);
-        yearSelect.addEventListener("change", renderCalendar);
-        renderCalendar();
+    if (toggleMonthBtn) {
+        toggleMonthBtn.addEventListener("click", () => {
+            if (!canViewNextMonth) return;
+            monthOffset = monthOffset === 0 ? 1 : 0;
+            renderCalendar();
+        });
     }
+
+    renderCalendar();
 
     /* =========================
        📷 CAMERA
@@ -680,7 +663,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } catch (err) {
             console.error(err);
-            alert("Camera access denied or not supported.");
+            Swal.fire({
+                icon: "error",
+                title: "Camera Error",
+                text: "Camera access denied or not supported."
+            });
         }
     }
 
@@ -691,7 +678,11 @@ document.addEventListener("DOMContentLoaded", () => {
         captureBtn.addEventListener("click", () => {
 
             if (!video.videoWidth) {
-                alert("Camera not ready yet.");
+                Swal.fire({
+                    icon: "warning",
+                    title: "Camera Not Ready",
+                    text: "Camera not ready yet."
+                });
                 return;
             }
 
@@ -731,7 +722,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const appointmentDate = appointmentInput.value;
 
             if (!appointmentDate) {
-                alert("Please select an appointment date.");
+                Swal.fire({
+                    icon: "warning",
+                    title: "Missing Appointment",
+                    text: "Please select an appointment date."
+                });
                 return;
             }
 
@@ -753,7 +748,51 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (data.status === "success") {
 
-                    alert(data.message);
+                    const applicationId = data.application_id || "";
+
+                    const copyText = async (text) => {
+                        if (navigator.clipboard && window.isSecureContext) {
+                            await navigator.clipboard.writeText(text);
+                            return;
+                        }
+
+                        const tempInput = document.createElement("textarea");
+                        tempInput.value = text;
+                        tempInput.style.position = "fixed";
+                        tempInput.style.left = "-9999px";
+                        document.body.appendChild(tempInput);
+                        tempInput.focus();
+                        tempInput.select();
+                        document.execCommand("copy");
+                        document.body.removeChild(tempInput);
+                    };
+
+                    const swalConfig = {
+                        icon: "success",
+                        title: "Submitted",
+                        text: data.message
+                    };
+
+                    if (applicationId) {
+                        swalConfig.html = `
+                            <p>${data.message}</p>
+                            <p style="margin-top:8px;"><strong>Application ID:</strong><br>${applicationId}</p>
+                        `;
+                        swalConfig.showDenyButton = true;
+                        swalConfig.denyButtonText = "Copy ID";
+                        swalConfig.confirmButtonText = "Done";
+                    }
+
+                    const swalResult = await Swal.fire(swalConfig);
+
+                    if (applicationId && swalResult.isDenied) {
+                        await copyText(applicationId);
+                        await Swal.fire({
+                            icon: "success",
+                            title: "Copied",
+                            text: "Application ID copied to clipboard."
+                        });
+                    }
 
                     form.reset();
                     appointmentInput.value = "";
@@ -761,13 +800,21 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (preview) preview.style.display = "none";
 
                 } else {
-                    alert("Error: " + data.message);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Submission Error",
+                        text: data.message
+                    });
                 }
 
             } catch (err) {
 
                 console.error(err);
-                alert("Something went wrong. Please try again.");
+                Swal.fire({
+                    icon: "error",
+                    title: "Request Failed",
+                    text: "Something went wrong. Please try again."
+                });
 
             }
 

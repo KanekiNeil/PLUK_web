@@ -1,3 +1,13 @@
+<?php
+$_GET['type'] = 'client';
+$availableDates = include '../php/get_available_dates.php';
+$priorities = include '../php/get_priorities.php';
+
+$fullDates = [
+    "2026-03-02",
+];
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -253,7 +263,20 @@ input{
     background:#880318;
     color:white;
 }
+.calendar-btn.available{
+    background:#d1e7dd;
+}
 
+/* Fully booked */
+.calendar-btn.full{
+    background:#f8d7da;
+    cursor:not-allowed;
+}
+
+.calendar-nav{
+    text-align:center;
+    margin-bottom:10px;
+}
 /* ================= BUTTONS ================= */
 .actions{
     display:flex;
@@ -441,87 +464,100 @@ input{
 <!-- ================= FORM ================= -->
 <div class="container">
 
+    <form id="applicationForm">
+
     <!-- STEP 1 -->
     <div class="section-title">Step 1: Personal Information</div>
 
     <div class="form-row">
         <div class="input-group">
             <label>First Name</label>
-            <input type="text" placeholder="First Name">
+            <input type="text" name="first_name" placeholder="First Name">
         </div>
         <div class="input-group">
             <label>Last Name</label>
-            <input type="text" placeholder="Last Name">
+            <input type="text" name="last_name" placeholder="Last Name">
         </div>
         <div class="input-group">
             <label>Middle Name</label>
-            <input type="text" placeholder="Middle Name">
+            <input type="text" name="middle_name" placeholder="Middle Name">
         </div>
     </div>
 
     <div class="form-row">
         <div class="input-group">
             <label>Email</label>
-            <input type="email" placeholder="@email.com">
+            <input type="email" name="email" placeholder="@email.com">
         </div>
         <div class="input-group">
             <label>Phone</label>
-            <input type="text" placeholder="Phone Number">
+            <input type="text" name="phone" placeholder="Phone Number">
         </div>
     </div>
 
     <!-- STEP 2 -->
     <div class="section-title">Step 2: Choose Top 3 Priorities</div>
 
-    <div class="priority-list">
-        <label><input type="checkbox"> Protection</label>
-        <label><input type="checkbox"> Education</label>
-        <label><input type="checkbox"> Retirement</label>
-        <label><input type="checkbox"> Medium to Long Term Goals</label>
-        <label><input type="checkbox"> Critical Illness Fund</label>
-        <label><input type="checkbox"> Estate Conservation</label>
+    <div id="priorityWarning" style="color: #d32f2f; font-weight: bold; margin-bottom: 10px; display: none;">
+        You can select a maximum of 3 priorities.
     </div>
+
+    <div class="priority-list" id="priorityList">
+        <?php 
+        if (empty($priorities)) {
+            $priorities = [
+                ['id' => 1, 'name' => 'Protection'],
+                ['id' => 2, 'name' => 'Education'],
+                ['id' => 3, 'name' => 'Retirement'],
+                ['id' => 4, 'name' => 'Medium to Long Term Goals'],
+                ['id' => 5, 'name' => 'Critical Illness Fund'],
+                ['id' => 6, 'name' => 'Estate Conservation']
+            ];
+        }
+        ?>
+        <?php foreach ($priorities as $priority): ?>
+        <label>
+            <input type="checkbox" name="priority_id" value="<?php echo $priority['id']; ?>" data-priority-id="<?php echo $priority['id']; ?>">
+            <?php echo htmlspecialchars($priority['name']); ?>
+        </label>
+        <?php endforeach; ?>
+    </div>
+
+    <input type="hidden" name="selected_priorities" id="selectedPriorities" value="">
 
     <!-- STEP 3 -->
     <div class="section-title">Step 3: Schedule Appointment</div>
 
-    <div class="calendar-container">
+        <div class="calendar-container">
+            <div class="calendar-header" id="calendarHeader"></div>
+            <div class="calendar-nav">
+                <button type="button" id="toggleMonthBtn" class="btn btn-outline-secondary btn-sm" style="display:none;"> </button>
+            </div>
 
-        <div class="calendar-header">FEBRUARY 2026</div>
+            <div class="calendar-days">
+                <div>SUN</div><div>MON</div><div>TUE</div>
+                <div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
+            </div>
 
-        <div class="calendar-days">
-            <div>SUN</div><div>MON</div><div>TUE</div>
-            <div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
+            <div class="calendar-dates" id="calendarDates"></div>
+
         </div>
 
-        <div class="calendar-dates">
-            <!-- 28 Days -->
-            <script>
-                for(let i=1;i<=28;i++){
-                    document.write(`<button class="calendar-btn">${i}</button>`)
-                }
-            </script>
-        </div>
-
-    </div>
+    <input type="hidden" name="appointment_date" id="appointmentDate">
+    <input type="hidden" name="application_type" value="sales">
 
     <div class="actions">
-        <button class="btn btn-cancel">Cancel</button>
-        <button class="btn btn-submit">Submit</button>
+        <button type="button" class="btn btn-cancel">Cancel</button>
+        <button type="submit" class="btn btn-submit">Submit</button>
     </div>
+
+    </form>
 
 </div>
 
 <!-- ================= JS ================= -->
 <script>
-const buttons = document.querySelectorAll(".calendar-btn");
 
-buttons.forEach(btn=>{
-    btn.addEventListener("click",()=>{
-        buttons.forEach(b=>b.classList.remove("active"));
-        btn.classList.add("active");
-    });
-});
 
 const modal = document.getElementById("applyModal");
 const applyBtn = document.getElementById("applyNow");
@@ -538,6 +574,218 @@ applyBtn.addEventListener("click", () => {
 closeBtn.addEventListener("click", () => {
     modal.style.display = "none";
 });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+    const availableDates = <?php echo json_encode($availableDates); ?>;
+    const fullDates = <?php echo json_encode($fullDates); ?>;
+
+    // Priority selection logic
+    const priorityCheckboxes = document.querySelectorAll('input[name="priority_id"]');
+    const selectedPrioritiesInput = document.getElementById("selectedPriorities");
+    const priorityWarning = document.getElementById("priorityWarning");
+
+    function updateSelectedPriorities() {
+        const checked = Array.from(priorityCheckboxes).filter(cb => cb.checked);
+        const ids = checked.map(cb => cb.value);
+        selectedPrioritiesInput.value = ids.join(',');
+    }
+
+    priorityCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const checked = Array.from(priorityCheckboxes).filter(cb => cb.checked);
+            
+            if (checked.length > 3) {
+                this.checked = false;
+                priorityWarning.style.display = 'block';
+                updateSelectedPriorities();
+                return;
+            }
+            
+            priorityWarning.style.display = checked.length === 3 ? 'block' : 'none';
+            updateSelectedPriorities();
+        });
+    });
+
+    const calendarDates = document.getElementById("calendarDates");
+    const header = document.getElementById("calendarHeader");
+    const toggleMonthBtn = document.getElementById("toggleMonthBtn");
+    const appointmentInput = document.getElementById("appointmentDate");
+
+    let selectedBtn = null;
+    const today = new Date();
+
+    function isLastWeekOfCurrentMonth(date) {
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        const lastDay = new Date(year, month + 1, 0).getDate();
+        return date.getDate() > (lastDay - 7);
+    }
+
+    const canViewNextMonth = isLastWeekOfCurrentMonth(today);
+    let monthOffset = 0;
+
+    if (canViewNextMonth && toggleMonthBtn) {
+        toggleMonthBtn.style.display = "inline-block";
+    }
+
+    function renderCalendar() {
+        const displayDate = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1);
+        const month = displayDate.getMonth() + 1;
+        const year = displayDate.getFullYear();
+
+        const firstDay = new Date(year, month - 1, 1).getDay();
+        const totalDays = new Date(year, month, 0).getDate();
+
+        const monthNames = [
+            "January","February","March","April","May","June",
+            "July","August","September","October","November","December"
+        ];
+
+        header.textContent = `${monthNames[month-1]} ${year}`;
+        if (toggleMonthBtn) {
+            toggleMonthBtn.textContent = monthOffset === 0 ? "Show Next Month" : "Show Current Month";
+        }
+
+        calendarDates.innerHTML = "";
+        selectedBtn = null;
+        if (appointmentInput) appointmentInput.value = "";
+
+        for (let i = 0; i < firstDay; i++) {
+            calendarDates.appendChild(document.createElement("div"));
+        }
+
+        for (let day = 1; day <= totalDays; day++) {
+
+            const btn = document.createElement("button");
+            btn.className = "calendar-btn";
+            btn.type = "button";
+            btn.textContent = day;
+
+            const dateStr =
+                `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+            const cellDate = new Date(year, month - 1, day);
+            const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const isPastDate = cellDate < todayStart;
+
+            if (availableDates.includes(dateStr)) {
+
+                btn.classList.add("available");
+
+            } else {
+
+                btn.classList.add("unavailable");
+                btn.disabled = true;
+
+            }
+
+            if (fullDates.includes(dateStr)) {
+
+                btn.classList.remove("available");
+                btn.classList.add("full");
+                btn.disabled = true;
+
+            }
+
+            if (isPastDate) {
+                btn.classList.remove("available");
+                btn.classList.add("unavailable");
+                btn.disabled = true;
+            }
+
+            btn.addEventListener("click", () => {
+
+                if (selectedBtn) {
+                    selectedBtn.classList.remove("active");
+                }
+
+                btn.classList.add("active");
+                selectedBtn = btn;
+
+                if (appointmentInput) appointmentInput.value = dateStr;
+
+                alert("Selected Date: " + dateStr);
+            });
+
+            calendarDates.appendChild(btn);
+        }
+    }
+
+    if (toggleMonthBtn) {
+        toggleMonthBtn.addEventListener("click", () => {
+            if (!canViewNextMonth) return;
+            monthOffset = monthOffset === 0 ? 1 : 0;
+            renderCalendar();
+        });
+    }
+
+    renderCalendar();
+
+        const form = document.getElementById("applicationForm");
+
+    if (form) {
+
+        form.addEventListener("submit", async (e) => {
+
+            e.preventDefault();
+
+            if (form.dataset.submitting === "true") return;
+
+            const appointmentDate = appointmentInput.value;
+            const selectedPriorities = selectedPrioritiesInput.value;
+
+            if (!appointmentDate) {
+                alert("Please select an appointment date.");
+                return;
+            }
+
+            if (!selectedPriorities) {
+                alert("Please select at least one priority.");
+                return;
+            }
+
+            const submitBtn = form.querySelector("button[type='submit']");
+            submitBtn.disabled = true;
+
+            form.dataset.submitting = "true";
+
+            try {
+
+                const formData = new FormData(form);
+
+                const response = await fetch("../php/submit_application.php", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.status === "success") {
+
+                    alert(data.message);
+
+                    form.reset();
+                    appointmentInput.value = "";
+
+                } else {
+                    alert("Error: " + data.message);
+                }
+
+            } catch (err) {
+
+                console.error(err);
+                alert("Something went wrong. Please try again.");
+
+            }
+
+            submitBtn.disabled = false;
+            form.dataset.submitting = "false";
+
+        });
+
+    }
+    });
 </script>
 
 </body>

@@ -8,15 +8,31 @@ $SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 // ---------------------------
 // 1️⃣ GET FORM DATA
 // ---------------------------
-$firstName       = trim($_POST['first_name'] ?? '');
-$lastName        = trim($_POST['last_name'] ?? '');
-$email           = trim($_POST['email'] ?? '');
-$address         = trim($_POST['address'] ?? '');
-$birthdate       = trim($_POST['birthdate'] ?? '');
-$currentJob      = trim($_POST['current_job'] ?? '');
-$schoolGraduated = trim($_POST['school_graduated'] ?? '');
-$faceImage       = $_POST['face_image'] ?? '';
-$appointmentDate = trim($_POST['appointment_date'] ?? '');
+$firstName           = trim($_POST['first_name'] ?? '');
+$lastName            = trim($_POST['last_name'] ?? '');
+$middleName          = trim($_POST['middle_name'] ?? '');
+$email               = trim($_POST['email'] ?? '');
+$address             = trim($_POST['address'] ?? '');
+$birthdate           = trim($_POST['birthdate'] ?? '');
+$currentJob          = trim($_POST['current_job'] ?? '');
+$schoolGraduated     = trim($_POST['school_graduated'] ?? '');
+$faceImage           = $_POST['face_image'] ?? '';
+$phone               = trim($_POST['phone'] ?? '');
+$appointmentDate     = trim($_POST['appointment_date'] ?? '');
+$applicationType     = trim($_POST['application_type'] ?? 'applicant');
+$selectedPriorities  = trim($_POST['selected_priorities'] ?? '');
+
+// Get priority IDs from either hidden field or checkbox array
+$priorityIds = [];
+if (!empty($selectedPriorities)) {
+    $priorityIds = array_filter(array_map('trim', explode(',', $selectedPriorities)));
+} else if (isset($_POST['priority_id']) && is_array($_POST['priority_id'])) {
+    $priorityIds = array_filter(array_map('trim', $_POST['priority_id']));
+}
+
+if (!in_array($applicationType, ['applicant', 'sales'], true)) {
+    $applicationType = 'applicant';
+}
 
 if ($appointmentDate) {
     $dateTime = new DateTime($appointmentDate . ' 08:00 PM');
@@ -42,12 +58,14 @@ if (!empty($errors)) {
 // ---------------------------
 // 3️⃣ PROCESS FACE IMAGE
 // ---------------------------
+if ($applicationType === 'applicant' && !$faceImage) {
+    echo json_encode(["status" => "error", "message" => "Face image is required."]);
+    exit;
+}
+
 if ($faceImage) {
     $faceImage = preg_replace('/^data:image\/\w+;base64,/', '', $faceImage); // remove prefix
     // keep as base64 string, Supabase TEXT column can store this
-}else{
-    echo json_encode(["status" => "error", "message" => "Face image is required."]);
-    exit;
 }
 
 // ---------------------------
@@ -61,6 +79,13 @@ $applicantData = [
     "AI_Birthdate" => $birthdate ?: null,
     "AI_CurrentJob" => $currentJob ?: null,
     "AI_SchoolGraduated" => $schoolGraduated ?: null
+];
+$salesData = [
+    "SI_FirstName" => $firstName,
+    "SI_MiddleName" => $middleName ?: null,
+    "SI_LastName" => $lastName,
+    "SI_Email" => $email,
+    "SI_PhoneNum" => $phone ?: null,
 ];
 
 // Use curl to POST JSON to Supabase REST endpoint
@@ -90,23 +115,122 @@ function supabaseInsert($table, $data, $SUPABASE_URL, $SUPABASE_KEY) {
     return $rows[0] ?? null;
 }
 
-try {
-    // Insert applicant
-    $insertedApplicant = supabaseInsert("applicant_information", $applicantData, $SUPABASE_URL, $SUPABASE_KEY);
-    if (!$insertedApplicant || !isset($insertedApplicant["aiid"])) {
-        throw new Exception("Failed to create applicant record.");
+function sendEmailJsEmail($toEmail, $toName, $subject, $messageText) {
+    $serviceId = getenv('EMAILJS_SERVICE_ID') ?: 'service_si8ka4i';
+    $templateId = getenv('EMAILJS_TEMPLATE_ID') ?: 'template_jmz8msa';
+    $publicKey = getenv('EMAILJS_PUBLIC_KEY') ?: 'DahQPSXP7ROP8aCT3';
+    $privateKey = getenv('EMAILJS_PRIVATE_KEY') ?: 'AZtuTthgSkYsQVH0tAVK5';
+
+    if (!$serviceId || !$templateId || !$publicKey) {
+        throw new Exception("EmailJS configuration missing. Set EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, and EMAILJS_PUBLIC_KEY.");
     }
-    $AIID = $insertedApplicant["aiid"];
 
-    // Insert appointment
-    $appointmentData = [
-        "AA_FaceID" => $faceImage ?: null,
-        "AA_DateTime" => $appointmentDate,
-        "aiid" => $AIID
+    $payload = [
+        "service_id" => $serviceId,
+        "template_id" => $templateId,
+        "user_id" => $publicKey,
+        "template_params" => [
+            "email" => $toEmail,
+            "name" => $toName,
+            "subject" => $subject,
+            "message" => $messageText,
+            "app_name" => "Alpha Aquila"
+        ]
     ];
-    $insertedAppointment = supabaseInsert("application_appointment", $appointmentData, $SUPABASE_URL, $SUPABASE_KEY);
 
-    echo json_encode(["status" => "success", "message" => "Your application was submitted successfully!"]);
+    if ($privateKey) {
+        $payload["accessToken"] = $privateKey;
+    }
+
+    $ch = curl_init("https://api.emailjs.com/api/v1.0/email/send");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "accept: application/json",
+        "content-type: application/json"
+    ]);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
+    curl_close($ch);
+
+    if ($error) throw new Exception("EmailJS cURL error: " . $error);
+    if ($httpCode >= 400) throw new Exception("EmailJS API error ({$httpCode}): " . $response);
+
+    return $response;
+}
+
+try {
+    $responsePayload = [
+        "status" => "success",
+        "message" => "Your application was submitted successfully!"
+    ];
+
+    if ($applicationType === 'applicant') {
+
+        $insertedApplicant = supabaseInsert("applicant_information", $applicantData, $SUPABASE_URL, $SUPABASE_KEY);
+        if (!$insertedApplicant || !isset($insertedApplicant["aiid"])) {
+            throw new Exception("Failed to create applicant record.");
+        }
+
+        $AIID = $insertedApplicant["aiid"];
+        $UUID = $insertedApplicant["uuid"] ?? null;
+
+        $appointmentData = [
+            "AA_FaceID" => ($faceImage ?: null),
+            "AA_DateTime" => $appointmentDate,
+            "aiid" => $AIID
+        ];
+
+        supabaseInsert("application_appointment", $appointmentData, $SUPABASE_URL, $SUPABASE_KEY);
+        $responsePayload["application_id"] = $UUID;
+
+    } else {
+
+        $insertedSales = supabaseInsert("sales_information", $salesData, $SUPABASE_URL, $SUPABASE_KEY);
+        if (!$insertedSales) {
+            throw new Exception("Failed to create sales record.");
+        }
+
+        $SIID = $insertedSales["siid"] ?? $insertedSales["SIID"] ?? $insertedSales["id"] ?? null;
+        if (!$SIID) {
+            throw new Exception("Sales record inserted but ID was not returned.");
+        }
+
+        $salesAppointmentData = [
+            "SA_DateTime" => $appointmentDate,
+            "siid" => $SIID
+        ];
+
+        supabaseInsert("sales_appointment", $salesAppointmentData, $SUPABASE_URL, $SUPABASE_KEY);
+
+        // Insert selected priorities into sales_priorities table as comma-separated text
+        if (!empty($priorityIds)) {
+            $prioritiesText = implode(',', $priorityIds);
+            $priorityData = [
+                "siid" => $SIID,
+                "pid" => $prioritiesText
+            ];
+            supabaseInsert("sales_priorities", $priorityData, $SUPABASE_URL, $SUPABASE_KEY);
+        }
+    }
+
+    try {
+        sendEmailJsEmail(
+            $email,
+            "$firstName $lastName",
+            "Application Received - Alpha Aquila",
+            "Dear $firstName,\n\nThank you for submitting your application to Alpha Aquila. We have received your information and will review it shortly. We will contact you via email with the next steps.\n\nBest regards,\nAlpha Aquila Team"
+        );
+        $responsePayload["email_status"] = "sent";
+    } catch (Exception $mailEx) {
+        $responsePayload["email_status"] = "failed";
+        $responsePayload["email_error"] = $mailEx->getMessage();
+    }
+
+    echo json_encode($responsePayload);
 
 } catch (Exception $e) {
     echo json_encode(["status" => "error", "message" => $e->getMessage()]);
