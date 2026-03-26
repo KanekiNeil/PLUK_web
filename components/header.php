@@ -164,6 +164,78 @@
 .profile-wrapper.active .profile-dropdown {
     display: flex;
 }
+
+/* Notification Wrapper */
+.notification-wrapper {
+    position: relative;
+}
+
+/* Dropdown Card */
+.notification-dropdown {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    width: 260px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    padding: 15px;
+    display: none;
+    flex-direction: column;
+    z-index: 999;
+}
+
+/* Title */
+.notification-dropdown h4 {
+    text-align: center;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+/* Notification Item */
+.notif-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+/* Time */
+.notif-time {
+    text-align: right;
+    font-size: 11px;
+    color: #777;
+}
+
+/* Empty lines */
+.notif-empty {
+    height: 20px;
+    border-bottom: 1px solid #f0f0f0;
+    margin: 5px 0;
+}
+
+/* View All Button */
+.view-all-btn {
+    margin-top: 10px;
+    padding: 8px;
+    border: none;
+    border-radius: 6px;
+    background: #e57373;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.view-all-btn:hover {
+    background: #d32f2f;
+}
+
+/* Show dropdown */
+.notification-wrapper.active .notification-dropdown {
+    display: flex;
+}
+
 </style>
 <?php $current_page = basename($_SERVER['PHP_SELF']); ?>
 <header>
@@ -187,8 +259,33 @@
 
         <!-- User Section -->
         <div class="user-section">
+            
+            <div class="notification-wrapper" id="notifToggle">
 
             <span class="material-icons notification-icon">notifications</span>
+
+            <!-- Notification Dropdown -->
+            <div class="notification-dropdown">
+                <h4>Notifications</h4>
+
+                <div class="notif-item">
+                    <div>
+                        <strong>Career Meeting</strong><br>
+                        <small>with Aislinn</small>
+                    </div>
+                    <span class="notif-time">5:00 pm<br><small>13/02/2025</small></span>
+                </div>
+
+                <!-- Empty placeholders -->
+                <div class="notif-empty"></div>
+                <div class="notif-empty"></div>
+                <div class="notif-empty"></div>
+
+                <button class="view-all-btn">View All</button>
+            </div>
+
+        </div>
+
 
             <div class="profile-wrapper" id="profileToggle">
 
@@ -216,3 +313,17 @@
 
 </div>
 </header>
+
+<script>
+const notifToggle = document.getElementById("notifToggle");
+
+notifToggle.addEventListener("click", function (e) {
+    e.stopPropagation();
+    notifToggle.classList.toggle("active");
+});
+
+// Close when clicking outside
+document.addEventListener("click", function () {
+    notifToggle.classList.remove("active");
+});
+</script>
