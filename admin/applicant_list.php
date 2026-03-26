@@ -1,11 +1,5 @@
 <?php
-$appointments = [
-    ["Juan Dela Cruz", "09218471841", "UP", "Engineer", "Pasig", "Pending"],
-    ["Maria Santos", "09123456789", "NU", "Teacher", "Mandaluyong", "Approved"],
-    ["Pedro Reyes", "09876543210", "ADMU", "Unemployed", "Cavite", "Completed"],
-    ["Ana Lopez", "09555555555", "UPLB", "Doctor", "Tondo", "Cancelled"],
-    ["Carlo Mendoza", "09444444444", "BSU", "N/A", "Davao", "Approved"]
-];
+$appointments = include '../php/get_applicant_info.php';
 
 $user_name = "Levi De Guzman";
 $user_role = "Junior Unit Manager";

@@ -131,6 +131,11 @@ body::before {
     color: #5a2d82;
 }
 
+.status-default {
+    background: #f0f0f0;
+    color: #333;
+}
+
 .status-select:hover {
     transform: scale(1.03);
 }
@@ -370,45 +375,53 @@ body::before {
 
         <?php foreach ($appointments as $appt): 
             $statusClass = match(true) {
-                str_contains($appt[4], "Rescheduled") => "status-rescheduled",
-                str_contains($appt[4], "Attended") => "status-attended",
-                str_contains($appt[4], "Processing") => "status-processing",
+                str_contains($appt[6], "Rescheduled") => "status-rescheduled",
+                str_contains($appt[6], "Attended") => "status-attended",
+                str_contains($appt[6], "Processing") => "status-processing",
                 default => "status-default"
             };
         ?>
 
         <div class="table-row"
-            data-date="<?= date("F d, Y", strtotime($appt[0])) ?>"
-            data-time="<?= $appt[1] ?>"
-            data-name="<?= htmlspecialchars($appt[2]) ?>"
-            data-type="<?= htmlspecialchars($appt[3]) ?>"
-            data-face="<?= htmlspecialchars($appt[5]) ?>"
+            data-aaid="<?= htmlspecialchars($appt[0]) ?>"
+            data-aiid="<?= htmlspecialchars($appt[1]) ?>"
+            data-date="<?= date("F d, Y", strtotime($appt[2])) ?>"
+            data-time="<?= $appt[3] ?>"
+            data-name="<?= htmlspecialchars($appt[4]) ?>"
+            data-type="<?= htmlspecialchars($appt[5]) ?>"
+            data-face="<?= htmlspecialchars($appt[7]) ?>"
             onclick="openModal(this)">
 
-            <div><?= date("m/d/y", strtotime($appt[0])) ?></div>
-            <div><?= $appt[1] ?></div>
-            <div><?= htmlspecialchars($appt[2]) ?></div>
-            <div><?= htmlspecialchars($appt[3]) ?></div>
+            <div><?= date("m/d/y", strtotime($appt[2])) ?></div>
+            <div><?= $appt[3] ?></div>
+            <div><?= htmlspecialchars($appt[4]) ?></div>
+            <div><?= htmlspecialchars($appt[5]) ?></div>
             <div>
                 <select class="status-select"
-                        onchange="changeStatusColor(this)"
+                        onchange="persistStatus(this)"
                         onclick="event.stopPropagation()"
-                        data-type="<?= htmlspecialchars($appt[3]) ?>">
+                        data-type="<?= htmlspecialchars($appt[5]) ?>">
 
-                    <?php if ($appt[3] === "Career"): ?>
+                    <?php if ($appt[5] === "Career"): ?>
 
-                        <option value="Attended BYB">Attended BYB</option>
-                        <option value="Rescheduled">Rescheduled</option>
-                        <option value="Waiting">Waiting</option>
-                        <option value="Not Qualified">Not Qualified</option>
+                        <option value="Attended BYB" <?= $appt[6] === "Attended BYB" ? "selected" : "" ?>>Attended BYB</option>
+                        <option value="Rescheduled" <?= $appt[6] === "Rescheduled" ? "selected" : "" ?>>Rescheduled</option>
+                        <option value="Waiting" <?= $appt[6] === "Waiting" ? "selected" : "" ?>>Waiting</option>
+                        <option value="Not Qualified" <?= $appt[6] === "Not Qualified" ? "selected" : "" ?>>Not Qualified</option>
+                        <?php if (!in_array($appt[6], ["Attended BYB", "Rescheduled", "Waiting", "Not Qualified"], true)): ?>
+                            <option value="<?= htmlspecialchars($appt[6]) ?>" selected><?= htmlspecialchars($appt[6]) ?></option>
+                        <?php endif; ?>
 
-                    <?php elseif ($appt[3] === "Sales"): ?>
+                    <?php elseif ($appt[5] === "Sales"): ?>
 
-                        <option value="Set Appointment">Set Appointment</option>
-                        <option value="Waiting for Reply">Waiting for Reply</option>
-                        <option value="No Response">No Response</option>
-                        <option value="With Existing Insurance">With Existing Insurance</option>
-                        <option value="No Budget">No Budget</option>
+                        <option value="Set Appointment" <?= $appt[6] === "Set Appointment" ? "selected" : "" ?>>Set Appointment</option>
+                        <option value="Waiting for Reply" <?= $appt[6] === "Waiting for Reply" ? "selected" : "" ?>>Waiting for Reply</option>
+                        <option value="No Response" <?= $appt[6] === "No Response" ? "selected" : "" ?>>No Response</option>
+                        <option value="With Existing Insurance" <?= $appt[6] === "With Existing Insurance" ? "selected" : "" ?>>With Existing Insurance</option>
+                        <option value="No Budget" <?= $appt[6] === "No Budget" ? "selected" : "" ?>>No Budget</option>
+                        <?php if (!in_array($appt[6], ["Set Appointment", "Waiting for Reply", "No Response", "With Existing Insurance", "No Budget"], true)): ?>
+                            <option value="<?= htmlspecialchars($appt[6]) ?>" selected><?= htmlspecialchars($appt[6]) ?></option>
+                        <?php endif; ?>
 
                     <?php endif; ?>
 
@@ -589,6 +602,10 @@ function enableEdit() {
         ];
     }
 
+    if (currentStatus && !options.includes(currentStatus)) {
+        options.unshift(currentStatus);
+    }
+
     statusSelect.innerHTML = options.map(opt => 
         `<option value="${opt}">${opt}</option>`
     ).join("");
@@ -614,7 +631,7 @@ function saveChanges() {
 
     const rowStatusSelect = currentRow.querySelector(".status-select");
     rowStatusSelect.value = newStatus;
-    changeStatusColor(rowStatusSelect);
+    persistStatus(rowStatusSelect);
 
     // Update modal
     document.getElementById("modalNameInput").readOnly = true;
@@ -672,7 +689,8 @@ function changeStatusColor(select) {
         "status-blue",
         "status-yellow",
         "status-red",
-        "status-lavender"
+        "status-lavender",
+        "status-default"
     );
 
     switch (value) {
@@ -701,12 +719,65 @@ function changeStatusColor(select) {
         case "With Existing Insurance":
             select.classList.add("status-lavender");
             break;
+
+        default:
+            select.classList.add("status-default");
+
     }
 }
 
 document.querySelectorAll(".status-select").forEach(select => {
+    select.dataset.previousStatus = select.value;
     changeStatusColor(select);
 });
+
+function persistStatus(select) {
+    const row = select.closest(".table-row");
+    const aaid = row?.dataset.aaid;
+    const aiid = row?.dataset.aiid;
+    const newStatus = select.value;
+    const previousStatus = select.dataset.previousStatus || newStatus;
+
+    changeStatusColor(select);
+
+    if (!aaid && (!aiid)) {
+        console.error("Missing IDs for status update", row?.dataset);
+        alert("Unable to update status: missing appointment identifiers.");
+        select.value = previousStatus;
+        changeStatusColor(select);
+        return;
+    }
+
+    const payload = {
+        status: newStatus
+    };
+
+    if (aaid) {
+        payload.aaid = aaid;
+    } else {
+        payload.aiid = aiid;
+    }
+
+    fetch("../php/update_status.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.status !== "success") {
+            throw new Error(data.message || "Failed to update status");
+        }
+        select.dataset.previousStatus = newStatus;
+    })
+    .catch((error) => {
+        select.value = previousStatus;
+        changeStatusColor(select);
+        alert(error.message || "Unable to update status.");
+    });
+}
 
 let selectedType = "All";
 let selectedStatus = "All";

@@ -42,8 +42,20 @@ if ($data) {
 
         $fullName = $row['AI_FirstName'] . " " . $row['AI_LastName'];
         $faceImage = $row['AA_FaceID']; // Assuming this is a base64 string of the image
+        $aiid = $row['appointment_aiid']  ?? null;
+        $appointmentDateTime = $row['AA_DateTime'];
+
+        $aaid = null;
+        foreach ($row as $key => $value) {
+            if (strtolower((string)$key) === 'aaid') {
+                $aaid = $value;
+                break;
+            }
+        }
 
         $appointments[] = [
+            $aaid,
+            $aiid,
             $date,
             $timeRange,
             $fullName,
