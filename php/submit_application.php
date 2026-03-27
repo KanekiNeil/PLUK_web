@@ -19,6 +19,8 @@ $schoolGraduated     = trim($_POST['school_graduated'] ?? '');
 $faceImage           = $_POST['face_image'] ?? '';
 $phone               = trim($_POST['phone'] ?? '');
 $appointmentDate     = trim($_POST['appointment_date'] ?? '');
+$availableDateId     = trim($_POST['available_date_id'] ?? '');
+$meetingLink         = trim($_POST['meeting_link'] ?? '');
 $applicationType     = trim($_POST['application_type'] ?? 'applicant');
 $selectedPriorities  = trim($_POST['selected_priorities'] ?? '');
 
@@ -47,8 +49,12 @@ if (!$firstName) $errors[] = "First Name is required.";
 if (!$lastName)  $errors[] = "Last Name is required.";
 if (!$email)     $errors[] = "Email is required.";
 if (!$appointmentDate) $errors[] = "Please select an appointment date.";
+if ($appointmentDate && $availableDateId === '') $errors[] = "Please select a valid available date.";
 if ($email && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     $errors[] = "Invalid email format.";
+}
+if ($availableDateId !== '' && !ctype_digit($availableDateId)) {
+    $errors[] = "Invalid available date reference.";
 }
 if (!empty($errors)) {
     echo json_encode(["status" => "error", "message" => implode(" ", $errors)]);
@@ -116,7 +122,39 @@ function supabaseInsert($table, $data, $SUPABASE_URL, $SUPABASE_KEY) {
     return $rows[0] ?? null;
 }
 
-function sendEmailJsEmail($toEmail, $toName, $subject, $messageText) {
+function supabaseInsertWithDateKeyFallback($table, $baseData, $availableDateId, $candidateKeys, $SUPABASE_URL, $SUPABASE_KEY) {
+    if ($availableDateId === '' || $availableDateId === null) {
+        return supabaseInsert($table, $baseData, $SUPABASE_URL, $SUPABASE_KEY);
+    }
+
+    $lastError = null;
+    foreach ($candidateKeys as $key) {
+        $data = $baseData;
+        $data[$key] = (int)$availableDateId;
+
+        try {
+            return supabaseInsert($table, $data, $SUPABASE_URL, $SUPABASE_KEY);
+        } catch (Exception $e) {
+            $lastError = $e;
+            $message = $e->getMessage();
+
+            // Try next candidate key only when error indicates unknown column.
+            if (stripos($message, "Could not find") !== false && stripos($message, "column") !== false) {
+                continue;
+            }
+
+            throw $e;
+        }
+    }
+
+    if ($lastError) {
+        throw new Exception("Unable to map available date ID to appointment table column. " . $lastError->getMessage());
+    }
+
+    return supabaseInsert($table, $baseData, $SUPABASE_URL, $SUPABASE_KEY);
+}
+
+function sendEmailJsEmail($toEmail, $toName, $subject, $messageText, $meetingLink = null) {
     $serviceId = getenv('EMAILJS_SERVICE_ID') ?: 'service_si8ka4i';
     $templateId = getenv('EMAILJS_TEMPLATE_ID') ?: 'template_jmz8msa';
     $publicKey = getenv('EMAILJS_PUBLIC_KEY') ?: 'DahQPSXP7ROP8aCT3';
@@ -135,7 +173,8 @@ function sendEmailJsEmail($toEmail, $toName, $subject, $messageText) {
             "name" => $toName,
             "subject" => $subject,
             "message" => $messageText,
-            "app_name" => "Alpha Aquila"
+            "app_name" => "Alpha Aquila",
+            "meeting_link" => $meetingLink // You can customize this if your template uses a different variable for the meeting link
         ]
     ];
 
@@ -185,7 +224,14 @@ try {
             "aiid" => $AIID
         ];
 
-        supabaseInsert("application_appointment", $appointmentData, $SUPABASE_URL, $SUPABASE_KEY);
+        supabaseInsertWithDateKeyFallback(
+            "application_appointment",
+            $appointmentData,
+            $availableDateId,
+            ["adid", "available_date_id", "AA_AvailableDateID"],
+            $SUPABASE_URL,
+            $SUPABASE_KEY
+        );
         $responsePayload["application_id"] = $UUID;
 
     } else {
@@ -205,7 +251,14 @@ try {
             "siid" => $SIID
         ];
 
-        supabaseInsert("sales_appointment", $salesAppointmentData, $SUPABASE_URL, $SUPABASE_KEY);
+        supabaseInsertWithDateKeyFallback(
+            "sales_appointment",
+            $salesAppointmentData,
+            $availableDateId,
+            ["adid", "available_date_id", "SA_AvailableDateID"],
+            $SUPABASE_URL,
+            $SUPABASE_KEY
+        );
 
         // Insert selected priorities into sales_priorities table as comma-separated text
         if (!empty($priorityIds)) {
@@ -223,7 +276,8 @@ try {
             $email,
             "$firstName $lastName",
             "Application Received - Alpha Aquila",
-            "Dear $firstName,\n\nThank you for submitting your application to Alpha Aquila. We have received your information and will review it shortly. We will contact you via email with the next steps.\n\nBest regards,\nAlpha Aquila Team"
+            "Dear $firstName,\n\nThank you for submitting your application to Alpha Aquila. We have received your information and will review it shortly. We will contact you via email with the next steps.\n\nBest regards,\nAlpha Aquila Team",
+            $meetingLink
         );
         $responsePayload["email_status"] = "sent";
     } catch (Exception $mailEx) {

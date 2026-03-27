@@ -35,8 +35,17 @@ $dates = [];
 
 if ($data) {
     foreach ($data as $row) {
-        $date = $row['date'];
-        $dates[] = $date;
+        $date = $row['date'] ?? null;
+        $id = $row['id'] ?? $row['adid'] ?? $row['ADID'] ?? null;
+        $meetingLink = $row['meeting_link'] ?? null;
+
+        if ($date) {
+            $dates[] = [
+                "id" => $id,
+                "date" => $date,
+                "meeting_link" => $meetingLink
+            ];
+        }
     }
 }
 

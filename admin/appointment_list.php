@@ -321,6 +321,23 @@ body::before {
     background: #f3f4f8;
 }
 
+.active-filter-pill {
+    margin-left: 6px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    background: #880318;
+    color: #fff;
+}
+
+.filter-summary {
+    margin: 12px 0 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #880318;
+}
+
 </style>
 </head>
 
@@ -335,7 +352,18 @@ body::before {
     <div class="card">
 
         <div class="table-header">
-            <div>Date</div>
+            <div class="filter-header">
+                Date
+                <span class="active-filter-pill" id="dateFilterCurrent">Today</span>
+                <span class="filter-icon" onclick="toggleFilter('dateFilterBox')">⏷</span>
+
+                <div class="filter-box" id="dateFilterBox">
+                    <div onclick="applyDateFilter('All')">All</div>
+                    <div onclick="applyDateFilter('Today')">Today</div>
+                    <div onclick="applyDateFilter('Past')">Past</div>
+                    <div onclick="applyDateFilter('Upcoming')">Upcoming</div>
+                </div>
+            </div>
             <div>Time</div>
             <div>Full Name</div>
 
@@ -372,6 +400,8 @@ body::before {
             </div>
         </div>
 
+        <div id="filterSummary" class="filter-summary">Showing: Today records</div>
+
         <?php foreach ($appointments as $appt): 
             $statusClass = match(true) {
                 str_contains($appt[6], "Rescheduled") => "status-rescheduled",
@@ -385,6 +415,7 @@ body::before {
             data-aaid="<?= htmlspecialchars($appt[0]) ?>"
             data-aiid="<?= htmlspecialchars($appt[1]) ?>"
             data-date="<?= date("F d, Y", strtotime($appt[2])) ?>"
+            data-date-raw="<?= htmlspecialchars($appt[2]) ?>"
             data-time="<?= $appt[3] ?>"
             data-name="<?= htmlspecialchars($appt[4]) ?>"
             data-type="<?= htmlspecialchars($appt[5]) ?>"
@@ -809,6 +840,7 @@ function persistStatus(select) {
 
 let selectedType = "All";
 let selectedStatus = "All";
+let selectedDateRange = "Today";
 
 // Toggle filter dropdown
 function toggleFilter(id) {
@@ -835,26 +867,109 @@ function applyStatusFilter(status) {
     document.getElementById("statusFilterBox").style.display = "none";
 }
 
+// Apply Date Filter
+function applyDateFilter(dateRange) {
+    selectedDateRange = dateRange;
+    filterTable();
+    document.getElementById("dateFilterBox").style.display = "none";
+}
+
+function toLocalDateOnly(dateString) {
+    if (!dateString) {
+        return null;
+    }
+
+    const ymdMatch = String(dateString).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (ymdMatch) {
+        const year = Number(ymdMatch[1]);
+        const month = Number(ymdMatch[2]) - 1;
+        const day = Number(ymdMatch[3]);
+        return new Date(year, month, day);
+    }
+
+    const parsed = new Date(dateString);
+    if (Number.isNaN(parsed.getTime())) {
+        return null;
+    }
+
+    return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+}
+
+function getDateFilterLabel(dateRange) {
+    if (dateRange === "Today") return "Today";
+    if (dateRange === "Past") return "Past";
+    if (dateRange === "Upcoming") return "Upcoming";
+    return "All";
+}
+
+function updateFilterSummary(visibleCount, totalCount) {
+    const dateLabel = getDateFilterLabel(selectedDateRange);
+    const summaryEl = document.getElementById("filterSummary");
+    const dateBadge = document.getElementById("dateFilterCurrent");
+
+    if (summaryEl) {
+        summaryEl.innerText = `Showing: ${dateLabel} records (${visibleCount} of ${totalCount})`;
+    }
+
+    if (dateBadge) {
+        dateBadge.innerText = dateLabel;
+    }
+}
+
+function isDateMatch(rowDate, dateRange) {
+    if (dateRange === "All") {
+        return true;
+    }
+
+    if (!rowDate) {
+        return false;
+    }
+
+    const today = new Date();
+    const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+    if (dateRange === "Today") {
+        return rowDate.getTime() === todayOnly.getTime();
+    }
+
+    if (dateRange === "Past") {
+        return rowDate.getTime() < todayOnly.getTime();
+    }
+
+    if (dateRange === "Upcoming") {
+        return rowDate.getTime() > todayOnly.getTime();
+    }
+
+    return true;
+}
+
 // Filter Logic
 function filterTable() {
 
     const rows = document.querySelectorAll(".table-row");
+    let visibleCount = 0;
 
     rows.forEach(row => {
 
         const rowType = row.dataset.type;
         const rowStatus = row.querySelector(".status-select").value;
+        const rawDate = row.dataset.dateRaw || row.dataset.date;
+        const rowDate = toLocalDateOnly(rawDate);
 
         const typeMatch = selectedType === "All" || rowType === selectedType;
         const statusMatch = selectedStatus === "All" || rowStatus === selectedStatus;
+        const dateMatch = isDateMatch(rowDate, selectedDateRange);
 
-        if (typeMatch && statusMatch) {
+        if (typeMatch && statusMatch && dateMatch) {
             row.style.display = "grid";
+            visibleCount++;
         } else {
             row.style.display = "none";
         }
 
     });
+
+    updateFilterSummary(visibleCount, rows.length);
 }
 
 // Close filter when clicking outside
@@ -865,6 +980,8 @@ document.addEventListener("click", function(e) {
         });
     }
 });
+
+filterTable();
 
 </script>
 <script>
