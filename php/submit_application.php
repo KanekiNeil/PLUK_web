@@ -76,6 +76,7 @@ $applicantData = [
     "AI_LastName" => $lastName,
     "AI_Email" => $email,
     "AI_Address" => $address ?: null,
+    "AI_ContactNum" => $phone ?: null,
     "AI_Birthdate" => $birthdate ?: null,
     "AI_CurrentJob" => $currentJob ?: null,
     "AI_SchoolGraduated" => $schoolGraduated ?: null

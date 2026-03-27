@@ -30,7 +30,7 @@
         <div style="font-size:14px;">
 
             <p><strong>Current Job:</strong> <span id="modalType"></span></p>
-            <p><strong>Contact Number:</strong> <span>N/A</span></p>
+            <p><strong>Contact Number:</strong> <span id="contact"></span></p>
 
             <p>
                 <strong>Status:</strong> 

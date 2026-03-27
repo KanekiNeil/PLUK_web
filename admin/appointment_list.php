@@ -5,8 +5,8 @@ include_once "../php/session.php";
 
 if (!isset($_SESSION['user_id'])) {
     // Not logged in
-    //header("Location: admin_login.php");
-    //exit;
+    header("Location: admin_login.php");
+    exit;
 }
 // $appointments = [
 //     ["2026-02-16", "7:00-8:00 AM", "Juan Dela Cruz", "Career", "Rescheduled"],
@@ -390,6 +390,8 @@ body::before {
             data-type="<?= htmlspecialchars($appt[5]) ?>"
             data-status="<?= htmlspecialchars($appt[6]) ?>"
             data-face="<?= htmlspecialchars($appt[7]) ?>"
+            data-currentjob="<?= htmlspecialchars($appt[8]) ?>"
+            data-contact="<?= htmlspecialchars($appt[9]) ?>"
             onclick="openModal(this)">
 
             <div><?= date("m/d/y", strtotime($appt[2])) ?></div>
@@ -477,7 +479,7 @@ body::before {
                 <div style="font-size:14px;">
 
                     <p><strong>Current Job:</strong> <span id="modalType"></span></p>
-                    <p><strong>Contact Number:</strong> <span>N/A</span></p>
+                    <p><strong>Contact Number:</strong> <span id="contact"></span></p>
 
                     <p>
                         <strong>Status:</strong> 
@@ -526,16 +528,16 @@ function toggleProfile() {
     }
 }
 
-document.addEventListener("click", function(e){
+// document.addEventListener("click", function(e){
 
-    const profile = document.querySelector(".user-section");
-    const dropdown = document.getElementById("profileDropdown");
+//     const profile = document.querySelector(".user-section");
+//     const dropdown = document.getElementById("profileDropdown");
 
-    if (!profile.contains(e.target)) {
-        dropdown.style.display = "none";
-    }
+//     if (!profile.contains(e.target)) {
+//         dropdown.style.display = "none";
+//     }
 
-});
+// });
 
 let currentRow = null;
 
@@ -547,6 +549,8 @@ function openModal(row) {
     const type = row.dataset.type;
     const status = row.dataset.status;
     const face = row.dataset.face;
+    const currentJob = row.dataset.currentjob;
+    const contact = row.dataset.contact;
 
     document.getElementById("modalOverlay").style.display = "flex";
 
@@ -559,8 +563,10 @@ function openModal(row) {
     document.getElementById("modalTime").innerText = "⏰ " + time;
 
     // DETAILS
-    document.getElementById("modalType").innerText = type;
-
+    document.getElementById("modalType").innerText = currentJob ? currentJob : "N/A";
+    document.getElementById("contact").innerText = contact ? contact : "N/A";
+    console.log("Current Job:", currentJob);
+    console.log("Contact Number:", contact);
     const statusEl = document.getElementById("modalStatus");
     statusEl.innerText = status;
 

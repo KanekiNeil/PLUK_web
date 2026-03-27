@@ -6,7 +6,7 @@ $anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI
 // Optional filter
 $aiid = $_GET['aiid'] ?? null;
 
-$url = $supabaseUrl . "/rest/v1/application_appointment_with_applicant?select=*";
+$url = $supabaseUrl . "/rest/v1/application_appointment_with_applicant?select=*&order=AA_DateTime.desc";
 
 if ($aiid) {
     $url .= "&aiid=eq." . urlencode($aiid);
@@ -44,6 +44,8 @@ if ($data) {
         $faceImage = $row['AA_FaceID']; // Assuming this is a base64 string of the image
         $aiid = $row['appointment_aiid']  ?? null;
         $appointmentDateTime = $row['AA_DateTime'];
+        $currentJob = $row['AI_CurrentJob'] ?? null;
+        $contactNum = $row['AI_ContactNum'] ?? null;
 
         $aaid = null;
         foreach ($row as $key => $value) {
@@ -61,7 +63,9 @@ if ($data) {
             $fullName,
             "Career", // Placeholder for appointment type
             $row['status'],
-            $faceImage
+            $faceImage,
+            $currentJob,
+            $contactNum
         ];
     }
 }

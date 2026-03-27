@@ -32,7 +32,7 @@ if ($data) {
     foreach ($data as $row) {
 
         $fullName = $row['AI_FirstName'] . " " . $row['AI_LastName'];
-        $contactNo = $row['AI_PhoneNum'] ?? "N/A";
+        $contactNo = $row['AI_ContactNum'] ?? "N/A";
         $schoolGraduated = $row['AI_SchoolGraduated'] ?? "N/A";
         $currentJob = $row['AI_CurrentJob'] ?? "N/A";
         $address = $row['AI_Address'] ?? "N/A";

@@ -1,4 +1,12 @@
 <?php
+include_once "../php/session.php";
+
+
+if (!isset($_SESSION['user_id'])) {
+    // Not logged in
+    header("Location: admin_login.php");
+    exit;
+}
 $appointments = include '../php/get_applicant_info.php';
 
 $user_name = "Levi De Guzman";
@@ -273,7 +281,7 @@ document.querySelectorAll('.table-row').forEach(row => {
         document.getElementById('modalSchool').textContent = row.dataset.school;
         document.getElementById('modalJob').textContent = row.dataset.job;
         document.getElementById('modalAddress').textContent = row.dataset.address;
-        document.getElementById('modalStatus').textContent = row.dataset.status;
+        // document.getElementById('modalStatus').textContent = row.dataset.status;
 
         new bootstrap.Modal(document.getElementById('applicantModal')).show();
     });
