@@ -389,6 +389,7 @@ body::before {
             data-time="<?= $appt[3] ?>"
             data-name="<?= htmlspecialchars($appt[4]) ?>"
             data-type="<?= htmlspecialchars($appt[5]) ?>"
+            data-status="<?= htmlspecialchars($appt[6]) ?>"
             data-face="<?= htmlspecialchars($appt[7]) ?>"
             onclick="openModal(this)">
 
@@ -441,48 +442,58 @@ body::before {
 <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
         <div class="modal-header">
-            <h3 id="modalType">Appointment Details</h3>
+            <h3>Appointment Details</h3>
             <span class="close-btn" onclick="closeModal()">✖</span>
         </div>
 
         <div class="modal-content">
 
-            <!-- Name -->
-            <label><strong>Full Name:</strong></label>
-            <input type="text" id="modalNameInput" class="modal-input" readonly>
-
-            <!-- Date & Time -->
-            <div style="display:flex; gap:10px; margin-top:10px;">
-                <div style="flex:1">
-                    <label><strong>Date:</strong></label>
-                    <input type="date" id="modalDateInput" class="modal-input" readonly>
-                </div>
-                <div style="flex:1">
-                    <label><strong>Time:</strong></label>
-                    <input type="text" id="modalTimeInput" class="modal-input" readonly>
+            <!-- PROFILE SECTION -->
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
+                <img id="modalFaceImage" 
+                    style="width:50px; height:50px; border-radius:50%; border:2px solid #880318;">
+                <div>
+                    <div id="modalName" style="font-size:18px; font-weight:700;"></div>
                 </div>
             </div>
 
-            <!-- Appointment Type & Status -->
-            <div style="margin-top:15px;">
-                <p><strong>Appointment Type:</strong> <span id="modalApptTypeText"></span></p>
-                <p>
-                    <strong>Status:</strong> 
-                    <span id="modalStatusText" class="status-badge"></span>
-                    <select id="modalStatusSelect" class="modal-select" style="display:none;"></select>
-                </p>
+            <!-- SCHEDULE DATE SECTION -->
+            <div style="margin-top:10px;">
+                <div style="font-weight:600; margin-bottom:8px; color:#555;">
+                    Schedule Date
+                </div>
+
+                <div style="background:#f4b2b2; padding:12px; border-radius:10px;">
+                    <div id="modalDate"></div>
+                    <div id="modalTime"></div>
+                </div>
             </div>
 
-            <!-- Face Image -->
-            <div style="margin-top:15px; text-align:center;">
-                <img id="modalFaceImage" name="faceImage" src="" alt="Face Image" style="max-width:150px; border-radius:50%; border:2px solid #880318;">
+            <!-- DETAILS SECTION -->
+            <div style="margin-top:20px;">
+                <div style="font-weight:600; margin-bottom:8px; color:#555;">
+                    Details
+                </div>
+
+                <div style="font-size:14px;">
+
+                    <p><strong>Current Job:</strong> <span id="modalType"></span></p>
+                    <p><strong>Contact Number:</strong> <span>N/A</span></p>
+
+                    <p>
+                        <strong>Status:</strong> 
+                        <span id="modalStatus" class="status-badge"></span>
+                    </p>
+
+                    <p><strong>Date Attended BYB:</strong> <span>N/A</span></p>
+                    <p><strong>Next Step:</strong> <span>N/A</span></p>
+
+                </div>
             </div>
 
-            <!-- Buttons -->
-            <div style="margin-top:20px; display:flex; gap:10px; justify-content:end;">
-                <button class="modal-btn" id="editBtn" onclick="enableEdit()">Edit</button>
-                <button class="modal-btn save-btn" id="saveBtn" onclick="saveChanges()" style="display:none;">Save</button>
-                <button class="modal-btn cancel-btn" onclick="closeModal()">Close</button>
+            <!-- FOOTER -->
+            <div style="text-align:center; margin-top:20px;">
+                <button class="close-modal-btn" onclick="closeModal()">Close</button>
             </div>
 
         </div>
@@ -531,43 +542,55 @@ let currentRow = null;
 
 function openModal(row) {
 
-    currentRow = row;
-
+    const name = row.dataset.name;
     const date = row.dataset.date;
     const time = row.dataset.time;
-    const name = row.dataset.name;
     const type = row.dataset.type;
-    const faceImage = row.dataset.face;
-
-    const select = row.querySelector(".status-select");
-    const status = select.value;
+    const status = row.dataset.status;
+    const face = row.dataset.face;
 
     document.getElementById("modalOverlay").style.display = "flex";
 
-    document.getElementById("modalNameInput").value = name;
-    document.getElementById("modalDateInput").value = new Date(date).toISOString().split("T")[0];
-    document.getElementById("modalTimeInput").value = time;
+    // PROFILE SECTION
+    document.getElementById("modalName").innerText = name;
+    document.getElementById("modalFaceImage").src = "data:image/png;base64," + face;
 
-    document.getElementById("modalApptTypeText").innerText = type;
-    document.getElementById("modalStatusText").innerText = status;
+    // SCHEDULE DATE
+    document.getElementById("modalDate").innerText = "📅 " + date;
+    document.getElementById("modalTime").innerText = "⏰ " + time;
 
-    document.getElementById("modalType").innerText = type + " Details";
-    document.getElementById("modalFaceImage").src = "data:image/png;base64," + faceImage;
+    // DETAILS
+    document.getElementById("modalType").innerText = type;
 
-    disableEditMode();
-}
+    const statusEl = document.getElementById("modalStatus");
+    statusEl.innerText = status;
 
-function disableEditMode() {
+    // RESET CLASS
+    statusEl.className = "status-badge";
 
-    document.getElementById("modalNameText").style.display = "block";
-    document.getElementById("modalDateText").style.display = "inline";
-    document.getElementById("modalTimeText").style.display = "inline";
+    switch (status) {
+        case "Attended BYB":
+        case "Set Appointment":
+            statusEl.classList.add("status-green"); break;
 
-    document.getElementById("modalNameInput").style.display = "none";
-    document.getElementById("modalDateInput").style.display = "none";
-    document.getElementById("modalTimeInput").style.display = "none";
+        case "Rescheduled":
+        case "No Budget":
+            statusEl.classList.add("status-blue"); break;
 
-    document.getElementById("saveBtn").style.display = "none";
+        case "Waiting":
+        case "Waiting for Reply":
+            statusEl.classList.add("status-yellow"); break;
+
+        case "Not Qualified":
+        case "No Response":
+            statusEl.classList.add("status-red"); break;
+
+        case "With Existing Insurance":
+            statusEl.classList.add("status-lavender"); break;
+
+        default:
+            statusEl.classList.add("status-default");
+    }
 }
 
 function enableEdit() {
