@@ -303,6 +303,7 @@
                 <div class="profile-dropdown">
                     <a href="#">Profile</a>
                     <a href="#">Settings</a>
+                    <a href="news_management.php">Announcement</a>
                     <a href="#" id="logout">Logout</a>
                 </div>
 
