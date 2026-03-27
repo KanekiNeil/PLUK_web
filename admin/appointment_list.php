@@ -81,13 +81,12 @@ body::before {
 }
 
 .table-row {
-    border-bottom: 1px solid #f0f0f0;
-    transition: 0.2s ease;
     cursor: pointer;
 }
 
 .table-row:hover {
-    background: #f8f9fc;
+    background: #f1f5f9;
+    transform: scale(1.01);
 }
 
 /* STATUS DROPDOWN BASE STYLE */

@@ -144,6 +144,15 @@ body::before {
     font-weight:bold;
 }
 
+.table-row {
+    cursor: pointer;
+}
+
+.table-row:hover {
+    background: #f1f5f9;
+    transform: scale(1.01);
+}
+
 </style>
 </head>
 
@@ -241,6 +250,34 @@ if (profile) {
     });
 }
 
+</script>
+
+<script>
+document.querySelectorAll('.table-row').forEach(row => {
+
+    row.addEventListener('click', () => {
+
+        // Get data from clicked row
+        const name = row.dataset.name;
+        const contact = row.dataset.contact;
+        const school = row.dataset.school;
+        const job = row.dataset.job;
+        const address = row.dataset.address;
+
+        // Insert into modal
+        document.getElementById('modalName').textContent = name;
+        document.getElementById('modalContact').textContent = contact;
+        document.getElementById('modalSchool').textContent = school;
+        document.getElementById('modalJob').textContent = job;
+        document.getElementById('modalAddress').textContent = address;
+
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('applicantModal'));
+        modal.show();
+
+    });
+
+});
 </script>
 
 </body>
