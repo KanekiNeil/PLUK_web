@@ -55,11 +55,11 @@ body::before {
 .table-row{
     display:grid;
     grid-template-columns: 
-        minmax(180px, 2fr)
-        minmax(140px, 1.5fr)
+        minmax(120px, 2fr)
+        minmax(120px, 1.5fr)
+        minmax(150px, 1.2fr)
         minmax(120px, 1.2fr)
-        minmax(140px, 1.2fr)
-        minmax(220px, 2fr)
+        minmax(200px, 2fr)
         minmax(110px, 1fr);
     gap:15px;
     padding:14px 18px;
@@ -68,21 +68,11 @@ body::before {
 
 /* HEADER */
 .table-header{
-    font-weight:bold;
-    border-bottom:2px solid #880318;
-    font-size:14px;
-    background:#fafafa;
-}
-
-/* ROW */
-.table-row{
-    border-bottom:1px solid #eee;
-    transition:0.2s ease;
-}
-
-.table-row:hover{
-    background:#f9fafc;
-    cursor:pointer;
+    font-weight: 700;
+    border-bottom: 2px solid #880318;
+    color: #000000;
+    font-size: 16px;
+    letter-spacing: 0.5px;
 }
 
 /* TEXT HANDLING */
@@ -163,8 +153,6 @@ body::before {
 
 <div class="container mt-5">
 <div class="applicant-container">
-
-<h5 class="page-title">Applicant List</h5>
 
 <!-- HEADER -->
 <div class="table-header">
