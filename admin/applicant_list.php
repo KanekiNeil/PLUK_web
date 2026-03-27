@@ -6,22 +6,22 @@ $user_role = "Junior Unit Manager";
 $initials = strtoupper(substr($user_name, 0, 1)) .
             strtoupper(substr(strrchr($user_name, " "), 1, 1));
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Applicant List</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
 
 <style>
 
+/* ===== GLOBAL ===== */
 body {
     margin: 0;
-    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    font-family: "Segoe UI", system-ui, sans-serif;
     background-color: #f5f5f5;
     color: #333;
 }
@@ -30,128 +30,111 @@ body::before {
     content: "";
     position: fixed;
     inset: 0;
-    background-image: url("../assets/logo.jpg");
-    background-repeat: no-repeat;
-    background-position: center;
+    background: url("../assets/logo.jpg") center no-repeat;
     background-size: 400px;
-    opacity: 0.07; /* Makes it very light */
+    opacity: 0.05;
     z-index: -1;
 }
 
-/* container */
+/* ===== CONTAINER ===== */
 .applicant-container{
     background:white;
-    border-radius:18px;
-    padding:30px;
-    box-shadow:0 5px 20px rgba(0,0,0,0.08);
+    border-radius:16px;
+    padding:25px;
+    box-shadow:0 6px 20px rgba(0,0,0,0.06);
 }
 
-/* title */
+/* ===== TITLE ===== */
 .page-title{
     font-weight:600;
     margin-bottom:20px;
 }
 
-/* TABLE DESIGN LIKE APPOINTMENT LIST */
-
+/* ===== GRID TABLE ===== */
 .table-header,
 .table-row{
     display:grid;
-    grid-template-columns:1.5fr 1.2fr 1fr 1fr 1.5fr 1fr;
-    padding:16px 15px;
+    grid-template-columns: 
+        minmax(120px, 2fr)
+        minmax(120px, 1.5fr)
+        minmax(150px, 1.2fr)
+        minmax(120px, 1.2fr)
+        minmax(200px, 2fr)
+        minmax(110px, 1fr);
+    gap:15px;
+    padding:14px 18px;
     align-items:center;
 }
 
+/* HEADER */
 .table-header{
-    font-weight:700;
-    border-bottom:2px solid #880318;
-    font-size:16px;
+    font-weight: 700;
+    border-bottom: 2px solid #880318;
+    color: #000000;
+    font-size: 16px;
+    letter-spacing: 0.5px;
 }
 
-.table-row{
-    border-bottom:1px solid #f0f0f0;
-    transition:0.2s ease;
-    cursor:pointer;
+/* TEXT HANDLING */
+.table-row div{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
 }
 
-.table-row:hover{
-    background:#f8f9fc;
+@media (max-width: 900px) {
+    .table-header,
+    .table-row {
+        grid-template-columns: 1fr 1fr;
+        row-gap: 10px;
+    }
 }
 
-/* status badges */
+/* Allow address wrapping */
+.col-address{
+    white-space:normal;
+}
+
+/* ===== STATUS BADGES ===== */
 .status-badge{
-    padding:6px 14px;
+    padding:2px 12px;
     border-radius:20px;
-    font-size:0.8rem;
+    font-size:0.75rem;
     font-weight:500;
 }
 
 .badge-pending{
-    background:#ffe7a0;
-    color:#7a5c00;
+    background:#fff3cd;
+    color:#856404;
 }
 
 .badge-approved{
-    background:#d0e4ff;
-    color:#1e56c5;
+    background:#d1e7dd;
+    color:#0f5132;
 }
 
 .badge-completed{
-    background:#cde9d8;
-    color:#2c7a4b;
+    background:#cff4fc;
+    color:#055160;
 }
 
 .badge-cancelled{
-    background:#ffd4d4;
-    color:#a30000;
+    background:#f8d7da;
+    color:#842029;
 }
 
-/* datatable search */
-.dataTables_filter input{
-    border-radius:8px;
-    border:1px solid #ddd;
-}
-
-/* Notification Icon */
-
-.notification-icon {
-    font-size: 22px;
-    cursor: pointer;
-    color: #333;
-    transition: 0.2s ease;
-}
-
-.notification-icon:hover {
-    color: #8b0000;
-}
-
+/* ===== USER HEADER (optional fix safe) ===== */
 .user-section{
     display:flex;
     align-items:center;
-    gap:12px;
-}
-
-.user-info{
-   display: flex;
-    flex-direction: column;
-    line-height: 1.2;
-}
-
-.user-info strong {
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.user-info small{
-    font-size: 12px;
-    color: #666;
+    gap:10px;
 }
 
 .avatar{
     background:#2c6ed5;
     color:white;
-    width:40px;
-    height:40px;
+    width:38px;
+    height:38px;
     border-radius:50%;
     display:flex;
     align-items:center;
@@ -159,14 +142,62 @@ body::before {
     font-weight:bold;
 }
 
-.arrow{
-    font-size: 10px;
-    color: #444;
+.table-row {
+    cursor: pointer;
 }
 
-#applicantTable tbody tr{
-cursor:pointer;
+.table-row:hover {
+    background: #f1f5f9;
+    transform: scale(1.01);
 }
+
+/* ===== MODAL DESIGN ===== */
+
+.custom-modal {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* Header */
+.custom-header {
+    background: #880318;
+    color: white;
+    padding: 15px 20px;
+}
+
+/* Body spacing */
+.modal-body {
+    padding: 20px 25px;
+}
+
+/* Each field */
+.modal-item {
+    margin-bottom: 15px;
+}
+
+/* Labels */
+.modal-item label {
+    font-size: 12px;
+    color: #888;
+    display: block;
+    margin-bottom: 2px;
+}
+
+/* Values */
+.modal-item p {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+    color: #333;
+}
+
+/* Footer */
+.modal-footer {
+    border-top: 1px solid #eee;
+    padding-bottom: 20px;
+}
+
 
 </style>
 </head>
@@ -177,66 +208,81 @@ cursor:pointer;
 <?php include '../components/header.php'; ?>
 
 <div class="container mt-5">
-
 <div class="applicant-container">
 
-
+<!-- HEADER -->
 <div class="table-header">
     <div>Complete Name</div>
     <div>Contact Number</div>
-    <div>School Graduated</div>
-    <div>Current Job</div>
-    <div>Home Address</div>
-    <div>Work Status</div>
+    <div>School Attended</div>
+    <div>Job</div>
+    <div>Address</div>
+    <div>Status</div>
 </div>
 
-<?php foreach ($appointments as $appt): ?>
-
-<div class="table-row">
-
-<div><?= $appt[0] ?></div>
-<div><?= $appt[1] ?></div>
-<div><?= $appt[2] ?></div>
-<div><?= $appt[3] ?></div>
-<div><?= $appt[4] ?></div>
-
-<div>
-
-<?php
-$statusClass = match($appt[5]) {
-"Pending" => "badge-pending",
-"Approved" => "badge-approved",
-"Completed" => "badge-completed",
-"Cancelled" => "badge-cancelled",
-default => "bg-secondary"
-};
+<!-- DATA -->
+<?php foreach ($appointments as $appt): 
+    $statusClass = match($appt[5]) {
+        "Pending" => "badge-pending",
+        "Approved" => "badge-approved",
+        "Completed" => "badge-completed",
+        "Cancelled" => "badge-cancelled",
+        default => "bg-secondary"
+    };
 ?>
 
-<span class="status-badge <?= $statusClass ?>">
-<?= $appt[5] ?>
-</span>
+<div class="table-row"
+     data-name="<?= $appt[0] ?>"
+     data-contact="<?= $appt[1] ?>"
+     data-school="<?= $appt[2] ?>"
+     data-job="<?= $appt[3] ?>"
+     data-address="<?= $appt[4] ?>"
+     data-status="<?= $appt[5] ?>">
 
-</div>
+    <div><?= $appt[0] ?></div>
+    <div><?= $appt[1] ?></div>
+    <div><?= $appt[2] ?></div>
+    <div><?= $appt[3] ?></div>
+    <div class="col-address"><?= $appt[4] ?></div>
+
+    <div>
+        <span class="status-badge <?= $statusClass ?>">
+            <?= $appt[5] ?>
+        </span>
+    </div>
 
 </div>
 
 <?php endforeach; ?>
-</table>
 
 </div>
 </div>
 
 <?php include 'applicant_detail_modal.php'; ?>
 
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
 
-    const profile = document.getElementById("profileToggle");
+/* ===== ROW CLICK → MODAL ===== */
+document.querySelectorAll('.table-row').forEach(row => {
+    row.addEventListener('click', () => {
 
+        document.getElementById('modalName').textContent = row.dataset.name;
+        document.getElementById('modalContact').textContent = row.dataset.contact;
+        document.getElementById('modalSchool').textContent = row.dataset.school;
+        document.getElementById('modalJob').textContent = row.dataset.job;
+        document.getElementById('modalAddress').textContent = row.dataset.address;
+        document.getElementById('modalStatus').textContent = row.dataset.status;
+
+        new bootstrap.Modal(document.getElementById('applicantModal')).show();
+    });
+});
+
+/* ===== SAFE PROFILE TOGGLE ===== */
+const profile = document.getElementById("profileToggle");
+
+if (profile) {
     profile.addEventListener("click", function () {
         this.classList.toggle("active");
     });
@@ -246,48 +292,36 @@ default => "bg-secondary"
             profile.classList.remove("active");
         }
     });
-
-function toggleProfile() {
-
-    const dropdown = document.getElementById("profileDropdown");
-
-    if (dropdown.style.display === "flex") {
-        dropdown.style.display = "none";
-    } else {
-        dropdown.style.display = "flex";
-    }
 }
 
+</script>
 
-$(document).ready(function(){
+<script>
+document.querySelectorAll('.table-row').forEach(row => {
 
-    var table = $('#applicantTable').DataTable({
-    responsive:true,
-    pageLength:5,
-    lengthChange:false
-    });
+    row.addEventListener('click', () => {
 
-    $('#applicantTable tbody').on('click','tr',function(){
+        // Get data from clicked row
+        const name = row.dataset.name;
+        const contact = row.dataset.contact;
+        const school = row.dataset.school;
+        const job = row.dataset.job;
+        const address = row.dataset.address;
 
-    var data = table.row(this).data();
-    if(!data) return;
+        // Insert into modal
+        document.getElementById('modalName').textContent = name;
+        document.getElementById('modalContact').textContent = contact;
+        document.getElementById('modalSchool').textContent = school;
+        document.getElementById('modalJob').textContent = job;
+        document.getElementById('modalAddress').textContent = address;
 
-    $('#modalName').text(data[0]);
-    $('#modalContact').text(data[1]);
-    $('#modalSchool').text(data[2]);
-    $('#modalJob').text(data[3]);
-    $('#modalAddress').text(data[4]);
-
-    var statusText = $('<div>').html(data[5]).text().trim();
-    $('#modalStatus').text(statusText);
-
-    var modal = new bootstrap.Modal(document.getElementById('applicantModal'));
-    modal.show();
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('applicantModal'));
+        modal.show();
 
     });
 
 });
-
 </script>
 
 </body>
