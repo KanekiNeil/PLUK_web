@@ -90,6 +90,14 @@ body::before {
     white-space:nowrap;
 }
 
+@media (max-width: 900px) {
+    .table-header,
+    .table-row {
+        grid-template-columns: 1fr 1fr;
+        row-gap: 10px;
+    }
+}
+
 /* Allow address wrapping */
 .col-address{
     white-space:normal;
@@ -150,6 +158,54 @@ body::before {
     background: #f1f5f9;
     transform: scale(1.01);
 }
+
+/* ===== MODAL DESIGN ===== */
+
+.custom-modal {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* Header */
+.custom-header {
+    background: #880318;
+    color: white;
+    padding: 15px 20px;
+}
+
+/* Body spacing */
+.modal-body {
+    padding: 20px 25px;
+}
+
+/* Each field */
+.modal-item {
+    margin-bottom: 15px;
+}
+
+/* Labels */
+.modal-item label {
+    font-size: 12px;
+    color: #888;
+    display: block;
+    margin-bottom: 2px;
+}
+
+/* Values */
+.modal-item p {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+    color: #333;
+}
+
+/* Footer */
+.modal-footer {
+    border-top: 1px solid #eee;
+    padding-bottom: 20px;
+}
+
 
 </style>
 </head>
@@ -225,7 +281,7 @@ document.querySelectorAll('.table-row').forEach(row => {
         document.getElementById('modalSchool').textContent = row.dataset.school;
         document.getElementById('modalJob').textContent = row.dataset.job;
         document.getElementById('modalAddress').textContent = row.dataset.address;
-        document.getElementById('modalStatus').textContent = row.dataset.status;
+        // document.getElementById('modalStatus').textContent = row.dataset.status;
 
         new bootstrap.Modal(document.getElementById('applicantModal')).show();
     });
