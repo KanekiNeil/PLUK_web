@@ -5,8 +5,8 @@ include_once "../php/session.php";
 
 if (!isset($_SESSION['user_id'])) {
     // Not logged in
-    //header("Location: admin_login.php");
-    //exit;
+    header("Location: admin_login.php");
+    exit;
 }
 // $appointments = [
 //     ["2026-02-16", "7:00-8:00 AM", "Juan Dela Cruz", "Career", "Rescheduled"],

@@ -1,4 +1,12 @@
 <?php
+include_once "../php/session.php";
+
+
+if (!isset($_SESSION['user_id'])) {
+    // Not logged in
+    header("Location: admin_login.php");
+    exit;
+}
 $appointments = include '../php/get_applicant_info.php';
 
 $user_name = "Levi De Guzman";
