@@ -48,8 +48,14 @@ body::before {
 .applicant-container{
     background:white;
     border-radius:16px;
-    padding:25px;
-    box-shadow:0 6px 20px rgba(0,0,0,0.06);
+    padding:30px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.06);
+    min-height: 500px;
+}
+
+/* optional wrapper matching appointment_list */
+.container-al {
+    padding: 40px;
 }
 
 /* ===== TITLE ===== */
@@ -60,18 +66,11 @@ body::before {
 
 /* ===== GRID TABLE ===== */
 .table-header,
-.table-row{
-    display:grid;
-    grid-template-columns: 
-        minmax(120px, 2fr)
-        minmax(120px, 1.5fr)
-        minmax(150px, 1.2fr)
-        minmax(120px, 1.2fr)
-        minmax(200px, 2fr)
-        minmax(110px, 1fr);
-    gap:15px;
-    padding:14px 18px;
-    align-items:center;
+.table-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.5fr 1.5fr 1.2fr 0.2fr;
+    padding: 16px 15px;
+    align-items: center;
 }
 
 /* HEADER */
@@ -215,8 +214,8 @@ body::before {
 <!-- HEADER -->
 <?php include '../components/header.php'; ?>
 
-<div class="container mt-5">
-<div class="applicant-container">
+<div class="container-al">
+<div class="card">
 
 <!-- HEADER -->
 <div class="table-header">
@@ -263,7 +262,7 @@ body::before {
 
 <?php endforeach; ?>
 
-</div>
+    </div>
 </div>
 
 <?php include 'applicant_detail_modal.php'; ?>
