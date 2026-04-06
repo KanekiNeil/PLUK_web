@@ -23,22 +23,62 @@ document.addEventListener("click", function (e) {
 
 const filterBtn = document.querySelector(".filter-calendar");
 const dateInput = document.getElementById("overviewDate");
+const applicantCount = document.getElementById("applicantCount");
+const clientCount = document.getElementById("clientCount");
+const eventCount = document.getElementById("eventCount");
+const selectedDateLabel = document.getElementById("selectedDate");
 
 filterBtn.addEventListener("click", () => {
-    dateInput.showPicker(); // modern browsers
+    if (typeof dateInput.showPicker === 'function') {
+        dateInput.showPicker();
+    } else {
+        dateInput.click();
+    }
 });
+
+function updateStatsForDate(dateStr) {
+    if (!dateStr) return;
+
+    fetch(`../php/get_dashboard_stats.php?date=${encodeURIComponent(dateStr)}`)
+        .then(response => response.json())
+        .then(json => {
+            if (json.error) {
+                console.error('Dashboard stats error:', json.error);
+                return;
+            }
+            if (applicantCount) applicantCount.textContent = json.applicants;
+            if (clientCount) clientCount.textContent = json.clients;
+            if (eventCount) eventCount.textContent = json.events;
+            if (selectedDateLabel) {
+                const formatted = new Date(dateStr).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+                selectedDateLabel.textContent = formatted;
+            }
+        })
+        .catch(err => {
+            console.error('Failed to fetch dashboard stats:', err);
+        });
+}
+
+// initialize with current selection (if any)
+function initDashboardStats() {
+    const initialDate = dateInput.value || new Date().toISOString().slice(0, 10);
+    dateInput.value = initialDate;
+    updateStatsForDate(initialDate);
+}
+
+initDashboardStats();
 
 dateInput.addEventListener("change", () => {
     const selected = dateInput.value;
-    alert("Filter dashboard data for: " + selected);
-
+    console.log("Filter dashboard data for: " + selected);
+    updateStatsForDate(selected);
     // Later you can fetch from database here using AJAX
 });
 
 // CALENDAR
 const monthYear = document.getElementById("monthYear");
 const datesContainer = document.getElementById("dates");
-const selectedDate = document.getElementById("selectedDate");
+const selectedDateHeading = document.getElementById("selectedDate");
 
 let date = new Date();
 
@@ -64,7 +104,9 @@ function renderCalendar() {
         span.addEventListener("click", () => {
             document.querySelectorAll(".dates span").forEach(s => s.classList.remove("active-date"));
             span.classList.add("active-date");
-            selectedDate.innerText = `${i} ${monthYear.innerText}`;
+            if (selectedDateHeading) {
+                selectedDateHeading.innerText = `${i} ${monthYear.innerText}`;
+            }
         });
 
         datesContainer.appendChild(span);
