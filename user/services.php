@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <title>PRU Claim and Services</title>
 
 <style>
@@ -230,89 +231,238 @@ left:0;
 top:0;
 width:100%;
 height:100%;
-background:rgba(0,0,0,0.5);
+background:rgba(0,0,0,0.55);
+backdrop-filter:blur(6px);
 justify-content:center;
 align-items:center;
 z-index:2000;
 }
 
 .modal-content{
-background:white;
-width:520px;
+width:700px; /* wider */
 max-width:95%;
-border-radius:12px;
-overflow:hidden;
-box-shadow:0 20px 40px rgba(0,0,0,0.2);
-animation:fade .3s ease;
+border-radius:18px;
+background:white;
 }
-
 /* MODAL HEADER */
 
 .modal-header{
-background:#8b0014;
+background:linear-gradient(135deg,#8b0014,#b3122a);
 color:white;
 display:flex;
 align-items:center;
-padding:18px 22px;
-gap:12px;
+padding:20px 25px;
+gap:10px; /* tighter and cleaner */
 }
 
 .modal-icon{
-width:38px;
-height:38px;
-background:white;
-color:#8b0014;
+font-size:22px;
+color:white;
 display:flex;
 align-items:center;
 justify-content:center;
-border-radius:8px;
-font-weight:bold;
 }
 
 .modal-header h2{
 flex:1;
-font-size:18px;
+font-size:19px;
+letter-spacing:.5px;
 }
 
 .close-btn{
-font-size:22px;
+width:32px;
+height:32px;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:50%;
+background:rgba(255,255,255,0.2);
 cursor:pointer;
+font-size:18px;
+transition:.3s;
+}
+
+.close-btn:hover{
+background:white;
+color:#8b0014;
 }
 
 /* MODAL BODY */
 
 .modal-body{
-padding:25px;
-max-height:500px;
-overflow-y:auto;
-line-height:1.9;
-font-size: 20px;
+padding:35px;
+display:flex;
+flex-direction:column;
+gap:25px;
+text-align:left;
+}
+
+/* CLICKABLE SMALL TITLE */
+
+.modal-link{
+display:inline-block;
+font-size:14px;
+font-weight:600;
+color:#6b0f1a;
+margin-bottom:10px;
+text-decoration:none;
+position:relative;
+transition:.3s;
+}
+
+.modal-link::after{
+content:"";
+display:block;
+width:0%;
+height:2px;
+background:#6b0f1a;
+margin:auto;
+transition:.3s;
+}
+
+.modal-link:hover{
+color:#b3122a;
+}
+
+.modal-link:hover::after{
+width:100%;
+}
+
+/* MAIN TITLE */
+
+.modal-main-title{
+font-size:38px;
+font-weight:800;
+letter-spacing:1px;
+margin:10px 0;
+color:#111;
+}
+
+/* SUBTEXT */
+
+.modal-subtext{
+font-size:17px;
+color:#555;
+max-width:520px;
+margin:auto;
+line-height:1.6;
+}
+
+/* OPTIONAL DIVIDER */
+
+.modal-divider{
+width:60px;
+height:3px;
+background:#8b0014;
+margin:15px auto 20px;
+border-radius:10px;
 }
 
 /* INFO BOX */
 
 .info-box{
-background:#f7f7f7;
-padding:14px;
-border-radius:8px;
-margin-bottom:12px;
-border-left:4px solid #8b0014;
+background:#fafafa;
+padding:18px;
+border-radius:12px;
+margin-bottom:15px;
+box-shadow:0 5px 15px rgba(0,0,0,0.05);
 }
 
-.info-box ul{
-padding-left:18px;
-margin-top:6px;
+/* FEATURE ROW (REPLACES BULLETS) */
+
+.feature{
+display:flex;
+align-items:flex-start;
+gap:12px;
+padding:10px 0;
+border-bottom:1px solid #eee;
 }
 
-.info-box li{
-margin-bottom:6px;
+.feature:last-child{
+border-bottom:none;
+}
+
+.feature-icon{
+width:26px;
+height:26px;
+background:#8b0014;
+color:white;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:6px;
+font-size:14px;
+flex-shrink:0;
+}
+
+.feature-text{
+flex:1;
+color:#444;
+}
+
+/* HERO SECTION */
+.modal-hero{
+display:flex;
+align-items:center;
+gap:20px;
+background:#fafafa;
+padding:20px;
+border-radius:12px;
+border-color: #8b0000;
+}
+
+/* ICON INSIDE BODY */
+.modal-hero-icon{
+width:55px;
+height:55px;
+background:#8b0014;
+color:white;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:14px;
+font-size:22px;
+}
+
+/* TITLE IMPROVED */
+.modal-main-title{
+font-size:24px;
+font-weight:700;
+color:#111;
+}
+
+/* SUBTEXT */
+.modal-subtext{
+font-size:15px;
+color:#666;
+margin-top:5px;
+line-height:1.5;
+}
+
+/* CTA BUTTON */
+.cta-btn{
+margin-top:10px;
+background:linear-gradient(135deg,#8b0014,#b3122a);
+color:white;
+padding:12px 20px;
+border-radius:10px;
+font-weight:600;
+text-align:center;
+cursor:pointer;
+transition:.3s;
+width:fit-content;
+}
+
+.cta-btn:hover{
+transform:translateY(-2px);
+box-shadow:0 8px 20px rgba(139,0,20,0.25);
 }
 
 /* ANIMATION */
 
 @keyframes fade{
-from{transform:scale(.9);opacity:0;}
-to{transform:scale(1);opacity:1;}
+from{transform:translateY(20px) scale(.95);opacity:0;}
+to{transform:translateY(0) scale(1);opacity:1;}
 }
 
 </style>
@@ -415,7 +565,9 @@ to{transform:scale(1);opacity:1;}
 
 <div class="modal-header">
 
-<div class="modal-icon">ℹ️</div>
+<div class="modal-icon" id="modalIcon">
+<i class="fas fa-shield-alt"></i>
+</div>
 <h2 id="modalTitle"></h2>
 <span class="close-btn">&times;</span>
 
@@ -433,67 +585,144 @@ const modal = document.getElementById("serviceModal");
 const modalTitle = document.getElementById("modalTitle");
 const modalText = document.getElementById("modalText");
 const closeBtn = document.querySelector(".close-btn");
-
+const modalIcon = document.getElementById("modalIcon");
 const serviceData = {
 
 premium:{
 title:"Premium Payment Facilities",
 text:`
-<div class="info-box">
-<strong>Payment Methods</strong>
-<ul>
-<li>PRUServices Online Payment</li>
-<li>GCash Bills Payment</li>
-<li>Online Banking</li>
-<li>Automatic Debit / Credit Card</li>
-<li>Authorized Payment Centers</li>
-</ul>
+
+<div class="modal-hero">
+
+    <div class="modal-hero-icon">
+        <i class="fas fa-credit-card"></i>
+    </div>
+
+    <div>
+        <div class="modal-main-title">
+            Premium Payment Facilities
+        </div>
+
+        <div class="modal-subtext">
+            Pay your premiums easily through secure and convenient channels.
+        </div>
+    </div>
+
 </div>
 
-<div class="info-box">
-Payments are usually posted within 2–3 working days.
+<div class="modal-divider"></div>
+
+<a href="your-link-here.html" class="modal-link">
+    Answering Your Policy Questions →
+</a>
+
+<div class="cta-btn">
+    Proceed to Service
 </div>
+
+
 `
 },
 
 forms:{
 title:"Downloadable Forms",
 text:`
-<div class="info-box">
-<strong>Available Forms</strong>
-<ul>
-<li>Policy Amendment Forms</li>
-<li>Claim Forms</li>
-<li>Beneficiary Change Forms</li>
-<li>Policy Servicing Forms</li>
-</ul>
+
+<div class="modal-hero">
+
+    <div class="modal-hero-icon">
+        <i class="fas fa-file-alt"></i>
+    </div>
+
+    <div>
+        <div class="modal-main-title">
+            Downloadable Forms
+        </div>
+
+        <div class="modal-subtext">
+           Find all the essential forms for policy-related transactions in just one click.
+        </div>
+    </div>
+
 </div>
+
+<div class="modal-divider"></div>
+
+<a href="your-link-here.html" class="modal-link">
+    What form do you need today?→
+</a>
+
+<div class="cta-btn">
+    Proceed to Service
+</div>
+
 `
 },
 
 faq:{
 title:"Policy FAQs",
 text:`
-<div class="info-box">
-<ul>
-<li>How to pay premiums</li>
-<li>Understanding policy coverage</li>
-<li>Claim procedures</li>
-<li>Policy updates</li>
-</ul>
+
+<div class="modal-hero">
+
+    <div class="modal-hero-icon">
+        <i class="fas fa-circle-question"></i>
+    </div>
+
+    <div>
+        <div class="modal-main-title">
+            Policy FAQs
+        </div>
+
+        <div class="modal-subtext">
+            Find the answer to your questions about your policy and our services.
+        </div>
+    </div>
+
 </div>
+
+<div class="modal-divider"></div>
+
+<a href="your-link-here.html" class="modal-link">
+    Answering Your Policy Questions →
+</a>
+
+<div class="cta-btn">
+    Proceed to Service
+</div>
+
 `
 },
 
 withdrawal:{
 title:"Partial Withdrawal",
 text:`
-<div class="info-box">
-<ul>
-<li>Available for investment-linked policies</li>
-<li>Minimum fund value required</li>
-<li>Requires withdrawal request form</li>
-</ul>
+<div class="modal-hero">
+
+    <div class="modal-hero-icon">
+        <i class="fa-money-bill-wave"></i>
+    </div>
+
+    <div>
+        <div class="modal-main-title">
+            Partial Withdrawal
+        </div>
+
+        <div class="modal-subtext">
+            Find the answer to your questions about your policy and our services.
+        </div>
+    </div>
+
+</div>
+
+<div class="modal-divider"></div>
+
+<a href="your-link-here.html" class="modal-link">
+   Make a Request →
+</a>
+
+<div class="cta-btn">
+    Proceed to Service
 </div>
 `
 },
@@ -501,8 +730,32 @@ text:`
 payment:{
 title:"Payment Link",
 text:`
-<div class="info-box">
-Secure online payment through personalized payment links.
+<div class="modal-hero">
+
+    <div class="modal-hero-icon">
+        <i class="fas fa-link"></i>
+    </div>
+
+    <div>
+        <div class="modal-main-title">
+           Payment Link
+        </div>
+
+        <div class="modal-subtext">
+            Request for a payment Link
+        </div>
+    </div>
+
+</div>
+
+<div class="modal-divider"></div>
+
+<a href="your-link-here.html" class="modal-link">
+    Payment Link →
+</a>
+
+<div class="cta-btn">
+    Proceed to Service
 </div>
 `
 },
@@ -510,13 +763,32 @@ Secure online payment through personalized payment links.
 death:{
 title:"Death Claim",
 text:`
-<div class="info-box">
-<ul>
-<li>Death certificate</li>
-<li>Claim form</li>
-<li>Policy details</li>
-<li>Beneficiary identification</li>
-</ul>
+<div class="modal-hero">
+
+    <div class="modal-hero-icon">
+        <i class="fas fa-hand-holding-heart"></i>
+    </div>
+
+    <div>
+        <div class="modal-main-title">
+           Filling a Death Claim
+        </div>
+
+        <div class="modal-subtext">
+            Seamless and with outmost care and compassion for you.
+        </div>
+    </div>
+
+</div>
+
+<div class="modal-divider"></div>
+
+<a href="your-link-here.html" class="modal-link">
+    We Make Claims Convenient and Accessible →
+</a>
+
+<div class="cta-btn">
+    Proceed to Service
 </div>
 `
 },
@@ -524,13 +796,32 @@ text:`
 critical:{
 title:"Critical Illness Claim",
 text:`
-<div class="info-box">
-<ul>
-<li>Cancer</li>
-<li>Heart attack</li>
-<li>Stroke</li>
-<li>Kidney failure</li>
-</ul>
+<div class="modal-hero">
+
+    <div class="modal-hero-icon">
+        <i class="fas fa-heart-pulse"></i>
+    </div>
+
+    <div>
+        <div class="modal-main-title">
+            Filling a Critical Illness Claim 
+        </div>
+
+        <div class="modal-subtext">
+           Seamless and with outmost care and compassion for you.
+        </div>
+    </div>
+
+</div>
+
+<div class="modal-divider"></div>
+
+<a href="your-link-here.html" class="modal-link">
+   We Make Claims Convenient and Accessible →
+</a>
+
+<div class="cta-btn">
+    Proceed to Service
 </div>
 `
 },
@@ -538,12 +829,32 @@ text:`
 medical:{
 title:"Medical Claim",
 text:`
-<div class="info-box">
-<ul>
-<li>Hospital bills</li>
-<li>Medical certificate</li>
-<li>Doctor's statement</li>
-</ul>
+<div class="modal-hero">
+
+    <div class="modal-hero-icon">
+        <i class="fas fa-notes-medical"></i>
+    </div>
+
+    <div>
+        <div class="modal-main-title">
+            Filling a Medical Claim
+        </div>
+
+        <div class="modal-subtext">
+            Seamless and with outmost care and compassion for you.
+        </div>
+    </div>
+
+</div>
+
+<div class="modal-divider"></div>
+
+<a href="your-link-here.html" class="modal-link">
+    We Make Claims Convenient and Accessible →
+</a>
+
+<div class="cta-btn">
+    Proceed to Service
 </div>
 `
 },
@@ -551,18 +862,38 @@ text:`
 disability:{
 title:"Disability Claim",
 text:`
-<div class="info-box">
-<ul>
-<li>Lump sum benefit</li>
-<li>Income replacement</li>
-<li>Premium waiver</li>
-</ul>
+<div class="modal-hero">
+
+    <div class="modal-hero-icon">
+        <i class="fas fa-wheelchair"></i>
+    </div>
+
+    <div>
+        <div class="modal-main-title">
+            Filling a Disability Claim
+        </div>
+
+        <div class="modal-subtext">
+            Seamless and with outmost care and compassion for you.
+        </div>
+    </div>
+
+</div>
+
+<div class="modal-divider"></div>
+
+<a href="your-link-here.html" class="modal-link">
+   We Make Claims Convenient and Accessible →
+</a>
+
+<div class="cta-btn">
+    Proceed to Service
+</div>
 </div>
 `
 }
 
 };
-
 document.querySelectorAll(".service-btn").forEach(btn=>{
 btn.addEventListener("click",function(){
 
@@ -570,6 +901,21 @@ let service=this.dataset.service;
 
 modalTitle.innerText=serviceData[service].title;
 modalText.innerHTML=serviceData[service].text;
+
+// ICON SWITCH
+let iconMap = {
+premium: "fa-credit-card",
+forms: "fa-file-alt",
+faq: "fa-circle-question",
+withdrawal: "fa-money-bill-wave",
+payment: "fa-link",
+death: "fa-hand-holding-heart",
+critical: "fa-heart-pulse",
+medical: "fa-notes-medical",
+disability: "fa-wheelchair"
+};
+
+modalIcon.innerHTML = `<i class="fas ${iconMap[service]}"></i>`;
 
 modal.style.display="flex";
 
