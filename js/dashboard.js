@@ -23,22 +23,62 @@ document.addEventListener("click", function (e) {
 
 const filterBtn = document.querySelector(".filter-calendar");
 const dateInput = document.getElementById("overviewDate");
+const applicantCount = document.getElementById("applicantCount");
+const clientCount = document.getElementById("clientCount");
+const eventCount = document.getElementById("eventCount");
+const selectedDateLabel = document.getElementById("selectedDate");
 
 filterBtn.addEventListener("click", () => {
-    dateInput.showPicker(); // modern browsers
+    if (typeof dateInput.showPicker === 'function') {
+        dateInput.showPicker();
+    } else {
+        dateInput.click();
+    }
 });
+
+function updateStatsForDate(dateStr) {
+    if (!dateStr) return;
+
+    fetch(`../php/get_dashboard_stats.php?date=${encodeURIComponent(dateStr)}`)
+        .then(response => response.json())
+        .then(json => {
+            if (json.error) {
+                console.error('Dashboard stats error:', json.error);
+                return;
+            }
+            if (applicantCount) applicantCount.textContent = json.applicants;
+            if (clientCount) clientCount.textContent = json.clients;
+            if (eventCount) eventCount.textContent = json.events;
+            if (selectedDateLabel) {
+                const formatted = new Date(dateStr).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+                selectedDateLabel.textContent = formatted;
+            }
+        })
+        .catch(err => {
+            console.error('Failed to fetch dashboard stats:', err);
+        });
+}
+
+// initialize with current selection (if any)
+function initDashboardStats() {
+    const initialDate = dateInput.value || new Date().toISOString().slice(0, 10);
+    dateInput.value = initialDate;
+    updateStatsForDate(initialDate);
+}
+
+initDashboardStats();
 
 dateInput.addEventListener("change", () => {
     const selected = dateInput.value;
-    alert("Filter dashboard data for: " + selected);
-
+    console.log("Filter dashboard data for: " + selected);
+    updateStatsForDate(selected);
     // Later you can fetch from database here using AJAX
 });
 
 // CALENDAR
 const monthYear = document.getElementById("monthYear");
 const datesContainer = document.getElementById("dates");
-const selectedDate = document.getElementById("selectedDate");
+const selectedDateHeading = document.getElementById("selectedDate");
 
 let date = new Date();
 
@@ -64,7 +104,9 @@ function renderCalendar() {
         span.addEventListener("click", () => {
             document.querySelectorAll(".dates span").forEach(s => s.classList.remove("active-date"));
             span.classList.add("active-date");
-            selectedDate.innerText = `${i} ${monthYear.innerText}`;
+            if (selectedDateHeading) {
+                selectedDateHeading.innerText = `${i} ${monthYear.innerText}`;
+            }
         });
 
         datesContainer.appendChild(span);
@@ -103,3 +145,104 @@ new Chart(ctx, {
         maintainAspectRatio: false
     }
 });
+
+
+async function loadDashboard() {
+    const res = await fetch("../php/fetch_pie_and_bar_dashboard.php");
+    const data = await res.json();
+
+    console.log(data);
+
+    renderPriorities(data.priorities);
+    renderJobs(data.jobs);
+}
+
+// PIE
+function renderPriorities(data) {
+    const pie = document.querySelector(".pie");
+    const legend = document.querySelector(".pie-legend");
+
+    pie.innerHTML = "";
+    legend.innerHTML = "";
+
+    const total = data.reduce((a,b) => a + Number(b.count), 0) || 1;
+
+    const colors = ["#4e73df", "#e74a3b", "#1cc88a", "#f6c23e", "#36b9cc"];
+
+    // build gradient
+    let gradient = "";
+    let start = 0;
+
+    data.forEach((item, index) => {
+        const percent = (item.count / total) * 100;
+        const end = start + percent;
+
+        gradient += `${colors[index % colors.length]} ${start}% ${end}%`;
+        if (index < data.length - 1) gradient += ", ";
+
+        start = end;
+
+        // LEGEND ITEM
+        const legendItem = document.createElement("div");
+        legendItem.className = "legend-item";
+
+        legendItem.innerHTML = `
+            <div class="legend-color" style="background:${colors[index % colors.length]}"></div>
+            <span>${item.priority} (${item.count})</span>
+        `;
+
+        legend.appendChild(legendItem);
+    });
+
+    pie.style.background = `conic-gradient(${gradient})`;
+
+    // optional center label
+    const center = document.createElement("div");
+    center.className = "pie-center";
+    center.innerText = "Priorities";
+
+    pie.appendChild(center);
+}
+
+// BAR
+function renderJobs(data) {
+    const bars = document.querySelector(".bars");
+    const yAxis = document.querySelector(".bar-yaxis");
+
+    bars.innerHTML = "";
+    yAxis.innerHTML = "";
+
+    const max = Math.max(...data.map(d => Number(d.count))) || 1;
+
+    // =====================
+    // CREATE Y AXIS LABELS
+    // =====================
+    const steps = 5;
+
+    for (let i = steps; i >= 0; i--) {
+        const value = Math.round((max / steps) * i);
+
+        const label = document.createElement("div");
+        label.innerText = value;
+
+        yAxis.appendChild(label);
+    }
+
+    // =====================
+    // CREATE BARS
+    // =====================
+    const colors = ["red", "blue", "teal", "orange", "yellow"];
+
+    data.forEach((item, index) => {
+        const bar = document.createElement("div");
+        bar.className = "bar " + colors[index % colors.length];
+
+        bar.style.height = (item.count / max) * 100 + "%";
+
+        bar.innerHTML = `<span>${item.job}</span>`;
+
+        bars.appendChild(bar);
+    });
+}
+
+document.addEventListener("DOMContentLoaded", loadDashboard);

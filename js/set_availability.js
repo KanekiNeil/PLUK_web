@@ -21,6 +21,8 @@ const endTime = document.getElementById("endTime")
 const saveBtn = document.getElementById("saveAvailability")
 const savedTimes = document.getElementById("savedTimes")
 
+const meetingLink = document.getElementById("meetingLink")
+
 // SINGLE CALENDAR
 const monthYear = document.getElementById("monthYear")
 const calendarDates = document.getElementById("calendarDates")
@@ -197,6 +199,7 @@ async function loadSavedTimes(date) {
     div.querySelector(".edit-slot").addEventListener("click", () => {
       startTime.value = start
       endTime.value = end
+      meetingLink.value = row.meeting_link || ""  // ⭐ THIS FIXES IT
       editingSlotId = row.id
     })
 
@@ -262,7 +265,7 @@ saveBtn.addEventListener("click", async () => {
   if (editingSlotId) {
     response = await supabase
       .from("available_dates")
-      .update({ start_time: startTime.value, end_time: endTime.value })
+      .update({ start_time: startTime.value, end_time: endTime.value,  meeting_link: meetingLink.value })
       .eq("id", editingSlotId)
     editingSlotId = null
   } else {
@@ -271,7 +274,8 @@ saveBtn.addEventListener("click", async () => {
         date,
         start_time: slot.start_time,
         end_time: slot.end_time,
-        appointment_type: currentAppointmentType
+        appointment_type: currentAppointmentType,
+         meeting_link: meetingLink.value   // ✅ ADD THIS
       }))
     )
 
@@ -281,6 +285,7 @@ saveBtn.addEventListener("click", async () => {
   if (response.error) return alert("Save failed")
   startTime.value = ""
   endTime.value = ""
+  meetingLink.value = ""   // ✅ ADD THIS
   loadSavedTimes(previewDate)
   loadAvailability(currentAppointmentType)
 })

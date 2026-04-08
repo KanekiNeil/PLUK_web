@@ -66,7 +66,7 @@ MAIN CONTENT
 
         <div class="filter-calendar">
             <span class="material-icons">calendar_month</span>
-            <input type="date" id="overviewDate" hidden>
+            <input type="date" id="overviewDate">
         </div>
     </div>
 
@@ -99,18 +99,18 @@ MAIN CONTENT
 
     <div class="card equal-card">
         <h3>Priorities</h3>
-        <div class="pie"></div>
+        <div class="pie-wrapper">
+            <div class="pie"></div>
+            <div class="pie-legend"></div>
+        </div>
     </div>
 
     <div class="card equal-card">
         <h3>Past Job</h3>
 
-        <div class="bars">
-            <div class="bar red"></div>
-            <div class="bar blue"></div>
-            <div class="bar teal"></div>
-            <div class="bar orange"></div>
-            <div class="bar yellow"></div>
+        <div class="bar-wrapper">
+            <div class="bar-yaxis"></div>
+            <div class="bars"></div>
         </div>
 
     </div>
@@ -119,7 +119,7 @@ MAIN CONTENT
 
 
 <!-- LINE CHART -->
-<div class="card">
+<div class="card line-chart-card">
     <h3>Line</h3>
     <canvas id="lineChart"></canvas>
 </div>
@@ -138,7 +138,8 @@ MAIN CONTENT
     </div>
 
     <!-- Calendar -->
-    <div class="calendar">
+    <div class="calendar-card">
+        <div class="calendar">
 
         <div class="month">
             <button id="prev">&lt;</button>
@@ -153,12 +154,16 @@ MAIN CONTENT
 
         <div class="dates" id="dates"></div>
 
+        </div>
     </div>
+
+    <div class="schedule-divider"></div>
 
     <!-- Appointments -->
     <div class="appointments">
 
         <h4 id="selectedDate">February 16, 2026</h4>
+        <div class="title-divider"></div>
 
         <div class="meeting">9:00 AM - 11:00 AM | 1st Client Meeting</div>
         <div class="meeting">1:00 PM - 2:00 PM | 2nd Client Meeting</div>

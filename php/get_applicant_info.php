@@ -6,15 +6,10 @@ $anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI
 // Optional filter
 $aiid = $_GET['aiid'] ?? null;
 
-$url = $supabaseUrl . "/rest/v1/available_dates?select=*";
+$url = $supabaseUrl . "/rest/v1/applicant_information?select=*";
 
 if ($aiid) {
     $url .= "&aiid=eq." . urlencode($aiid);
-}
-if (isset($_GET['type']) && $_GET['type'] === 'applicant') {
-    $url .= "&appointment_type=eq.applicant";
-}elseif (isset($_GET['type']) && $_GET['type'] === 'client') {
-    $url .= "&appointment_type=eq.client";
 }
 
 $ch = curl_init($url);
@@ -31,23 +26,28 @@ curl_close($ch);
 
 $data = json_decode($response, true);
 
-$dates = [];
+$applicant = [];
 
 if ($data) {
     foreach ($data as $row) {
-        $date = $row['date'] ?? null;
-        $id = $row['id'] ?? $row['adid'] ?? $row['ADID'] ?? null;
-        $meetingLink = $row['meeting_link'] ?? null;
 
-        if ($date) {
-            $dates[] = [
-                "id" => $id,
-                "date" => $date,
-                "meeting_link" => $meetingLink
-            ];
-        }
+        $fullName = $row['AI_FirstName'] . " " . $row['AI_LastName'];
+        $contactNo = $row['AI_ContactNum'] ?? "N/A";
+        $schoolGraduated = $row['AI_SchoolGraduated'] ?? "N/A";
+        $currentJob = $row['AI_CurrentJob'] ?? "N/A";
+        $address = $row['AI_Address'] ?? "N/A";
+        $workStatus = $row['AI_WorkStatus'] ?? "N/A";
+
+        $applicant[] = [
+            $fullName,
+            $contactNo,
+            $schoolGraduated,
+            $currentJob,
+            $address,
+            $workStatus
+        ];
     }
 }
 
 // IMPORTANT: return the array
-return $dates;
+return $applicant;

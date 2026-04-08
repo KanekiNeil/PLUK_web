@@ -255,14 +255,18 @@ input{
     cursor:pointer;
 }
 
+/* Hover */
 .calendar-btn:hover{
     background:#d6d6d6;
 }
 
+/* Selected */
 .calendar-btn.active{
     background:#880318;
     color:white;
 }
+
+/* Available */
 .calendar-btn.available{
     background:#d1e7dd;
 }
@@ -277,10 +281,12 @@ input{
     text-align:center;
     margin-bottom:10px;
 }
+
+
 /* ================= BUTTONS ================= */
 .actions{
     display:flex;
-    justify-content:flex-end;
+    justify-content:center;
     gap:20px;
     margin-top:30px;
 }
@@ -333,7 +339,7 @@ input{
     width:420px;
     padding:30px;
     border-radius:16px;
-    border:3px solid #3b82f6;
+    border:3px solid #f3f4f5;
     position:relative;
 }
 
@@ -398,11 +404,11 @@ input{
             <ul>
                 <li><a href="../index.php">Home</a></li>
 
-                <li class="dropdown">
+                  <li class="dropdown">
                     <a href="#">Work with Us</a>
                     <ul class="dropdown-menu">
-                        <li><a href="#" id="salesLink">Sales</a></li>
-                        <li><a href="#" id="careerLink">Career</a></li>
+                        <li><a href="sales_application.php" >Sales</a></li>
+                        <li><a href="fa_application.php" >Career</a></li>
                     </ul>
                 </li>
 
@@ -544,10 +550,11 @@ input{
         </div>
 
     <input type="hidden" name="appointment_date" id="appointmentDate">
+    <input type="hidden" name="available_date_id" id="availableDateId">
     <input type="hidden" name="application_type" value="sales">
 
     <div class="actions">
-        <button type="button" class="btn btn-cancel">Cancel</button>
+       
         <button type="submit" class="btn btn-submit">Submit</button>
     </div>
 
@@ -578,8 +585,25 @@ closeBtn.addEventListener("click", () => {
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-    const availableDates = <?php echo json_encode($availableDates); ?>;
+    const availableDatesRaw = <?php echo json_encode($availableDates); ?>;
     const fullDates = <?php echo json_encode($fullDates); ?>;
+
+    const normalizedAvailableDates = (Array.isArray(availableDatesRaw) ? availableDatesRaw : [])
+        .map((item) => {
+            if (typeof item === "string") {
+                return { id: null, date: item };
+            }
+            if (item && typeof item === "object" && item.date) {
+                return { id: item.id ?? null, date: item.date };
+            }
+            return null;
+        })
+        .filter(Boolean);
+
+    const availableDateSet = new Set(normalizedAvailableDates.map((item) => item.date));
+    const availableDateIdMap = new Map(
+        normalizedAvailableDates.map((item) => [item.date, item.id])
+    );
 
     // Priority selection logic
     const priorityCheckboxes = document.querySelectorAll('input[name="priority_id"]');
@@ -612,6 +636,7 @@ closeBtn.addEventListener("click", () => {
     const header = document.getElementById("calendarHeader");
     const toggleMonthBtn = document.getElementById("toggleMonthBtn");
     const appointmentInput = document.getElementById("appointmentDate");
+    const availableDateIdInput = document.getElementById("availableDateId");
 
     let selectedBtn = null;
     const today = new Date();
@@ -651,6 +676,7 @@ closeBtn.addEventListener("click", () => {
         calendarDates.innerHTML = "";
         selectedBtn = null;
         if (appointmentInput) appointmentInput.value = "";
+        if (availableDateIdInput) availableDateIdInput.value = "";
 
         for (let i = 0; i < firstDay; i++) {
             calendarDates.appendChild(document.createElement("div"));
@@ -669,7 +695,7 @@ closeBtn.addEventListener("click", () => {
             const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
             const isPastDate = cellDate < todayStart;
 
-            if (availableDates.includes(dateStr)) {
+            if (availableDateSet.has(dateStr)) {
 
                 btn.classList.add("available");
 
@@ -704,6 +730,9 @@ closeBtn.addEventListener("click", () => {
                 selectedBtn = btn;
 
                 if (appointmentInput) appointmentInput.value = dateStr;
+                if (availableDateIdInput) {
+                    availableDateIdInput.value = availableDateIdMap.get(dateStr) ?? "";
+                }
 
                 alert("Selected Date: " + dateStr);
             });
@@ -733,6 +762,7 @@ closeBtn.addEventListener("click", () => {
             if (form.dataset.submitting === "true") return;
 
             const appointmentDate = appointmentInput.value;
+            const availableDateId = availableDateIdInput ? availableDateIdInput.value : "";
             const selectedPriorities = selectedPrioritiesInput.value;
 
             if (!appointmentDate) {
@@ -742,6 +772,11 @@ closeBtn.addEventListener("click", () => {
 
             if (!selectedPriorities) {
                 alert("Please select at least one priority.");
+                return;
+            }
+
+            if (!availableDateId) {
+                alert("Please reselect an available appointment date.");
                 return;
             }
 
@@ -767,6 +802,7 @@ closeBtn.addEventListener("click", () => {
 
                     form.reset();
                     appointmentInput.value = "";
+                    if (availableDateIdInput) availableDateIdInput.value = "";
 
                 } else {
                     alert("Error: " + data.message);

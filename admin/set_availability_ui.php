@@ -68,10 +68,15 @@ $initials = strtoupper(substr($user_name, 0, 1)) .
         <label>End Time</label>
         <input type="time" id="endTime">
 
+        <!-- NEW: Meeting Link -->
+        <label>Meeting Link</label>
+        <input type="text" id="meetingLink" placeholder="Paste your meeting link here">
+
         <button id="saveAvailability">Save Availability</button>
         <div id="savedTimes"></div>
     </div>
 </div>
+
 
 <script src="../js/set_availability.js" type="module"></script>
 </body>

@@ -1,11 +1,5 @@
 <?php
-// Example: Fetch this from database in real usage
-// $availableDates = [
-//     "2026-03-01",
-//     "2026-03-03",
-//     "2026-03-05",
-//     "2026-03-08"
-// ];
+
 $_GET['type'] = 'applicant';
 $availableDates = include '../php/get_available_dates.php';
 
@@ -374,11 +368,11 @@ $fullDates = [
             <ul>
                 <li><a href="../index.php">Home</a></li>
 
-                <li class="dropdown">
+                  <li class="dropdown">
                     <a href="#">Work with Us</a>
                     <ul class="dropdown-menu">
-                        <li><a href="#" id="salesLink">Sales</a></li>
-                        <li><a href="#" id="careerLink">Career</a></li>
+                        <li><a href="sales_application.php" >Sales</a></li>
+                        <li><a href="fa_application.php" >Career</a></li>
                     </ul>
                 </li>
 
@@ -487,12 +481,16 @@ $fullDates = [
             </div>
 
             <input type="hidden" name="appointment_date" id="appointmentDate">
+            <input type="hidden" name="available_date_id" id="availableDateId">
+            <input type="hidden" name="meeting_link" id="meetingLink">
             <input type="hidden" name="application_type" value="applicant">
 
             <div class="text-center">
                 <button type="submit" class="btn "id="submitBtn">
                     Submit
                 </button>
+
+
             </div>
 
         </form>
@@ -515,13 +513,35 @@ document.addEventListener("DOMContentLoaded", () => {
        📅 CALENDAR
     ========================== */
 
-    const availableDates = <?php echo json_encode($availableDates); ?>;
+    const availableDatesRaw = <?php echo json_encode($availableDates); ?>;
     const fullDates = <?php echo json_encode($fullDates); ?>;
+
+    const normalizedAvailableDates = (Array.isArray(availableDatesRaw) ? availableDatesRaw : [])
+        .map((item) => {
+            if (typeof item === "string") {
+                return { id: null, date: item, meeting_link: null };
+            }
+            if (item && typeof item === "object" && item.date) {
+                return { id: item.id ?? null, date: item.date, meeting_link: item.meeting_link ?? null };
+            }
+            return null;
+        })
+        .filter(Boolean);
+
+    const availableDateSet = new Set(normalizedAvailableDates.map((item) => item.date));
+    const availableDateIdMap = new Map(
+        normalizedAvailableDates.map((item) => [item.date, item.id])
+    );
+    const availableDateMeetingLinkMap = new Map(
+        normalizedAvailableDates.map((item) => [item.date, item.meeting_link])
+    );
 
     const calendarDates = document.getElementById("calendarDates");
     const header = document.getElementById("calendarHeader");
     const toggleMonthBtn = document.getElementById("toggleMonthBtn");
     const appointmentInput = document.getElementById("appointmentDate");
+    const availableDateIdInput = document.getElementById("availableDateId");
+    const meetingLinkInput = document.getElementById("meetingLink");
 
     let selectedBtn = null;
     const today = new Date();
@@ -561,6 +581,8 @@ document.addEventListener("DOMContentLoaded", () => {
         calendarDates.innerHTML = "";
         selectedBtn = null;
         appointmentInput.value = "";
+        if (availableDateIdInput) availableDateIdInput.value = "";
+        if (meetingLinkInput) meetingLinkInput.value = "";
 
         for (let i = 0; i < firstDay; i++) {
             calendarDates.appendChild(document.createElement("div"));
@@ -579,7 +601,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
             const isPastDate = cellDate < todayStart;
 
-            if (availableDates.includes(dateStr)) {
+            if (availableDateSet.has(dateStr)) {
 
                 btn.classList.add("available");
 
@@ -614,6 +636,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 selectedBtn = btn;
 
                 appointmentInput.value = dateStr;
+                if (availableDateIdInput) {
+                    availableDateIdInput.value = availableDateIdMap.get(dateStr) ?? "";
+                }
+                if (meetingLinkInput) {
+                    meetingLinkInput.value = availableDateMeetingLinkMap.get(dateStr) ?? "";
+                }
 
                 Swal.fire({
                     icon: "info",
@@ -720,12 +748,22 @@ document.addEventListener("DOMContentLoaded", () => {
             if (form.dataset.submitting === "true") return;
 
             const appointmentDate = appointmentInput.value;
+            const availableDateId = availableDateIdInput ? availableDateIdInput.value : "";
 
             if (!appointmentDate) {
                 Swal.fire({
                     icon: "warning",
                     title: "Missing Appointment",
                     text: "Please select an appointment date."
+                });
+                return;
+            }
+
+            if (!availableDateId) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Missing Date Reference",
+                    text: "Please reselect an available appointment date."
                 });
                 return;
             }
@@ -796,6 +834,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     form.reset();
                     appointmentInput.value = "";
+                    if (availableDateIdInput) availableDateIdInput.value = "";
+                    if (meetingLinkInput) meetingLinkInput.value = "";
 
                     if (preview) preview.style.display = "none";
 
