@@ -5,8 +5,8 @@ include_once "../php/session.php";
 
 if (!isset($_SESSION['user_id'])) {
     // Not logged in
-    //header("Location: admin_login.php");
-    //exit;
+    header("Location: admin_login.php");
+    exit;
 }
 // $appointments = [
 //     ["2026-02-16", "7:00-8:00 AM", "Juan Dela Cruz", "Career", "Rescheduled"],
@@ -81,13 +81,12 @@ body::before {
 }
 
 .table-row {
-    border-bottom: 1px solid #f0f0f0;
-    transition: 0.2s ease;
     cursor: pointer;
 }
 
 .table-row:hover {
-    background: #f8f9fc;
+    background: #f1f5f9;
+    transform: scale(1.01);
 }
 
 /* STATUS DROPDOWN BASE STYLE */
@@ -129,6 +128,11 @@ body::before {
 .status-lavender {
     background: #e6d4f5;
     color: #5a2d82;
+}
+
+.status-default {
+    background: #f0f0f0;
+    color: #333;
 }
 
 .status-select:hover {
@@ -317,6 +321,23 @@ body::before {
     background: #f3f4f8;
 }
 
+.active-filter-pill {
+    margin-left: 6px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    background: #880318;
+    color: #fff;
+}
+
+.filter-summary {
+    margin: 12px 0 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #880318;
+}
+
 </style>
 </head>
 
@@ -331,7 +352,18 @@ body::before {
     <div class="card">
 
         <div class="table-header">
-            <div>Date</div>
+            <div class="filter-header">
+                Date
+                <span class="active-filter-pill" id="dateFilterCurrent">Today</span>
+                <span class="filter-icon" onclick="toggleFilter('dateFilterBox')">⏷</span>
+
+                <div class="filter-box" id="dateFilterBox">
+                    <div onclick="applyDateFilter('All')">All</div>
+                    <div onclick="applyDateFilter('Today')">Today</div>
+                    <div onclick="applyDateFilter('Past')">Past</div>
+                    <div onclick="applyDateFilter('Upcoming')">Upcoming</div>
+                </div>
+            </div>
             <div>Time</div>
             <div>Full Name</div>
 
@@ -368,47 +400,61 @@ body::before {
             </div>
         </div>
 
+        <div id="filterSummary" class="filter-summary">Showing: Today records</div>
+
         <?php foreach ($appointments as $appt): 
             $statusClass = match(true) {
-                str_contains($appt[4], "Rescheduled") => "status-rescheduled",
-                str_contains($appt[4], "Attended") => "status-attended",
-                str_contains($appt[4], "Processing") => "status-processing",
+                str_contains($appt[6], "Rescheduled") => "status-rescheduled",
+                str_contains($appt[6], "Attended") => "status-attended",
+                str_contains($appt[6], "Processing") => "status-processing",
                 default => "status-default"
             };
         ?>
 
         <div class="table-row"
-            data-date="<?= date("F d, Y", strtotime($appt[0])) ?>"
-            data-time="<?= $appt[1] ?>"
-            data-name="<?= htmlspecialchars($appt[2]) ?>"
-            data-type="<?= htmlspecialchars($appt[3]) ?>"
-            data-face="<?= htmlspecialchars($appt[5]) ?>"
+            data-aaid="<?= htmlspecialchars($appt[0]) ?>"
+            data-aiid="<?= htmlspecialchars($appt[1]) ?>"
+            data-date="<?= date("F d, Y", strtotime($appt[2])) ?>"
+            data-date-raw="<?= htmlspecialchars($appt[2]) ?>"
+            data-time="<?= $appt[3] ?>"
+            data-name="<?= htmlspecialchars($appt[4]) ?>"
+            data-type="<?= htmlspecialchars($appt[5]) ?>"
+            data-status="<?= htmlspecialchars($appt[6]) ?>"
+            data-face="<?= htmlspecialchars($appt[7]) ?>"
+            data-currentjob="<?= htmlspecialchars($appt[8]) ?>"
+            data-contact="<?= htmlspecialchars($appt[9]) ?>"
             onclick="openModal(this)">
 
-            <div><?= date("m/d/y", strtotime($appt[0])) ?></div>
-            <div><?= $appt[1] ?></div>
-            <div><?= htmlspecialchars($appt[2]) ?></div>
-            <div><?= htmlspecialchars($appt[3]) ?></div>
+            <div><?= date("m/d/y", strtotime($appt[2])) ?></div>
+            <div><?= $appt[3] ?></div>
+            <div><?= htmlspecialchars($appt[4]) ?></div>
+            <div><?= htmlspecialchars($appt[5]) ?></div>
             <div>
                 <select class="status-select"
-                        onchange="changeStatusColor(this)"
+                        onchange="persistStatus(this)"
                         onclick="event.stopPropagation()"
-                        data-type="<?= htmlspecialchars($appt[3]) ?>">
+                        data-type="<?= htmlspecialchars($appt[5]) ?>">
 
-                    <?php if ($appt[3] === "Career"): ?>
+                    <?php if ($appt[5] === "Career"): ?>
 
-                        <option value="Attended BYB">Attended BYB</option>
-                        <option value="Rescheduled">Rescheduled</option>
-                        <option value="Waiting">Waiting</option>
-                        <option value="Not Qualified">Not Qualified</option>
+                        <option value="Attended BYB" <?= $appt[6] === "Attended BYB" ? "selected" : "" ?>>Attended BYB</option>
+                        <option value="Rescheduled" <?= $appt[6] === "Rescheduled" ? "selected" : "" ?>>Rescheduled</option>
+                        <option value="Waiting" <?= $appt[6] === "Waiting" ? "selected" : "" ?>>Waiting</option>
+                        <option value="Not Qualified" <?= $appt[6] === "Not Qualified" ? "selected" : "" ?>>Not Qualified</option>
+                        <?php if (!in_array($appt[6], ["Attended BYB", "Rescheduled", "Waiting", "Not Qualified"], true)): ?>
+                            <option value="<?= htmlspecialchars($appt[6]) ?>" selected><?= htmlspecialchars($appt[6]) ?></option>
+                        <?php endif; ?>
 
-                    <?php elseif ($appt[3] === "Sales"): ?>
+                    <?php elseif ($appt[5] === "Sales"): ?>
 
-                        <option value="Set Appointment">Set Appointment</option>
-                        <option value="Waiting for Reply">Waiting for Reply</option>
-                        <option value="No Response">No Response</option>
-                        <option value="With Existing Insurance">With Existing Insurance</option>
-                        <option value="No Budget">No Budget</option>
+                        <option value="Set Appointment" <?= $appt[6] === "Set Appointment" ? "selected" : "" ?>>Set Appointment</option>
+                        <option value="Waiting for Reply" <?= $appt[6] === "Waiting for Reply" ? "selected" : "" ?>>Waiting for Reply</option>
+                        <option value="No Response" <?= $appt[6] === "No Response" ? "selected" : "" ?>>No Response</option>
+                        <option value="With Existing Insurance" <?= $appt[6] === "With Existing Insurance" ? "selected" : "" ?>>With Existing Insurance</option>
+                        <option value="No Budget" <?= $appt[6] === "No Budget" ? "selected" : "" ?>>No Budget</option>
+                        <?php if (!in_array($appt[6], ["Set Appointment", "Waiting for Reply", "No Response", "With Existing Insurance", "No Budget"], true)): ?>
+                            <option value="<?= htmlspecialchars($appt[6]) ?>" selected><?= htmlspecialchars($appt[6]) ?></option>
+                        <?php endif; ?>
 
                     <?php endif; ?>
 
@@ -428,48 +474,58 @@ body::before {
 <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
         <div class="modal-header">
-            <h3 id="modalType">Appointment Details</h3>
+            <h3>Appointment Details</h3>
             <span class="close-btn" onclick="closeModal()">✖</span>
         </div>
 
         <div class="modal-content">
 
-            <!-- Name -->
-            <label><strong>Full Name:</strong></label>
-            <input type="text" id="modalNameInput" class="modal-input" readonly>
-
-            <!-- Date & Time -->
-            <div style="display:flex; gap:10px; margin-top:10px;">
-                <div style="flex:1">
-                    <label><strong>Date:</strong></label>
-                    <input type="date" id="modalDateInput" class="modal-input" readonly>
-                </div>
-                <div style="flex:1">
-                    <label><strong>Time:</strong></label>
-                    <input type="text" id="modalTimeInput" class="modal-input" readonly>
+            <!-- PROFILE SECTION -->
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
+                <img id="modalFaceImage" 
+                    style="width:50px; height:50px; border-radius:50%; border:2px solid #880318;">
+                <div>
+                    <div id="modalName" style="font-size:18px; font-weight:700;"></div>
                 </div>
             </div>
 
-            <!-- Appointment Type & Status -->
-            <div style="margin-top:15px;">
-                <p><strong>Appointment Type:</strong> <span id="modalApptTypeText"></span></p>
-                <p>
-                    <strong>Status:</strong> 
-                    <span id="modalStatusText" class="status-badge"></span>
-                    <select id="modalStatusSelect" class="modal-select" style="display:none;"></select>
-                </p>
+            <!-- SCHEDULE DATE SECTION -->
+            <div style="margin-top:10px;">
+                <div style="font-weight:600; margin-bottom:8px; color:#555;">
+                    Schedule Date
+                </div>
+
+                <div style="background:#f4b2b2; padding:12px; border-radius:10px;">
+                    <div id="modalDate"></div>
+                    <div id="modalTime"></div>
+                </div>
             </div>
 
-            <!-- Face Image -->
-            <div style="margin-top:15px; text-align:center;">
-                <img id="modalFaceImage" name="faceImage" src="" alt="Face Image" style="max-width:150px; border-radius:50%; border:2px solid #880318;">
+            <!-- DETAILS SECTION -->
+            <div style="margin-top:20px;">
+                <div style="font-weight:600; margin-bottom:8px; color:#555;">
+                    Details
+                </div>
+
+                <div style="font-size:14px;">
+
+                    <p><strong>Current Job:</strong> <span id="modalType"></span></p>
+                    <p><strong>Contact Number:</strong> <span id="contact"></span></p>
+
+                    <p>
+                        <strong>Status:</strong> 
+                        <span id="modalStatus" class="status-badge"></span>
+                    </p>
+
+                    <p><strong>Date Attended BYB:</strong> <span>N/A</span></p>
+                    <p><strong>Next Step:</strong> <span>N/A</span></p>
+
+                </div>
             </div>
 
-            <!-- Buttons -->
-            <div style="margin-top:20px; display:flex; gap:10px; justify-content:end;">
-                <button class="modal-btn" id="editBtn" onclick="enableEdit()">Edit</button>
-                <button class="modal-btn save-btn" id="saveBtn" onclick="saveChanges()" style="display:none;">Save</button>
-                <button class="modal-btn cancel-btn" onclick="closeModal()">Close</button>
+            <!-- FOOTER -->
+            <div style="text-align:center; margin-top:20px;">
+                <button class="close-modal-btn" onclick="closeModal()">Close</button>
             </div>
 
         </div>
@@ -503,58 +559,74 @@ function toggleProfile() {
     }
 }
 
-document.addEventListener("click", function(e){
+// document.addEventListener("click", function(e){
 
-    const profile = document.querySelector(".user-section");
-    const dropdown = document.getElementById("profileDropdown");
+//     const profile = document.querySelector(".user-section");
+//     const dropdown = document.getElementById("profileDropdown");
 
-    if (!profile.contains(e.target)) {
-        dropdown.style.display = "none";
-    }
+//     if (!profile.contains(e.target)) {
+//         dropdown.style.display = "none";
+//     }
 
-});
+// });
 
 let currentRow = null;
 
 function openModal(row) {
 
-    currentRow = row;
-
+    const name = row.dataset.name;
     const date = row.dataset.date;
     const time = row.dataset.time;
-    const name = row.dataset.name;
     const type = row.dataset.type;
-    const faceImage = row.dataset.face;
-
-    const select = row.querySelector(".status-select");
-    const status = select.value;
+    const status = row.dataset.status;
+    const face = row.dataset.face;
+    const currentJob = row.dataset.currentjob;
+    const contact = row.dataset.contact;
 
     document.getElementById("modalOverlay").style.display = "flex";
 
-    document.getElementById("modalNameInput").value = name;
-    document.getElementById("modalDateInput").value = new Date(date).toISOString().split("T")[0];
-    document.getElementById("modalTimeInput").value = time;
+    // PROFILE SECTION
+    document.getElementById("modalName").innerText = name;
+    document.getElementById("modalFaceImage").src = "data:image/png;base64," + face;
 
-    document.getElementById("modalApptTypeText").innerText = type;
-    document.getElementById("modalStatusText").innerText = status;
+    // SCHEDULE DATE
+    document.getElementById("modalDate").innerText = "📅 " + date;
+    document.getElementById("modalTime").innerText = "⏰ " + time;
 
-    document.getElementById("modalType").innerText = type + " Details";
-    document.getElementById("modalFaceImage").src = "data:image/png;base64," + faceImage;
+    // DETAILS
+    document.getElementById("modalType").innerText = currentJob ? currentJob : "N/A";
+    document.getElementById("contact").innerText = contact ? contact : "N/A";
+    console.log("Current Job:", currentJob);
+    console.log("Contact Number:", contact);
+    const statusEl = document.getElementById("modalStatus");
+    statusEl.innerText = status;
 
-    disableEditMode();
-}
+    // RESET CLASS
+    statusEl.className = "status-badge";
 
-function disableEditMode() {
+    switch (status) {
+        case "Attended BYB":
+        case "Set Appointment":
+            statusEl.classList.add("status-green"); break;
 
-    document.getElementById("modalNameText").style.display = "block";
-    document.getElementById("modalDateText").style.display = "inline";
-    document.getElementById("modalTimeText").style.display = "inline";
+        case "Rescheduled":
+        case "No Budget":
+            statusEl.classList.add("status-blue"); break;
 
-    document.getElementById("modalNameInput").style.display = "none";
-    document.getElementById("modalDateInput").style.display = "none";
-    document.getElementById("modalTimeInput").style.display = "none";
+        case "Waiting":
+        case "Waiting for Reply":
+            statusEl.classList.add("status-yellow"); break;
 
-    document.getElementById("saveBtn").style.display = "none";
+        case "Not Qualified":
+        case "No Response":
+            statusEl.classList.add("status-red"); break;
+
+        case "With Existing Insurance":
+            statusEl.classList.add("status-lavender"); break;
+
+        default:
+            statusEl.classList.add("status-default");
+    }
 }
 
 function enableEdit() {
@@ -589,6 +661,10 @@ function enableEdit() {
         ];
     }
 
+    if (currentStatus && !options.includes(currentStatus)) {
+        options.unshift(currentStatus);
+    }
+
     statusSelect.innerHTML = options.map(opt => 
         `<option value="${opt}">${opt}</option>`
     ).join("");
@@ -614,7 +690,7 @@ function saveChanges() {
 
     const rowStatusSelect = currentRow.querySelector(".status-select");
     rowStatusSelect.value = newStatus;
-    changeStatusColor(rowStatusSelect);
+    persistStatus(rowStatusSelect);
 
     // Update modal
     document.getElementById("modalNameInput").readOnly = true;
@@ -672,7 +748,8 @@ function changeStatusColor(select) {
         "status-blue",
         "status-yellow",
         "status-red",
-        "status-lavender"
+        "status-lavender",
+        "status-default"
     );
 
     switch (value) {
@@ -701,15 +778,69 @@ function changeStatusColor(select) {
         case "With Existing Insurance":
             select.classList.add("status-lavender");
             break;
+
+        default:
+            select.classList.add("status-default");
+
     }
 }
 
 document.querySelectorAll(".status-select").forEach(select => {
+    select.dataset.previousStatus = select.value;
     changeStatusColor(select);
 });
 
+function persistStatus(select) {
+    const row = select.closest(".table-row");
+    const aaid = row?.dataset.aaid;
+    const aiid = row?.dataset.aiid;
+    const newStatus = select.value;
+    const previousStatus = select.dataset.previousStatus || newStatus;
+
+    changeStatusColor(select);
+
+    if (!aaid && (!aiid)) {
+        console.error("Missing IDs for status update", row?.dataset);
+        alert("Unable to update status: missing appointment identifiers.");
+        select.value = previousStatus;
+        changeStatusColor(select);
+        return;
+    }
+
+    const payload = {
+        status: newStatus
+    };
+
+    if (aaid) {
+        payload.aaid = aaid;
+    } else {
+        payload.aiid = aiid;
+    }
+
+    fetch("../php/update_status.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.status !== "success") {
+            throw new Error(data.message || "Failed to update status");
+        }
+        select.dataset.previousStatus = newStatus;
+    })
+    .catch((error) => {
+        select.value = previousStatus;
+        changeStatusColor(select);
+        alert(error.message || "Unable to update status.");
+    });
+}
+
 let selectedType = "All";
 let selectedStatus = "All";
+let selectedDateRange = "Today";
 
 // Toggle filter dropdown
 function toggleFilter(id) {
@@ -736,26 +867,109 @@ function applyStatusFilter(status) {
     document.getElementById("statusFilterBox").style.display = "none";
 }
 
+// Apply Date Filter
+function applyDateFilter(dateRange) {
+    selectedDateRange = dateRange;
+    filterTable();
+    document.getElementById("dateFilterBox").style.display = "none";
+}
+
+function toLocalDateOnly(dateString) {
+    if (!dateString) {
+        return null;
+    }
+
+    const ymdMatch = String(dateString).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (ymdMatch) {
+        const year = Number(ymdMatch[1]);
+        const month = Number(ymdMatch[2]) - 1;
+        const day = Number(ymdMatch[3]);
+        return new Date(year, month, day);
+    }
+
+    const parsed = new Date(dateString);
+    if (Number.isNaN(parsed.getTime())) {
+        return null;
+    }
+
+    return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+}
+
+function getDateFilterLabel(dateRange) {
+    if (dateRange === "Today") return "Today";
+    if (dateRange === "Past") return "Past";
+    if (dateRange === "Upcoming") return "Upcoming";
+    return "All";
+}
+
+function updateFilterSummary(visibleCount, totalCount) {
+    const dateLabel = getDateFilterLabel(selectedDateRange);
+    const summaryEl = document.getElementById("filterSummary");
+    const dateBadge = document.getElementById("dateFilterCurrent");
+
+    if (summaryEl) {
+        summaryEl.innerText = `Showing: ${dateLabel} records (${visibleCount} of ${totalCount})`;
+    }
+
+    if (dateBadge) {
+        dateBadge.innerText = dateLabel;
+    }
+}
+
+function isDateMatch(rowDate, dateRange) {
+    if (dateRange === "All") {
+        return true;
+    }
+
+    if (!rowDate) {
+        return false;
+    }
+
+    const today = new Date();
+    const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+    if (dateRange === "Today") {
+        return rowDate.getTime() === todayOnly.getTime();
+    }
+
+    if (dateRange === "Past") {
+        return rowDate.getTime() < todayOnly.getTime();
+    }
+
+    if (dateRange === "Upcoming") {
+        return rowDate.getTime() > todayOnly.getTime();
+    }
+
+    return true;
+}
+
 // Filter Logic
 function filterTable() {
 
     const rows = document.querySelectorAll(".table-row");
+    let visibleCount = 0;
 
     rows.forEach(row => {
 
         const rowType = row.dataset.type;
         const rowStatus = row.querySelector(".status-select").value;
+        const rawDate = row.dataset.dateRaw || row.dataset.date;
+        const rowDate = toLocalDateOnly(rawDate);
 
         const typeMatch = selectedType === "All" || rowType === selectedType;
         const statusMatch = selectedStatus === "All" || rowStatus === selectedStatus;
+        const dateMatch = isDateMatch(rowDate, selectedDateRange);
 
-        if (typeMatch && statusMatch) {
+        if (typeMatch && statusMatch && dateMatch) {
             row.style.display = "grid";
+            visibleCount++;
         } else {
             row.style.display = "none";
         }
 
     });
+
+    updateFilterSummary(visibleCount, rows.length);
 }
 
 // Close filter when clicking outside
@@ -766,6 +980,8 @@ document.addEventListener("click", function(e) {
         });
     }
 });
+
+filterTable();
 
 </script>
 <script>

@@ -1,0 +1,288 @@
+body {
+    margin: 0;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("../assets/logo.jpg");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 400px;
+    opacity: 0.07;
+    z-index: -1;
+}
+
+.container-al {
+    padding: 40px;
+}
+
+.card {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+}
+
+/* TABLE */
+.table-header,
+.table-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.5fr 1.5fr 0.2fr;
+    padding: 16px 15px;
+    align-items: center;
+}
+
+.table-header {
+    font-weight: 700;
+    border-bottom: 2px solid #880318;
+    color: #000000;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+}
+
+.table-row {
+    cursor: pointer;
+}
+
+.table-row:hover {
+    background: #f1f5f9;
+    transform: scale(1.01);
+}
+
+/* STATUS DROPDOWN BASE STYLE */
+.status-select {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    text-align: center;
+    min-width: 160px;
+    transition: 0.2s ease;
+}
+
+/* STATUS COLORS */
+.status-green {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-blue {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.status-yellow {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-red {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-lavender {
+    background: #e6d4f5;
+    color: #5a2d82;
+}
+
+.status-default {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.status-select:hover {
+    transform: scale(1.03);
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .table-header,
+    .table-row {
+        grid-template-columns: 1fr 1fr;
+        row-gap: 10px;
+    }
+}
+
+/* MODAL */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.modal {
+    background: white;
+    width: 420px;
+    border-radius: 18px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    animation: fadeIn 0.2s ease;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.modal-content {
+    padding: 20px;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+}
+
+.close-btn {
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.modal-select {
+    width: 100%;
+    padding: 8px 10px;
+    margin-top:5px;
+    border-radius: 8px;
+    border:1px solid #ccc;
+    font-size:14px;
+}
+
+.modal-btn {
+    padding:8px 18px;
+    border:none;
+    border-radius:20px;
+    cursor:pointer;
+    font-weight:600;
+    transition:0.2s;
+}
+
+#editBtn {
+    background:#880318;
+    color:white;
+}
+
+.save-btn {
+    background:#155724;
+    color:white;
+}
+
+.cancel-btn {
+    background:#888;
+    color:white;
+}
+
+.modal-btn:hover {
+    opacity:0.85;
+}
+
+/* Status badges inside modal */
+.status-badge {
+    padding:4px 10px;
+    border-radius:15px;
+    font-size:13px;
+    font-weight:600;
+    display:inline-block;
+}
+.status-green { background:#d4edda; color:#155724; }
+.status-blue { background:#cce5ff; color:#004085; }
+.status-yellow { background:#fff3cd; color:#856404; }
+.status-red { background:#f8d7da; color:#721c24; }
+.status-lavender { background:#e6d4f5; color:#5a2d82; }
+
+.details p {
+    margin: 8px 0;
+}
+
+.close-modal-btn {
+    background: #880318;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+.close-modal-btn:hover {
+    opacity: 0.85;
+}
+
+@keyframes fadeIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* FILTER HEADER */
+.filter-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.filter-icon {
+    font-size: 14px;
+    cursor: pointer;
+    opacity: 0.6;
+}
+
+.filter-icon:hover {
+    opacity: 1;
+}
+
+/* FILTER DROPDOWN BOX */
+.filter-box {
+    position: absolute;
+    top: 28px;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    display: none;
+    flex-direction: column;
+    min-width: 170px;
+    z-index: 50;
+    padding: 5px 0;
+}
+
+.filter-box div {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.filter-box div:hover {
+    background: #f3f4f8;
+}
+
+.active-filter-pill {
+    margin-left: 6px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    background: #880318;
+    color: #fff;
+}
+
+.filter-summary {
+    margin: 12px 0 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #880318;
+}
