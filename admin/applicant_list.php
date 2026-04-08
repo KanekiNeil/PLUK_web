@@ -293,24 +293,35 @@ document.querySelectorAll('.table-row').forEach(row => {
 
     row.addEventListener('click', () => {
 
-        // Get data from clicked row
         const name = row.dataset.name;
         const contact = row.dataset.contact;
         const school = row.dataset.school;
         const job = row.dataset.job;
         const address = row.dataset.address;
+        const status = row.dataset.status;
 
-        // Insert into modal
+        // Fill modal
         document.getElementById('modalName').textContent = name;
         document.getElementById('modalContact').textContent = contact;
         document.getElementById('modalSchool').textContent = school;
         document.getElementById('modalJob').textContent = job;
         document.getElementById('modalAddress').textContent = address;
 
+        // STATUS BADGE (dynamic color)
+        const statusEl = document.getElementById('modalStatus');
+        statusEl.textContent = status;
+
+        statusEl.className = "status-badge"; // reset
+
+        if (status === "Pending") statusEl.classList.add("badge-pending");
+        if (status === "Approved") statusEl.classList.add("badge-approved");
+        if (status === "Completed") statusEl.classList.add("badge-completed");
+        if (status === "Cancelled") statusEl.classList.add("badge-cancelled");
+
+
         // Show modal
         const modal = new bootstrap.Modal(document.getElementById('applicantModal'));
         modal.show();
-
     });
 
 });
