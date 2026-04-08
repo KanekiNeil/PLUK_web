@@ -1,23 +1,28 @@
 <?php
 include_once "../php/session.php";
 
-/* ==============================
-   AUTHENTICATION CHECK
-================================*/
-/*if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user_id'])) {
     header("Location: admin_login.php");
     exit();
 }
 
 /* ==============================
+   AUTHENTICATION CHECK
+================================*/
+
+
+/* ==============================
    SAMPLE DASHBOARD DATA
    (Replace later with DB queries)
 ================================*/
+
+
 $stats = [
     "applicants" => 10,
     "clients" => 12,
     "events" => 32
 ];
+
 
 /* ==============================
    USER INFO
@@ -75,19 +80,19 @@ MAIN CONTENT
         <div class="stat-box">
             <span class="material-icons stat-icon">groups</span>
             <p>No. of Applicants</p>
-            <h1><?= $stats['applicants'] ?></h1>
+            <h1 id="applicantCount"><?= $stats['applicants'] ?></h1>
         </div>
 
         <div class="stat-box">
             <span class="material-icons stat-icon">person</span>
             <p>No. of Clients</p>
-            <h1><?= $stats['clients'] ?></h1>
+            <h1 id="clientCount"><?= $stats['clients'] ?></h1>
         </div>
 
         <div class="stat-box">
             <span class="material-icons stat-icon">event</span>
             <p>Upcoming Events</p>
-            <h1><?= $stats['events'] ?></h1>
+            <h1 id="eventCount"><?= $stats['events'] ?></h1>
         </div>
 
     </div>
@@ -134,7 +139,14 @@ MAIN CONTENT
 
     <div class="calendar-header">
         <h3>Schedule</h3>
-        <a href="#" class="see-all">See All</a>
+        <div class="schedule-actions">
+            <select id="appointmentTypeFilter" class="schedule-type-filter">
+                <option value="all">All Appointments</option>
+                <option value="applicant">Applicant</option>
+                <option value="sales">Sales</option>
+            </select>
+            <a href="#" class="see-all">See All</a>
+        </div>
     </div>
 
     <!-- Calendar -->
@@ -162,14 +174,11 @@ MAIN CONTENT
     <!-- Appointments -->
     <div class="appointments">
 
-        <h4 id="selectedDate">February 16, 2026</h4>
+        <h4 id="selectedDate">Select a date</h4>
         <div class="title-divider"></div>
-
-        <div class="meeting">9:00 AM - 11:00 AM | 1st Client Meeting</div>
-        <div class="meeting">1:00 PM - 2:00 PM | 2nd Client Meeting</div>
-        <div class="meeting">3:00 PM - 4:00 PM | 3rd Client Meeting</div>
-        <div class="meeting">4:30 PM - 5:30 PM | 4th Client Meeting</div>
-        <div class="meeting">6:00 PM - 7:00 PM | 5th Client Meeting</div>
+        <div id="appointmentsList" class="appointments-list">
+            <div class="meeting">Select a date to view appointments.</div>
+        </div>
 
     </div>
 
