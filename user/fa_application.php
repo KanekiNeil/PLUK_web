@@ -1,11 +1,5 @@
 <?php
-// Example: Fetch this from database in real usage
-// $availableDates = [
-//     "2026-03-01",
-//     "2026-03-03",
-//     "2026-03-05",
-//     "2026-03-08"
-// ];
+
 $_GET['type'] = 'applicant';
 $availableDates = include '../php/get_available_dates.php';
 
@@ -374,11 +368,11 @@ $fullDates = [
             <ul>
                 <li><a href="../index.php">Home</a></li>
 
-                <li class="dropdown">
+                  <li class="dropdown">
                     <a href="#">Work with Us</a>
                     <ul class="dropdown-menu">
-                        <li><a href="#" id="salesLink">Sales</a></li>
-                        <li><a href="#" id="careerLink">Career</a></li>
+                        <li><a href="sales_application.php" >Sales</a></li>
+                        <li><a href="fa_application.php" >Career</a></li>
                     </ul>
                 </li>
 
@@ -493,6 +487,8 @@ $fullDates = [
                 <button type="submit" class="btn "id="submitBtn">
                     Submit
                 </button>
+
+
             </div>
 
         </form>

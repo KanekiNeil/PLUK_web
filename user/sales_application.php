@@ -255,14 +255,18 @@ input{
     cursor:pointer;
 }
 
+/* Hover */
 .calendar-btn:hover{
     background:#d6d6d6;
 }
 
+/* Selected */
 .calendar-btn.active{
     background:#880318;
     color:white;
 }
+
+/* Available */
 .calendar-btn.available{
     background:#d1e7dd;
 }
@@ -277,10 +281,12 @@ input{
     text-align:center;
     margin-bottom:10px;
 }
+
+
 /* ================= BUTTONS ================= */
 .actions{
     display:flex;
-    justify-content:flex-end;
+    justify-content:center;
     gap:20px;
     margin-top:30px;
 }
@@ -333,7 +339,7 @@ input{
     width:420px;
     padding:30px;
     border-radius:16px;
-    border:3px solid #3b82f6;
+    border:3px solid #f3f4f5;
     position:relative;
 }
 
@@ -398,11 +404,11 @@ input{
             <ul>
                 <li><a href="../index.php">Home</a></li>
 
-                <li class="dropdown">
+                  <li class="dropdown">
                     <a href="#">Work with Us</a>
                     <ul class="dropdown-menu">
-                        <li><a href="#" id="salesLink">Sales</a></li>
-                        <li><a href="#" id="careerLink">Career</a></li>
+                        <li><a href="sales_application.php" >Sales</a></li>
+                        <li><a href="fa_application.php" >Career</a></li>
                     </ul>
                 </li>
 
@@ -547,7 +553,7 @@ input{
     <input type="hidden" name="application_type" value="sales">
 
     <div class="actions">
-        <button type="button" class="btn btn-cancel">Cancel</button>
+       
         <button type="submit" class="btn btn-submit">Submit</button>
     </div>
 
