@@ -154,28 +154,57 @@ function supabaseInsertWithDateKeyFallback($table, $baseData, $availableDateId, 
     return supabaseInsert($table, $baseData, $SUPABASE_URL, $SUPABASE_KEY);
 }
 
-function sendEmailJsEmail($toEmail, $toName, $subject, $messageText, $meetingLink = null) {
+function sendEmailJsEmail($toEmail, $toName, $subject, $messageText, $meetingLink = null, $applicationType = 'applicant', $appointmentDateTime = null) {
     $serviceId = getenv('EMAILJS_SERVICE_ID') ?: 'service_si8ka4i';
-    $templateId = getenv('EMAILJS_TEMPLATE_ID') ?: 'template_jmz8msa';
+    $applicantTemplateId = getenv('EMAILJS_TEMPLATE_ID') ?: 'template_jmz8msa';
+    $salesTemplateId = getenv('EMAILJS_TEMPLATE_ID_SALES') ?: 'template_v6xid2o';
     $publicKey = getenv('EMAILJS_PUBLIC_KEY') ?: 'DahQPSXP7ROP8aCT3';
     $privateKey = getenv('EMAILJS_PRIVATE_KEY') ?: 'AZtuTthgSkYsQVH0tAVK5';
 
+    $templateId = $applicantTemplateId;
+    if ($applicationType === 'sales') {
+        if (!$salesTemplateId) {
+            throw new Exception("EMAILJS_TEMPLATE_ID_SALES is not configured.");
+        }
+        $templateId = $salesTemplateId;
+    }
+
     if (!$serviceId || !$templateId || !$publicKey) {
         throw new Exception("EmailJS configuration missing. Set EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, and EMAILJS_PUBLIC_KEY.");
+    }
+
+    $templateParams = [
+        "email" => $toEmail,
+        "name" => $toName,
+        "subject" => $subject,
+        "message" => $messageText,
+        "app_name" => "Alpha Aquila",
+        "meeting_link" => $meetingLink
+    ];
+
+    if ($applicationType === 'sales') {
+        // Sales template expects only daytime.
+        $formattedDateTime = null;
+        if ($appointmentDateTime) {
+            $dt = DateTime::createFromFormat('Y-m-d H:i:s', $appointmentDateTime) ?: new DateTime($appointmentDateTime);
+            if ($dt) {
+                $formattedDateTime = $dt->format('F d, Y h:i A');
+            }
+        }
+
+        $templateParams = [
+            "daytime" => $formattedDateTime ?: (string)$appointmentDateTime,
+            "email" => $toEmail,
+            "to_email" => $toEmail,
+            "meeting_link" => $meetingLink
+        ];
     }
 
     $payload = [
         "service_id" => $serviceId,
         "template_id" => $templateId,
         "user_id" => $publicKey,
-        "template_params" => [
-            "email" => $toEmail,
-            "name" => $toName,
-            "subject" => $subject,
-            "message" => $messageText,
-            "app_name" => "Alpha Aquila",
-            "meeting_link" => $meetingLink // You can customize this if your template uses a different variable for the meeting link
-        ]
+        "template_params" => $templateParams
     ];
 
     if ($privateKey) {
@@ -275,7 +304,9 @@ try {
             "$firstName $lastName",
             "Application Received - Alpha Aquila",
             "Dear $firstName,\n\nThank you for submitting your application to Alpha Aquila. We have received your information and will review it shortly. We will contact you via email with the next steps.\n\nBest regards,\nAlpha Aquila Team",
-            $meetingLink
+            $meetingLink,
+            $applicationType,
+            $appointmentDate
         );
         $responsePayload["email_status"] = "sent";
     } catch (Exception $mailEx) {
