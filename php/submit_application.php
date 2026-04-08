@@ -251,11 +251,9 @@ try {
             "siid" => $SIID
         ];
 
-        supabaseInsertWithDateKeyFallback(
+        supabaseInsert(
             "sales_appointment",
             $salesAppointmentData,
-            $availableDateId,
-            ["adid", "available_date_id", "SA_AvailableDateID"],
             $SUPABASE_URL,
             $SUPABASE_KEY
         );
