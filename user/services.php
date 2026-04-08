@@ -8,123 +8,151 @@
 <style>
 
 /* ================= GLOBAL ================= */
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Segoe UI',sans-serif;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
 }
 
-body{
-background:#f5f5f5;
-color:#333;
+body {
+    background-color: #f5f5f5;
+    color: #333;
 }
 
 /* ================= HEADER ================= */
-header{
-background:#ffffff;
-padding:15px 40px;
-border-bottom:1px solid #ddd;
-position:relative;
-z-index:1000;
+header {
+    background: #ffffff;
+    padding: 15px 40px;
+    border-bottom: 1px solid #ddd;
+    position: relative;
+    z-index: 1000;
 }
 
-.header-container{
-display:flex;
-align-items:center;
+.header-container {
+    display: flex;
+    align-items: center;
 }
 
-.logo{
-width:60px;
-height:60px;
-object-fit:cover;
-border-radius:50%;
-border:2px solid #8b0000;
+
+.logo {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 50%; /* makes logo circular */
+    border: 2px solid #8b0000; /* optional border color */
 }
 
-.logo-title{
-display:flex;
-align-items:center;
-gap:10px;
+
+/* ================= LOGO ================= */
+.logo-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.logo-title h1{
-font-size:14px;
-font-weight:700;
+.logo-title h1 {
+    font-size: 14px;
+    font-weight: 700;
 }
 
-/* ================= NAV ================= */
 
-.top-nav ul{
-display:flex;
-list-style:none;
-gap:50px;
+/* ================= TOP NAVIGATION ================= */
+.top-nav ul {
+    display: flex;
+    list-style: none;
+    gap: 50px;
+    ;
 }
 
-.top-nav ul li{
-position:relative;
+.top-nav ul li {
+    position: relative; 
 }
 
-.top-nav ul li a{
-text-decoration:none;
-color:#8b0000;
-font-weight:600;
-font-size:14px;
-padding:10px 0;
-display:block;
+.top-nav ul li a {
+    text-decoration: none;
+    color: #8b0000;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 10px 0;
+    display: block;
+    transition: 0.3s ease;
 }
 
-.top-nav ul li a:hover{
-opacity:.8;
+.top-nav ul li a:hover {
+    opacity: 0.8;
 }
 
-.top-nav{
-margin-left:500px;
+.top-nav {
+    margin-left: 500px;
 }
 
 /* ================= DROPDOWN ================= */
+.top-nav ul li .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 200px;
+    background: #ffffff;
+    padding: 0;
+    margin: 0;
+    border-radius: 6px;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.06);
 
-.top-nav ul li .dropdown-menu{
-position:absolute;
-top:100%;
-left:0;
-width:200px;
-background:#fff;
-border-radius:6px;
-box-shadow:0 8px 18px rgba(0,0,0,0.06);
-opacity:0;
-visibility:hidden;
-transform:translateY(5px);
-transition:.2s;
+    display: block; /* vertical layout */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(5px);
+    transition: all 0.2s ease;
+    z-index: 999;
 }
 
-.top-nav ul li:hover > .dropdown-menu{
-opacity:1;
-visibility:visible;
-transform:translateY(0);
+.top-nav ul li .dropdown-menu li a {
+    text-align: left;
+    padding: 10px 15px;
+    display: block;
 }
 
-.dropdown-menu li{
-list-style:none;
+/* Show dropdown on hover */
+.top-nav ul li:hover > .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
 }
 
-.dropdown-menu li a{
-padding:8px 20px;
-font-size:13px;
-color:#333;
-display:block;
+/* Dropdown items */
+.dropdown-menu li {
+    display: block;
+    margin: 0; /* remove spacing between items */
+    padding: 0;
+    list-style: none;
 }
 
-.dropdown-menu li a:hover{
-background:#f3f3f3;
-color:#8b0000;
+.dropdown-menu li a {
+    display: block;
+    width: 100%;
+    padding-left: 50px;
+    padding: 6px 20px; /* spacing controlled here */
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
 }
 
-.dropdown > a::after{
-content:" ▼";
-font-size:10px;
-margin-left:4px;
-color:#8b0000;
+.dropdown-menu li a:hover {
+    background: #f3f3f3;
+    color: #8b0000;
+}
+
+/* Dropdown arrow indicator */
+.dropdown > a::after {
+    content: " ▼";
+    font-size: 10px;
+    margin-left: 4px;
+    color: #8b0000;
 }
 
 /* ================= HEADER TITLE ================= */
@@ -471,37 +499,40 @@ to{transform:translateY(0) scale(1);opacity:1;}
 <body>
 
 <header>
+    <div class="header-container">
+        
+        <div class="logo-title">
+            <img src="../assets/logo.jpg" alt="Alpha Aquila Logo" class="logo">
+            <h1>ALPHA AQUILA</h1>
+        </div>
 
-<div class="header-container">
+        <nav class="top-nav">
+            <ul>
+                <li><a href="../index.php">Home</a></li>
 
-<div class="logo-title">
-<img src="../assets/logo.jpg" class="logo">
-<h1>ALPHA AQUILA</h1>
-</div>
+                <li class="dropdown">
+                    <a href="#">Work with Us</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#" id="salesLink">Sales</a></li>
+                        <li><a href="#" id="careerLink">Career</a></li>
+                    </ul>
+                </li>
 
-<nav class="top-nav">
+                <li ">
+                    <a href="../user/services.php">Claim and Services</a>
+                </li>
 
-<ul>
-<li><a href="../index.php">Home</a></li>
+                <li>
+                    <a href="../user/contactus.php">Contact Us</a>
+                    
+                </li>
 
-<li class="dropdown">
-<a href="#">Work with Us</a>
-<ul class="dropdown-menu">
-<li><a href="#">Sales</a></li>
-<li><a href="#">Career</a></li>
-</ul>
-</li>
+            </ul>
+        </nav>
 
-<li><a href="../user/services.php">Claim and Services</a></li>
-<li><a href="../user/contactus.php">Contact Us</a></li>
-
-</ul>
-
-</nav>
-
-</div>
-
+    </div>
 </header>
+
 
 <div class="header">Claim and Services</div>
 

@@ -251,8 +251,34 @@ function closeModal() {
 }
 
 function persistStatus(select) {
-    // API call to update status
-    console.log('Status updated to:', select.value);
+    const newStatus = select.value;
+
+    // Get the row
+    const row = select.closest('.table-row');
+
+    // 1. Update data-status (IMPORTANT for modal)
+    row.setAttribute('data-status', newStatus);
+
+    // 2. Remove old status classes
+    select.classList.remove('status-green', 'status-yellow', 'status-blue', 'status-red');
+
+    // 3. Add new class based on selected value
+    switch(newStatus) {
+        case 'Approved':
+            select.classList.add('status-green');
+            break;
+        case 'Pending':
+            select.classList.add('status-yellow');
+            break;
+        case 'Processing':
+            select.classList.add('status-blue');
+            break;
+        case 'Rejected':
+            select.classList.add('status-red');
+            break;
+    }
+
+    console.log('Status updated to:', newStatus);
 }
 
 function editInquiry(element) {

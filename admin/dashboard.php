@@ -13,7 +13,6 @@ if (!isset($_SESSION['user_id'])) {
 
 /* ==============================
    SAMPLE DASHBOARD DATA
-   (Replace later with DB queries)
 ================================*/
 
 
@@ -30,7 +29,6 @@ $stats = [
 $user_name = "Levi De Guzman";
 $user_role = "Junior Unit Manager";
 
-/* Avatar Initials */
 $initials = strtoupper(substr($user_name, 0, 1)) .
             strtoupper(substr(strrchr($user_name, " "), 1, 1));
 ?>
@@ -45,19 +43,103 @@ $initials = strtoupper(substr($user_name, 0, 1)) .
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<!-- ================= ANNOUNCEMENT STYLE ================= -->
+<style>
+.fab {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 65px;
+    height: 65px;
+    background: #800000;
+    color: #fff;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    cursor: pointer;
+    box-shadow: 0 5px 12px rgba(0,0,0,0.3);
+    z-index: 999;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background: #fff;
+    width: 420px;
+    margin: 80px auto;
+    padding: 20px;
+    border-radius: 12px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.close {
+    cursor: pointer;
+    font-size: 24px;
+}
+
+#announcementInput {
+    width: 100%;
+    height: 90px;
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.modal-actions {
+    margin-top: 10px;
+    text-align: right;
+}
+
+.modal-actions button {
+    background: #800000;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+}
+
+.announcement-item {
+    background: #f5f5f5;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 8px;
+    position: relative;
+}
+
+.edit-btn {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    cursor: pointer;
+    color: #800000;
+}
+</style>
+
 </head>
 
 <body>
 
-<!-- ==============================
-HEADER
-================================-->
 <?php include "../components/header.php"; ?>
 
-
-<!-- ==============================
-MAIN CONTENT
-================================-->
 <div class="container">
 
 <!-- LEFT SIDE -->
@@ -98,7 +180,6 @@ MAIN CONTENT
     </div>
 </div>
 
-
 <!-- PRIORITIES + PAST JOB -->
 <div class="chart-row">
 
@@ -122,7 +203,6 @@ MAIN CONTENT
 
 </div>
 
-
 <!-- LINE CHART -->
 <div class="card line-chart-card">
     <h3>Line</h3>
@@ -130,7 +210,6 @@ MAIN CONTENT
 </div>
 
 </div>
-
 
 <!-- RIGHT SIDE -->
 <div class="right">
@@ -149,7 +228,6 @@ MAIN CONTENT
         </div>
     </div>
 
-    <!-- Calendar -->
     <div class="calendar-card">
         <div class="calendar">
 
@@ -171,7 +249,6 @@ MAIN CONTENT
 
     <div class="schedule-divider"></div>
 
-    <!-- Appointments -->
     <div class="appointments">
 
         <h4 id="selectedDate">Select a date</h4>
@@ -188,35 +265,98 @@ MAIN CONTENT
 
 </div>
 
+<!-- ================= FLOATING BUTTON ================= -->
+<button id="announcementBtn" class="fab">
+    <span class="material-icons">article</span>
+</button>
 
-<!-- ==============================
-SCRIPTS
-================================-->
+<!-- ================= MODAL ================= -->
+<div id="announcementModal" class="modal">
+<div class="modal-content">
+
+    <div class="modal-header">
+        <h2>Announcements</h2>
+        <span id="closeModal" class="close">&times;</span>
+    </div>
+
+    <textarea id="announcementInput" placeholder="Write announcement..."></textarea>
+
+    <div class="modal-actions">
+        <button id="saveAnnouncement">Post</button>
+    </div>
+
+    <div id="announcementList"></div>
+
+</div>
+</div>
+
+<!-- ================= SCRIPTS ================= -->
 <script src="../js/dashboard.js"></script>
 
 <script>
+
+/* LOGOUT */
 document.getElementById("logout").addEventListener("click", function(e) {
-
     e.preventDefault();
-
-    fetch("../php/logout.php", {
-        method: "POST"
-    })
-    .then(response => response.json())
+    fetch("../php/logout.php", { method: "POST" })
+    .then(res => res.json())
     .then(data => {
-
-        if (data.success) {
-            window.location.href = "admin_login.php";
-        } else {
-            alert("Logout failed.");
-        }
-
-    })
-    .catch(() => {
-        alert("An error occurred during logout.");
+        if (data.success) window.location.href = "admin_login.php";
+        else alert("Logout failed.");
     });
-
 });
+
+/* ANNOUNCEMENTS */
+const fab = document.getElementById("announcementBtn");
+const modal = document.getElementById("announcementModal");
+const closeModal = document.getElementById("closeModal");
+const saveBtn = document.getElementById("saveAnnouncement");
+const input = document.getElementById("announcementInput");
+const list = document.getElementById("announcementList");
+
+let announcements = [];
+let editIndex = null;
+
+fab.onclick = () => modal.style.display = "block";
+closeModal.onclick = () => modal.style.display = "none";
+
+saveBtn.onclick = () => {
+    const text = input.value.trim();
+    if (!text) return;
+
+    if (editIndex !== null) {
+        announcements[editIndex] = text;
+        editIndex = null;
+    } else {
+        announcements.push(text);
+    }
+
+    input.value = "";
+    renderAnnouncements();
+};
+
+function renderAnnouncements() {
+    list.innerHTML = "";
+    announcements.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.className = "announcement-item";
+        div.innerHTML = `
+            ${item}
+            <span class="material-icons edit-btn" onclick="editAnnouncement(${index})">edit</span>
+        `;
+        list.appendChild(div);
+    });
+}
+
+function editAnnouncement(index) {
+    input.value = announcements[index];
+    editIndex = index;
+}
+
+window.onclick = (e) => {
+    if (e.target == modal) modal.style.display = "none";
+};
+
 </script>
 
 </body>
