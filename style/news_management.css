@@ -2,11 +2,12 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    transition: all 0.2s ease-in-out;
 }
 
 body {
     font-family: 'Poppins', sans-serif;
-    background-color: #f5f5f5;
+    background: #f1f5f9; /* softer than gray */
     min-height: 100vh;
 }
 
@@ -17,8 +18,8 @@ body {
 
 .card {
     background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.06);
     padding: 30px;
     position: relative;
     min-height: 500px;
@@ -51,26 +52,37 @@ body {
 }
 
 .news-container{
-    display:flex;
-    gap:40px;
-    flex-wrap:wrap;
-    justify-content:center;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 25px;
 }
 
 .news-card{
-    width:260px;
-    height:380px;
-    border:2px solid #dc3545;
-    border-radius:18px;
-    background:white;
-    position:relative;
-    overflow:hidden;
+    width: 100%;
+    height: 360px;
+    border: none;
+    border-radius: 18px;
+    background: #fff;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.news-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.15);
 }
 
 .news-card img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: 0.3s;
+}
+
+.news-card:hover img {
+    transform: scale(1.05);
 }
 
 /* enforce modal fixed width and stable text area */
@@ -84,8 +96,16 @@ body {
     transform: translate(0, 20px) !important;
 }
 .modal-content {
-    width: 100%;
-    min-width: 1200px !important;
+    border-radius: 18px;
+    border: none;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+}
+
+.modal-header h5 {
+    font-weight: 600;
+}
+.modal-footer {
+    border-top: none;
 }
 #locationCaption {
     display: block;
@@ -96,11 +116,15 @@ body {
     text-overflow: ellipsis;
 }
 
-.upload-poster-container img {
-    max-width: 120px;
-    max-height: 120px;
-    object-fit: cover;
-    border-radius: 8px;
+.upload-poster-container {
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    transition: 0.3s;
+}
+
+.upload-poster-container:hover {
+    background: #f9fafb;
+    border-color: #22c55e;
 }
 
 @media (max-width: 1280px) {
@@ -110,14 +134,54 @@ body {
     }
 }
 
-.card-actions{
-    position:absolute;
-    bottom:10px;
-    right:12px;
-    background:white;
-    padding:4px 10px;
-    border-radius:20px;
+.card-actions {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    gap: 8px;
 }
+
+/* ICON STYLE */
+.card-actions i {
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(6px);
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 14px;
+}
+
+/* HOVER EFFECT */
+.card-actions i:hover {
+    transform: scale(1.15);
+}
+
+/* COLOR HOVER */
+.card-actions .bi-pencil:hover {
+    color: #22c55e;
+}
+
+.card-actions .bi-trash:hover {
+    color: #ef4444;
+}
+
+#addNewsBtn {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    border: none;
+    border-radius: 25px;
+    padding: 10px 22px;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(34,197,94,0.3);
+    transition: 0.3s;
+}
+
+#addNewsBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(34,197,94,0.4);
+}
+
 /* ================= HEADER FIX FOR DROPDOWN ================= */
 
 /* Make sure header is always on top */
