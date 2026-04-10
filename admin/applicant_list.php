@@ -168,9 +168,11 @@ body::before {
 
 /* Header */
 .custom-header {
-    background: #880318;
-    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 15px 20px;
+    border-bottom: 1px solid #eee;
 }
 
 /* Body spacing */
@@ -205,6 +207,31 @@ body::before {
     padding-bottom: 20px;
 }
 
+.modal-footer {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    border-top: none;
+    background-color: #f9fafb;
+}
+
+.close-modal-btn {
+    background-color: #880318; /* green theme */
+    color: white;
+    border: none;
+    padding: 10px 28px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.close-modal-btn:hover {
+    opacity:0.85;
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
 
 </style>
 </head>

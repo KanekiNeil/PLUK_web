@@ -5,7 +5,7 @@
             <!-- HEADER -->
             <div class="custom-header d-flex justify-content-between align-items-center">
                 <h5 class="m-0">Applicant Details</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-gray" data-bs-dismiss="modal"></button>
             </div>
 
             <div class="modal-body">
@@ -20,7 +20,7 @@
                 <!-- BASIC INFO -->
                 <div style="margin-top:10px;">
                     <div style="font-weight:600; margin-bottom:8px; color:#555;">
-                        Applicant Information
+                        Notable Information
                     </div>
 
                     <div style="background:#f4b2b2; padding:12px; border-radius:10px;">
