@@ -239,7 +239,7 @@ body::before {
 <body>
 
 <!-- HEADER -->
-<?php include '../components/header.php'; ?>
+<?php include '../components/admin_header.php'; ?>
 
 <div class="container-al">
 <div class="card">

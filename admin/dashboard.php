@@ -138,7 +138,7 @@ $initials = strtoupper(substr($user_name, 0, 1)) .
 
 <body>
 
-<?php include "../components/header.php"; ?>
+<?php include "../components/admin_header.php"; ?>
 
 <div class="container">
 

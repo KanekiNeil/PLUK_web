@@ -344,7 +344,7 @@ body::before {
 <body>
 
 <!-- HEADER -->
-<?php include "../components/header.php"; ?>
+<?php include "../components/admin_header.php"; ?>
 
 
 <!-- CONTENT -->

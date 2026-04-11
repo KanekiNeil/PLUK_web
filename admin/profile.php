@@ -39,7 +39,7 @@ $initials = strtoupper(substr($user_name, 0, 1)) .
 <body>
 
 <!-- HEADER -->
-<?php include "../components/header.php"; ?>
+<?php include "../components/admin_header.php"; ?>
 
 <!-- PROFILE CONTENT -->
 <div class="profile-page-wrapper">
