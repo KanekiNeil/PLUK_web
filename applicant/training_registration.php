@@ -11,7 +11,7 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
     $training_type = $_POST['training_type'] ?? '';
     $date = $_POST['date'] ?? '';
     $time = $_POST['time'] ?? '';
-    $email = $_POST['email'] ?? '';
+    $email = $_SESSION['pending_email'] ?? '';
     
     // If whole day, set automatic time to 9 AM - 6 PM
     if (strpos($training_type, 'Whole Day') !== false) {
@@ -500,7 +500,7 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
 			const completed = getCompletedSteps();
 			// Can only navigate to completed steps or current step
 			if (completed.includes(targetStep) || targetStep <= Math.max(...completed, 0) + 1) {
-				window.location.href = pages[targetStep - 1];
+				window.location.href = pages[targetStep];
 			}
 		}
 		

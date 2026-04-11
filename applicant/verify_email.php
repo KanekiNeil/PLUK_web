@@ -287,6 +287,9 @@
 						   <div class="form-group">
 							   <input type="email" id="email" placeholder="Email" required>
 						   </div>
+						   <div class="form-group">
+							   <input type="text" id="applicantionId" name="app_id" placeholder="Applicant ID" required>
+						   </div>
 						   <div class="description" id="description">
 							   In order to start using your pluk account. You need to<br>
 							   confirm your pluk email address.
@@ -432,6 +435,7 @@
 			// Send verification email via API
 			const formData = new FormData();
 			formData.append('email', email);
+			formData.append('app_id', document.getElementById('applicantionId').value);
                           
 			fetch('../php/send_verification.php', {
 				method: 'POST',

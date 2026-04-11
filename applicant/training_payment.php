@@ -377,7 +377,7 @@
 			const completed = getCompletedSteps();
 			// Can only navigate to completed steps or current step
 			if (completed.includes(targetStep) || targetStep <= Math.max(...completed, 0) + 1) {
-				window.location.href = pages[targetStep - 1];
+				window.location.href = pages[targetStep];
 			}
 		}
 		

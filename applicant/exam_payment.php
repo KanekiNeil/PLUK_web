@@ -1,3 +1,45 @@
+<?php
+session_start();
+
+// Prefer token from URL (email link), fallback to session
+$token = $_GET['token'] ?? ($_SESSION['verification_token'] ?? '');
+
+if (empty($token)) {
+    header('Location: verify_email.php');
+    exit;
+}
+
+$supabaseUrl = "https://ncsobcjlvytbivoxezfd.supabase.co";
+$anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jc29iY2psdnl0Yml2b3hlemZkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTU2ODc3NiwiZXhwIjoyMDg3MTQ0Nzc2fQ.TLktUWOmr-iAZTy4Vm0F_ihUa2q_tQuP83RLTodPcEY";
+
+$ch = curl_init($supabaseUrl . "/rest/v1/email_verification?select=email,app_id&token=eq." . urlencode($token));
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    "apikey: $anonKey",
+    "Authorization: Bearer $anonKey",
+    "Content-Type: application/json"
+]);
+
+$response = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$curlErr = curl_error($ch);
+curl_close($ch);
+
+if ($response === false || !empty($curlErr)) {
+    $_SESSION['pending_email'] = "Error fetching email. Please verify your email again.";
+} elseif ($httpCode >= 200 && $httpCode < 300) {
+    $data = json_decode($response, true);
+    if (is_array($data) && isset($data[0]['email']) && !empty($data[0]['email'])) {
+        $_SESSION['pending_email'] = $data[0]['email'];
+        $_SESSION['verification_token'] = $token;
+    } else {
+        $_SESSION['pending_email'] = "Email not found. Please verify your email again.";
+    }
+} else {
+    $_SESSION['pending_email'] = "Error fetching email. Please verify your email again.";
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -278,6 +320,8 @@
 	
 	<!-- Main Container -->
 	<div class="container">
+
+	<?= $_SESSION['pending_email']; ?>
 		<!-- Progress Steps -->
 		<div class="steps-progress">
 			<div class="step active" data-step="1">
@@ -384,7 +428,7 @@
 			const completed = getCompletedSteps();
 			// Can only navigate to completed steps or current step
 			if (completed.includes(targetStep) || targetStep <= Math.max(...completed, 0) + 1) {
-				window.location.href = pages[targetStep - 1];
+				window.location.href = pages[targetStep];
 			}
 		}
 		
