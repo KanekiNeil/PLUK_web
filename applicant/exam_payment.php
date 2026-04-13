@@ -32,11 +32,42 @@ if ($response === false || !empty($curlErr)) {
     if (is_array($data) && isset($data[0]['email']) && !empty($data[0]['email'])) {
         $_SESSION['pending_email'] = $data[0]['email'];
         $_SESSION['verification_token'] = $token;
+		$_SESSION['app_id'] = $data[0]['app_id'];
     } else {
         $_SESSION['pending_email'] = "Email not found. Please verify your email again.";
     }
 } else {
     $_SESSION['pending_email'] = "Error fetching email. Please verify your email again.";
+}
+
+$isExamPaymentVerified = false;
+$sessionAppId = $_SESSION['app_id'] ?? null;
+
+if (!empty($sessionAppId)) {
+	$verifyPaymentUrl = $supabaseUrl . "/rest/v1/exam_payment?select=verified&applicant_id=eq." . urlencode($sessionAppId);
+	$verifyCh = curl_init($verifyPaymentUrl);
+	curl_setopt($verifyCh, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($verifyCh, CURLOPT_HTTPHEADER, [
+		"apikey: $anonKey",
+		"Authorization: Bearer $anonKey",
+		"Content-Type: application/json"
+	]);
+
+	$verifyResponse = curl_exec($verifyCh);
+	$verifyHttpCode = curl_getinfo($verifyCh, CURLINFO_HTTP_CODE);
+	curl_close($verifyCh);
+
+	if ($verifyResponse !== false && $verifyHttpCode >= 200 && $verifyHttpCode < 300) {
+		$verifyData = json_decode($verifyResponse, true);
+		if (is_array($verifyData)) {
+			foreach ($verifyData as $row) {
+				if (!empty($row['verified'])) {
+					$isExamPaymentVerified = true;
+					break;
+				}
+			}
+		}
+	}
 }
 ?>
 
@@ -286,6 +317,87 @@ if ($response === false || !empty($curlErr)) {
 		.submit-btn:active {
 			transform: scale(0.98);
 		}
+
+		.modal-overlay {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(0, 0, 0, 0.5);
+			display: none;
+			align-items: center;
+			justify-content: center;
+			z-index: 999;
+		}
+
+		.modal-overlay.show {
+			display: flex;
+		}
+
+		.upload-modal {
+			background: #fff;
+			width: 100%;
+			max-width: 520px;
+			border-radius: 8px;
+			padding: 20px;
+			box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+		}
+
+		.upload-modal h3 {
+			margin-bottom: 10px;
+			color: #8B3A3A;
+		}
+
+		.upload-modal p {
+			font-size: 13px;
+			color: #555;
+			margin-bottom: 15px;
+		}
+
+		.file-input {
+			width: 100%;
+			padding: 10px;
+			border: 1px solid #ddd;
+			border-radius: 6px;
+			background: #fafafa;
+		}
+
+		.preview-img {
+			display: none;
+			max-width: 100%;
+			max-height: 240px;
+			object-fit: contain;
+			margin-top: 12px;
+			border: 1px solid #eee;
+			border-radius: 6px;
+		}
+
+		.modal-actions {
+			display: flex;
+			justify-content: flex-end;
+			gap: 10px;
+			margin-top: 16px;
+		}
+
+		.btn-secondary,
+		.btn-primary {
+			padding: 10px 14px;
+			border: none;
+			border-radius: 6px;
+			font-weight: 600;
+			cursor: pointer;
+		}
+
+		.btn-secondary {
+			background: #e6e6e6;
+			color: #333;
+		}
+
+		.btn-primary {
+			background: #8B3A3A;
+			color: #fff;
+		}
 		
 		@media (max-width: 768px) {
 			.container {
@@ -383,10 +495,30 @@ if ($response === false || !empty($curlErr)) {
 			<button class="submit-btn" onclick="sendConfirmation()">Send Confirmation</button>
 		</div>
 	</div>
+
+	<div class="modal-overlay" id="receiptModal" role="dialog" aria-modal="true" aria-labelledby="receiptModalTitle">
+		<div class="upload-modal">
+			<h3 id="receiptModalTitle">Upload E-Receipt</h3>
+			<p>Please upload a clear image of your e-receipt. This will be sent for admin review.</p>
+			<input type="file" id="receiptFileInput" class="file-input" accept="image/*">
+			<img id="receiptPreview" class="preview-img" alt="E-receipt preview">
+			<div class="modal-actions">
+				<button type="button" class="btn-secondary" onclick="closeReceiptModal()">Cancel</button>
+				<button type="button" class="btn-primary" id="confirmUploadBtn" onclick="submitExamPayment()">Submit Receipt</button>
+			</div>
+		</div>
+	</div>
 	
 	<script>
 		const currentStep = 2;
+		const examPaymentVerified = <?php echo $isExamPaymentVerified ? 'true' : 'false'; ?>;
 		const pages = ['verify_email.php', 'exam_payment.php', 'training_registration.php', 'training_payment.php', 'review.php'];
+		const receiptModal = document.getElementById('receiptModal');
+		const receiptFileInput = document.getElementById('receiptFileInput');
+		const receiptPreview = document.getElementById('receiptPreview');
+		const confirmUploadBtn = document.getElementById('confirmUploadBtn');
+		const sendConfirmationBtn = document.querySelector('.submit-btn');
+		let receiptBase64 = '';
 		
 		// Get completed steps from localStorage
 		function getCompletedSteps() {
@@ -405,6 +537,13 @@ if ($response === false || !empty($curlErr)) {
 		
 		// Initialize step states based on completed steps
 		function initializeSteps() {
+			if (examPaymentVerified) {
+				completeStep(2);
+				if (sendConfirmationBtn) {
+					sendConfirmationBtn.textContent = 'Continue to Training Registration';
+				}
+			}
+
 			const completed = getCompletedSteps();
 			const steps = document.querySelectorAll('.step');
 			
@@ -433,13 +572,88 @@ if ($response === false || !empty($curlErr)) {
 		}
 		
 		function sendConfirmation() {
-			// Mark step 2 as completed
-			completeStep(2);
-			
-			alert('Confirmation sent to admin for review');
-			console.log('Payment confirmation sent');
-			window.location.href = 'training_registration.php';
+			if (examPaymentVerified) {
+				completeStep(2);
+				window.location.href = 'training_registration.php';
+				return;
+			}
+
+			receiptModal.classList.add('show');
 		}
+
+		function closeReceiptModal() {
+			receiptModal.classList.remove('show');
+			receiptFileInput.value = '';
+			receiptBase64 = '';
+			receiptPreview.src = '';
+			receiptPreview.style.display = 'none';
+		}
+
+		receiptFileInput.addEventListener('change', (event) => {
+			const file = event.target.files[0];
+
+			if (!file) {
+				receiptBase64 = '';
+				receiptPreview.src = '';
+				receiptPreview.style.display = 'none';
+				return;
+			}
+
+			if (!file.type.startsWith('image/')) {
+				alert('Please upload an image file only.');
+				receiptFileInput.value = '';
+				return;
+			}
+
+			const reader = new FileReader();
+			reader.onload = () => {
+				receiptBase64 = reader.result;
+				receiptPreview.src = reader.result;
+				receiptPreview.style.display = 'block';
+			};
+			reader.readAsDataURL(file);
+		});
+
+		async function submitExamPayment() {
+			if (!receiptBase64) {
+				alert('Please upload your e-receipt image before submitting.');
+				return;
+			}
+
+			confirmUploadBtn.disabled = true;
+			confirmUploadBtn.textContent = 'Submitting...';
+
+			try {
+				const response = await fetch('../php/submit_exam_payment.php', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({ payment_proof: receiptBase64 })
+				});
+
+				const data = await response.json();
+
+				if (!response.ok || !data.success) {
+					throw new Error(data.message || 'Failed to submit payment confirmation.');
+				}
+
+				completeStep(2);
+				alert('Confirmation sent to admin for review.');
+				window.location.href = 'training_registration.php';
+			} catch (error) {
+				alert(error.message || 'Something went wrong. Please try again.');
+			} finally {
+				confirmUploadBtn.disabled = false;
+				confirmUploadBtn.textContent = 'Submit Receipt';
+			}
+		}
+
+		receiptModal.addEventListener('click', (event) => {
+			if (event.target === receiptModal) {
+				closeReceiptModal();
+			}
+		});
 		
 		// Initialize on page load
 		initializeSteps();
