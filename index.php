@@ -197,7 +197,11 @@
 
     <div class="video-container">
         <iframe 
-            src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
+            width="100%" 
+            height="400"
+            src="https://www.youtube.com/embed/Eb6dL_XEwBU?autoplay=1&mute=1"
+            frameborder="0"
+            allow="autoplay; encrypted-media"
             allowfullscreen>
         </iframe>
     </div>
