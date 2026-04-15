@@ -51,10 +51,11 @@
 
 <!-- ================= PRIORITIES ================= -->
 <section class="priorities-container">
-    <h2>Priorities:</h2>
-
-    <div class="carousel-wrapper">
-        <button class="arrow left-arrow">&#10094;</button>
+   <div class="priorities-layout">
+        <h2 class="priorities-title">Priorities</h2>
+    
+        <div class="carousel-wrapper">
+        
 
         <div class="priorities-carousel">
             <?php
@@ -79,7 +80,7 @@
             ?>
         </div>
 
-        <button class="arrow right-arrow">&#10095;</button>
+     </div>   
     </div>
 </section>
 

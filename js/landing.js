@@ -2,45 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /* ================= PRIORITIES CAROUSEL ================= */
     const cards = document.querySelectorAll(".priority-card");
-    let index = 0;
-    let autoSlideInterval;
-
-    function updateCarousel() {
-        cards.forEach((card, i) => {
-            card.classList.remove("active", "side");
-
-            if (i === index) {
-                card.classList.add("active");
-            } else {
-                card.classList.add("side");
-            }
-        });
-    }
-
-    function autoSlide() {
-        index = (index + 1) % cards.length;
-        updateCarousel();
-    }
-
-    function startAutoSlide() {
-        autoSlideInterval = setInterval(autoSlide, 3000);
-    }
-
-    function stopAutoSlide() {
-        clearInterval(autoSlideInterval);
-    }
-
-    if (cards.length > 0) {
-        updateCarousel();
-        startAutoSlide();
-
-        cards.forEach(card => {
-            card.addEventListener("mouseenter", stopAutoSlide);
-            card.addEventListener("mouseleave", startAutoSlide);
-        });
-    }
-
-
+    
     /* ================= PRIORITY MODAL ================= */
     const priorityModal = document.getElementById("priorityModal");
     const modalTitle = document.getElementById("modalTitle");
@@ -69,10 +31,10 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         window.addEventListener("click", (e) => {
-            if (e.target === priorityModal) {
-                priorityModal.style.display = "none";
-            }
-        });
+    if (e.target === priorityModal) {
+        priorityModal.classList.remove("active");
+    }
+});
     }
 
 
