@@ -801,6 +801,9 @@ function persistStatus(select) {
 
     changeStatusColor(select);
 
+    // ✅ ADD THIS LINE (IMPORTANT)
+    row.dataset.status = newStatus;
+
     const payload = {
         status: newStatus,
         appointment_type: appointmentType
