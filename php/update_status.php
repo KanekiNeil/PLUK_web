@@ -20,6 +20,8 @@ $input = is_array($jsonInput) ? $jsonInput : $_POST;
 $status = trim($input['status'] ?? '');
 $aaid = trim((string)($input['aaid'] ?? ''));
 $aiid = trim((string)($input['aiid'] ?? ''));
+$said = trim((string)($input['said'] ?? ''));
+$appointmentType = trim($input['appointment_type'] ?? 'applicant');
 $appointmentDateTime = trim((string)($input['appointment_datetime'] ?? ''));
 
 if ($status === '') {
@@ -31,21 +33,37 @@ if ($status === '') {
     exit;
 }
 
-if ($aaid === '' && $aiid === '') {
-    http_response_code(400);
-    echo json_encode([
-        "status" => "error",
-        "message" => "Provide AAID, or AIID with appointment_datetime."
-    ]);
-    exit;
+if ($appointmentType === 'sales') {
+    // Sales appointment update
+    if ($said === '') {
+        http_response_code(400);
+        echo json_encode([
+            "status" => "error",
+            "message" => "SAID (Sales Appointment ID) is required for sales appointments."
+        ]);
+        exit;
+    }
+    $updateUrl = $supabaseUrl . "/rest/v1/sales_appointment?said=eq." . urlencode($said);
+} else {
+    // Applicant appointment update
+    if ($aaid === '' && $aiid === '') {
+        http_response_code(400);
+        echo json_encode([
+            "status" => "error",
+            "message" => "Provide AAID, or AIID with appointment_datetime."
+        ]);
+        exit;
+    }
+    if ($aaid !== '') {
+        $updateUrl = $supabaseUrl . "/rest/v1/application_appointment?AAID=eq." . urlencode($aaid);
+    } else {
+        $updateUrl = $supabaseUrl . "/rest/v1/application_appointment?aiid=eq." . urlencode($aiid);
+    }
 }
 
-if ($aaid !== '') {
-    $updateUrl = $supabaseUrl . "/rest/v1/application_appointment?AAID=eq." . urlencode($aaid);
-} else {
-    $updateUrl = $supabaseUrl . "/rest/v1/application_appointment?aiid=eq." . urlencode($aiid);
-}
-$payload = json_encode(["status" => $status]);
+// Use appropriate status column name
+$statusColumn = ($appointmentType === 'sales') ? 'SA_Status' : 'status';
+$payload = json_encode([$statusColumn => $status]);
 
 $ch = curl_init($updateUrl);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

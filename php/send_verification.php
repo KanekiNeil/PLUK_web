@@ -24,9 +24,36 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $email = $_POST['email'] ?? '';
+$app_id = $_POST['app_id'] ?? null;
 
 if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     echo json_encode(['success' => false, 'message' => 'Invalid email address']);
+    exit;
+}
+
+if (empty($app_id) || !preg_match('/^[0-9a-fA-F-]{36}$/', $app_id)) {
+    echo json_encode(['success' => false, 'message' => 'Invalid application ID']);
+    exit;
+}
+
+// Verify that the provided app_id exists in applicant_information
+$lookupUrl = $supabaseUrl . "/rest/v1/applicant_information?select=uuid&uuid=eq." . urlencode($app_id);
+$ch = curl_init($lookupUrl);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    "apikey: $supabaseKey",
+    "Authorization: Bearer $supabaseKey",
+    "Content-Type: application/json"
+]);
+
+$lookupResponse = curl_exec($ch);
+$lookupHttpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+$lookupData = json_decode($lookupResponse, true);
+
+if ($lookupHttpCode < 200 || $lookupHttpCode >= 300 || empty($lookupData)) {
+    echo json_encode(['success' => false, 'message' => 'Application ID not found']);
     exit;
 }
 
@@ -42,7 +69,8 @@ curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
     'email' => $email,
     'token' => $token,
     'expires_at' => $expires_at,
-    'verified' => false
+    'verified' => false,
+    'app_id' => $app_id
 ]));
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     "apikey: $supabaseKey",
@@ -65,7 +93,7 @@ if ($httpCode < 200 || $httpCode >= 300) {
 
 // Build verification URL
 $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . $_SERVER['HTTP_HOST'];
-$verifyUrl = $baseUrl . "/PLUK_web/applicant/exam_payment.php";
+$verifyUrl = $baseUrl . "/PLUK_web/applicant/exam_payment.php?token=" . $token;
 
 // Store email in session for later use
 $_SESSION['pending_email'] = $email;

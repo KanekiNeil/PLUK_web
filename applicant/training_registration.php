@@ -1,8 +1,39 @@
 <?php
 session_start();
 
+if (!isset($_SESSION['verification_token'])) {
+	header('Location: verify_email.php');
+	exit;
+}
+
 $supabaseUrl = "https://ncsobcjlvytbivoxezfd.supabase.co";
 $supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jc29iY2psdnl0Yml2b3hlemZkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTU2ODc3NiwiZXhwIjoyMDg3MTQ0Nzc2fQ.TLktUWOmr-iAZTy4Vm0F_ihUa2q_tQuP83RLTodPcEY";
+$applicant_id = $_SESSION['app_id'] ?? null;
+$hasTrainingSchedule = false;
+$existingTrainingSchedule = null;
+
+if (!empty($applicant_id)) {
+	$lookupUrl = $supabaseUrl . "/rest/v1/training_sched?select=id,training_type,date,start_time,end_time,applicant_id&applicant_id=eq." . urlencode($applicant_id) . "&limit=1";
+	$lookupCh = curl_init($lookupUrl);
+	curl_setopt($lookupCh, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($lookupCh, CURLOPT_HTTPHEADER, [
+		"apikey: $supabaseKey",
+		"Authorization: Bearer $supabaseKey",
+		"Content-Type: application/json"
+	]);
+
+	$lookupResponse = curl_exec($lookupCh);
+	$lookupHttpCode = curl_getinfo($lookupCh, CURLINFO_HTTP_CODE);
+	curl_close($lookupCh);
+
+	if ($lookupResponse !== false && $lookupHttpCode >= 200 && $lookupHttpCode < 300) {
+		$lookupData = json_decode($lookupResponse, true);
+		if (is_array($lookupData) && !empty($lookupData[0])) {
+			$hasTrainingSchedule = true;
+			$existingTrainingSchedule = $lookupData[0];
+		}
+	}
+}
 
 // Handle form submission
 if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'register_training') {
@@ -11,7 +42,7 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
     $training_type = $_POST['training_type'] ?? '';
     $date = $_POST['date'] ?? '';
     $time = $_POST['time'] ?? '';
-    $email = $_POST['email'] ?? '';
+	$email = $_SESSION['pending_email'] ?? '';
     
     // If whole day, set automatic time to 9 AM - 6 PM
     if (strpos($training_type, 'Whole Day') !== false) {
@@ -28,6 +59,16 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
         echo json_encode(['success' => false, 'message' => 'Required fields are missing']);
         exit;
     }
+
+	if ($hasTrainingSchedule) {
+		echo json_encode([
+			'success' => true,
+			'message' => 'Training is already registered.',
+			'already_registered' => true,
+			'next_url' => 'training_payment.php'
+		]);
+		exit;
+	}
     
     // Insert using Supabase REST API
     $postData = [
@@ -35,7 +76,8 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
         'training_type' => $training_type,
         'date' => $date,
         'start_time' => $start_time,
-        'end_time' => $end_time
+        'end_time' => $end_time,
+		'applicant_id' => $applicant_id
     ];
     
     $ch = curl_init($supabaseUrl . "/rest/v1/training_sched");
@@ -388,6 +430,11 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
 		<div class="content">
 			<!-- Heading -->
 			<h2>Register for Instruction-Led Training</h2>
+			<?php if ($hasTrainingSchedule): ?>
+				<div style="max-width: 500px; margin: 0 auto 20px; padding: 14px 16px; border-radius: 6px; background: #e8f5e9; color: #1b5e20; text-align: left; font-size: 14px; line-height: 1.5;">
+					Your training schedule is already recorded. You can proceed directly to training payment.
+				</div>
+			<?php endif; ?>
 			
 			<!-- Info Text -->
 			<div class="info-text">
@@ -452,12 +499,13 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
 			</div>
 			
 			<!-- Register Button -->
-			<button class="register-btn" onclick="registerTraining()">Register</button>
+			<button class="register-btn" id="registerBtn" onclick="registerTraining()">Register</button>
 		</div>
 	</div>
 	
 	<script>
 		const currentStep = 3;
+		const hasTrainingSchedule = <?= $hasTrainingSchedule ? 'true' : 'false' ?>;
 		const pages = ['verify_email.php', 'exam_payment.php', 'training_registration.php', 'training_payment.php', 'review.php'];
 		
 		// Get completed steps from localStorage
@@ -500,12 +548,19 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
 			const completed = getCompletedSteps();
 			// Can only navigate to completed steps or current step
 			if (completed.includes(targetStep) || targetStep <= Math.max(...completed, 0) + 1) {
-				window.location.href = pages[targetStep - 1];
+				window.location.href = pages[targetStep];
 			}
 		}
 		
 		// Initialize on page load
 		initializeSteps();
+
+		if (hasTrainingSchedule) {
+			const registerBtn = document.getElementById('registerBtn');
+			if (registerBtn) {
+				registerBtn.textContent = 'Continue to Training Payment';
+			}
+		}
 		
 		// Handle training type selection
 		document.getElementById('trainingType').addEventListener('change', function() {
@@ -562,6 +617,12 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
 		}
 		
 		function registerTraining() {
+			if (hasTrainingSchedule) {
+				completeStep(3);
+				window.location.href = 'training_payment.php';
+				return;
+			}
+
 			const trainingType = document.getElementById('trainingType').value;
 			const date = document.getElementById('trainingDate').value;
 			const time = document.getElementById('trainingTime').value;

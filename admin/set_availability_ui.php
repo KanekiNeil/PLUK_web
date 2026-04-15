@@ -23,7 +23,7 @@ $initials = strtoupper(substr($user_name, 0, 1)) .
 </head>
 <body>
 
-<?php include_once "../components/header.php"; ?>
+<?php include_once "../components/admin_header.php"; ?>
 
 <!-- Tabs -->
 <ul class="nav nav-tabs justify-content-center mb-4 availability-tabs" id="calendarTabs" role="tablist" aria-label="Availability type">

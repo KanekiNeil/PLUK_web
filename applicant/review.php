@@ -1,3 +1,13 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['verification_token'])) {
+	header('Location: verify_email.php');
+	exit;
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

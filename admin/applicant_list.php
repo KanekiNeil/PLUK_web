@@ -22,7 +22,7 @@ $initials = strtoupper(substr($user_name, 0, 1)) .
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
 
@@ -168,9 +168,11 @@ body::before {
 
 /* Header */
 .custom-header {
-    background: #880318;
-    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 15px 20px;
+    border-bottom: 1px solid #eee;
 }
 
 /* Body spacing */
@@ -205,6 +207,31 @@ body::before {
     padding-bottom: 20px;
 }
 
+.modal-footer {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    border-top: none;
+    background-color: #f9fafb;
+}
+
+.close-modal-btn {
+    background-color: #880318; /* green theme */
+    color: white;
+    border: none;
+    padding: 10px 28px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.close-modal-btn:hover {
+    opacity:0.85;
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
 
 </style>
 </head>
@@ -212,7 +239,7 @@ body::before {
 <body>
 
 <!-- HEADER -->
-<?php include '../components/header.php'; ?>
+<?php include '../components/admin_header.php'; ?>
 
 <div class="container-al">
 <div class="card">
@@ -267,24 +294,9 @@ body::before {
 
 <?php include 'applicant_detail_modal.php'; ?>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 
 <script>
-
-/* ===== ROW CLICK → MODAL ===== */
-document.querySelectorAll('.table-row').forEach(row => {
-    row.addEventListener('click', () => {
-
-        document.getElementById('modalName').textContent = row.dataset.name;
-        document.getElementById('modalContact').textContent = row.dataset.contact;
-        document.getElementById('modalSchool').textContent = row.dataset.school;
-        document.getElementById('modalJob').textContent = row.dataset.job;
-        document.getElementById('modalAddress').textContent = row.dataset.address;
-        // document.getElementById('modalStatus').textContent = row.dataset.status;
-
-        new bootstrap.Modal(document.getElementById('applicantModal')).show();
-    });
-});
 
 /* ===== SAFE PROFILE TOGGLE ===== */
 const profile = document.getElementById("profileToggle");
@@ -308,24 +320,35 @@ document.querySelectorAll('.table-row').forEach(row => {
 
     row.addEventListener('click', () => {
 
-        // Get data from clicked row
         const name = row.dataset.name;
         const contact = row.dataset.contact;
         const school = row.dataset.school;
         const job = row.dataset.job;
         const address = row.dataset.address;
+        const status = row.dataset.status;
 
-        // Insert into modal
+        // Fill modal
         document.getElementById('modalName').textContent = name;
         document.getElementById('modalContact').textContent = contact;
         document.getElementById('modalSchool').textContent = school;
         document.getElementById('modalJob').textContent = job;
         document.getElementById('modalAddress').textContent = address;
 
+        // STATUS BADGE (dynamic color)
+        const statusEl = document.getElementById('modalStatus');
+        statusEl.textContent = status;
+
+        statusEl.className = "status-badge"; // reset
+
+        if (status === "Pending") statusEl.classList.add("badge-pending");
+        if (status === "Approved") statusEl.classList.add("badge-approved");
+        if (status === "Completed") statusEl.classList.add("badge-completed");
+        if (status === "Cancelled") statusEl.classList.add("badge-cancelled");
+
+
         // Show modal
         const modal = new bootstrap.Modal(document.getElementById('applicantModal'));
         modal.show();
-
     });
 
 });

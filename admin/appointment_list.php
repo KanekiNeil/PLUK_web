@@ -344,7 +344,7 @@ body::before {
 <body>
 
 <!-- HEADER -->
-<?php include "../components/header.php"; ?>
+<?php include "../components/admin_header.php"; ?>
 
 
 <!-- CONTENT -->
@@ -396,7 +396,7 @@ body::before {
                 </div>
             </div>
             <div>
-                Face
+                See More
             </div>
         </div>
 
@@ -423,6 +423,7 @@ body::before {
             data-face="<?= htmlspecialchars($appt[7]) ?>"
             data-currentjob="<?= htmlspecialchars($appt[8]) ?>"
             data-contact="<?= htmlspecialchars($appt[9]) ?>"
+            data-appointment-type="<?= htmlspecialchars($appt[10] ?? 'applicant') ?>"
             onclick="openModal(this)">
 
             <div><?= date("m/d/y", strtotime($appt[2])) ?></div>
@@ -461,7 +462,7 @@ body::before {
                 </select>
             </div>
             <div>
-                <img src="data:image/png;base64,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" alt="stack-of-photos">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAADl0lEQVR4nO2aS2sUQRDHf2LMrkTUbBIVEsGAChJRv4Sa+EDjLT5uil6MIXr1cY6ehEC+goRcNEGiqAgqxkfUixqjJx8XH6jgJkFlpfA/0MSZye5mdmYi+UPD7lRNV3V3VXV19cA8/l/kgL3AeWAIeAl8AabU7PcL0YxnD1BLSpAFDgHXgN9AocT2CxgGDgKZJAawGDgJfHCUmgRuAqe1Mhs044vUavXMaGeAW3rHe/890K3JiQU7gTeOAg+Bw8CyMvpaDhwBHjn9vQbaqCBspvocgY+BbRH23wo8cfrvrcTqrJLiJuAHcBxYGLUQ/vZ5Asg7q70yqs6btdwFRZ2NVB6bgDHJHJcOs0KD0+EDoJ74UAvckew3soqykHXM6R5QQ/yoAe47ZlaWz/Q55mSbXVKoc6zCAkDJIdZz7Dh8ohifyUsni25Fb3bePmHRKS3ocpy/KBM75ewTlQix5aIKeCrdbFChyChVMOatpA87pNuHmVbloBMh0ogFTiTdH8Z4XUyWO6UVR6Xj1SCGnNLqyTITwDg3yingZ5Ce7RrpDdKP29J1tx/xgoh2nkg7zknXHj/ikIh2BPVDE9APfFcbANaFCKskf7t0veJHfCXihgAhn32OqvasMQH+FtGtLvAPPolouc109Dsz0Kg2qGeXEuCvF+2j30CmRKz2oX0XzZ2d1Xr2NQH+jFMnKGkg30RrKlJQpfkzYQMJM60B0QYlrMkJDv0J8NeHmVaYs693BjrdGdcmwN8S5uyDM4TfRjneN7X+ACFx8LdL18thG6IVz+b0hrhXRKsWzpUUZVdQMuYljVYBTCtyTtK4NIhpWCO1MmZacUw6WlQLxAExWS02rQerUenYEcZoG807MW4nfdgl3d4Wcw3RLebRFBYfnkm3zmJeyDq1XisopwXd0mmslEuhNr2UV3EsaWwBJqRTyVcZvc4M+OVfcaFBRTnT5WI5HWRVFiqokJxEEXsJMCIdRmZzz9igxMy7VrD/cW58d53ruFlf+DQ7S2tmtpl4fGJcMi0rXxNVxysdM8ur9mrhMGpUKTpNOOa0ImohWScAFFRQbotwx7arDG+f8By7onfvrc6ye1X7o2V+xZBT7uSlHQWZUpS3xTOuTpeTzhSUkVp6fVYHnxaF7Wq1Ol0a7RPPbadO4KUdnUl9AZFRVfyqjgCFEttPZbEdSQ3AD8tUi+1RfeqFzuHeRzX2+7mOpz3iDTxPzIM5jj8FnIGyOHe7IAAAAABJRU5ErkJggg==" alt="connection-status-off">
             </div>
         </div>
 
@@ -794,27 +795,36 @@ function persistStatus(select) {
     const row = select.closest(".table-row");
     const aaid = row?.dataset.aaid;
     const aiid = row?.dataset.aiid;
+    const appointmentType = row?.dataset.appointmentType || 'applicant';
     const newStatus = select.value;
     const previousStatus = select.dataset.previousStatus || newStatus;
 
     changeStatusColor(select);
 
-    if (!aaid && (!aiid)) {
-        console.error("Missing IDs for status update", row?.dataset);
-        alert("Unable to update status: missing appointment identifiers.");
-        select.value = previousStatus;
-        changeStatusColor(select);
-        return;
-    }
+    // ✅ ADD THIS LINE (IMPORTANT)
+    row.dataset.status = newStatus;
 
     const payload = {
-        status: newStatus
+        status: newStatus,
+        appointment_type: appointmentType
     };
 
-    if (aaid) {
-        payload.aaid = aaid;
+    if (appointmentType === 'sales') {
+        payload.said = aaid; // For sales, aaid holds the said
     } else {
-        payload.aiid = aiid;
+        if (!aaid && (!aiid)) {
+            console.error("Missing IDs for status update", row?.dataset);
+            alert("Unable to update status: missing appointment identifiers.");
+            select.value = previousStatus;
+            changeStatusColor(select);
+            return;
+        }
+
+        if (aaid) {
+            payload.aaid = aaid;
+        } else {
+            payload.aiid = aiid;
+        }
     }
 
     fetch("../php/update_status.php", {

@@ -9,12 +9,14 @@ document.querySelectorAll(".nav-link").forEach(link => {
 // dropdown profile
 const profile = document.getElementById("profileToggle");
 
-profile.addEventListener("click", function () {
-    this.classList.toggle("active");
-});
+if (profile) {
+    profile.addEventListener("click", function () {
+        this.classList.toggle("active");
+    });
+}
 
 document.addEventListener("click", function (e) {
-    if (!profile.contains(e.target)) {
+    if (profile && !profile.contains(e.target)) {
         profile.classList.remove("active");
     }
 });
@@ -26,15 +28,16 @@ const dateInput = document.getElementById("overviewDate");
 const applicantCount = document.getElementById("applicantCount");
 const clientCount = document.getElementById("clientCount");
 const eventCount = document.getElementById("eventCount");
-const selectedDateLabel = document.getElementById("selectedDate");
 
-filterBtn.addEventListener("click", () => {
-    if (typeof dateInput.showPicker === 'function') {
-        dateInput.showPicker();
-    } else {
-        dateInput.click();
-    }
-});
+if (filterBtn && dateInput) {
+    filterBtn.addEventListener("click", () => {
+        if (typeof dateInput.showPicker === "function") {
+            dateInput.showPicker();
+        } else {
+            dateInput.click();
+        }
+    });
+}
 
 function updateStatsForDate(dateStr) {
     if (!dateStr) return;
@@ -49,10 +52,6 @@ function updateStatsForDate(dateStr) {
             if (applicantCount) applicantCount.textContent = json.applicants;
             if (clientCount) clientCount.textContent = json.clients;
             if (eventCount) eventCount.textContent = json.events;
-            if (selectedDateLabel) {
-                const formatted = new Date(dateStr).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
-                selectedDateLabel.textContent = formatted;
-            }
         })
         .catch(err => {
             console.error('Failed to fetch dashboard stats:', err);
@@ -61,6 +60,7 @@ function updateStatsForDate(dateStr) {
 
 // initialize with current selection (if any)
 function initDashboardStats() {
+    if (!dateInput) return;
     const initialDate = dateInput.value || new Date().toISOString().slice(0, 10);
     dateInput.value = initialDate;
     updateStatsForDate(initialDate);
@@ -68,21 +68,113 @@ function initDashboardStats() {
 
 initDashboardStats();
 
-dateInput.addEventListener("change", () => {
-    const selected = dateInput.value;
-    console.log("Filter dashboard data for: " + selected);
-    updateStatsForDate(selected);
-    // Later you can fetch from database here using AJAX
-});
+if (dateInput) {
+    dateInput.addEventListener("change", () => {
+        const selected = dateInput.value;
+        console.log("Filter dashboard data for: " + selected);
+        updateStatsForDate(selected);
+    });
+}
 
 // CALENDAR
 const monthYear = document.getElementById("monthYear");
 const datesContainer = document.getElementById("dates");
 const selectedDateHeading = document.getElementById("selectedDate");
+const appointmentsList = document.getElementById("appointmentsList");
+const appointmentTypeFilter = document.getElementById("appointmentTypeFilter");
 
 let date = new Date();
+let appointmentDates = new Set();
+let selectedCalendarDate = null;
+
+function pad(value) {
+    return String(value).padStart(2, "0");
+}
+
+function formatDateLong(dateStr) {
+    const [year, month, day] = dateStr.split("-").map(Number);
+    const localDate = new Date(year, month - 1, day);
+    return localDate.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+}
+
+function renderAppointments(items) {
+    if (!appointmentsList) return;
+
+    appointmentsList.innerHTML = "";
+
+    if (!items.length) {
+        const empty = document.createElement("div");
+        empty.className = "meeting";
+        empty.textContent = "No appointments for this date.";
+        appointmentsList.appendChild(empty);
+        return;
+    }
+
+    items.forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "meeting";
+
+        const status = item.status ? ` | ${item.status}` : "";
+        const type = item.type ? ` | ${item.type}` : "";
+        row.textContent = `${item.time_range} | ${item.full_name}${type}${status}`;
+
+        appointmentsList.appendChild(row);
+    });
+}
+
+async function loadAppointmentsForDate(dateStr) {
+    if (!dateStr) return;
+
+    if (selectedDateHeading) {
+        selectedDateHeading.textContent = formatDateLong(dateStr);
+    }
+
+    if (appointmentsList) {
+        appointmentsList.innerHTML = '<div class="meeting">Loading appointments...</div>';
+    }
+
+    try {
+        const selectedType = appointmentTypeFilter ? appointmentTypeFilter.value : "all";
+        const res = await fetch(`../php/get_dashboard_appointments_by_date.php?date=${encodeURIComponent(dateStr)}&type=${encodeURIComponent(selectedType)}`);
+        const data = await res.json();
+
+        if (!res.ok || data.error) {
+            throw new Error(data.error || "Failed to fetch appointments.");
+        }
+
+        renderAppointments(Array.isArray(data.appointments) ? data.appointments : []);
+    } catch (err) {
+        console.error("Failed to load appointments:", err);
+        if (appointmentsList) {
+            appointmentsList.innerHTML = '<div class="meeting">Unable to load appointments.</div>';
+        }
+    }
+}
+
+async function refreshCalendarAppointments() {
+    const monthParam = `${date.getFullYear()}-${pad(date.getMonth() + 1)}`;
+
+    try {
+        const selectedType = appointmentTypeFilter ? appointmentTypeFilter.value : "all";
+        const res = await fetch(`../php/get_dashboard_appointment_dates.php?month=${encodeURIComponent(monthParam)}&type=${encodeURIComponent(selectedType)}`);
+        const data = await res.json();
+
+        if (!res.ok || data.error) {
+            throw new Error(data.error || "Failed to fetch appointment dates.");
+        }
+
+        appointmentDates = new Set(Array.isArray(data.dates) ? data.dates : []);
+    } catch (err) {
+        console.error("Failed to load appointment dates:", err);
+        appointmentDates = new Set();
+    }
+
+    renderCalendar();
+}
 
 function renderCalendar() {
+    if (!datesContainer || !monthYear) return;
+
     datesContainer.innerHTML = "";
 
     const year = date.getFullYear();
@@ -100,30 +192,76 @@ function renderCalendar() {
     for (let i = 1; i <= lastDate; i++) {
         let span = document.createElement("span");
         span.innerText = i;
+        const dateKey = `${year}-${pad(month + 1)}-${pad(i)}`;
+
+        if (appointmentDates.has(dateKey)) {
+            span.classList.add("has-appointment");
+            span.title = "Has appointments";
+        }
 
         span.addEventListener("click", () => {
             document.querySelectorAll(".dates span").forEach(s => s.classList.remove("active-date"));
             span.classList.add("active-date");
-            if (selectedDateHeading) {
-                selectedDateHeading.innerText = `${i} ${monthYear.innerText}`;
-            }
+            selectedCalendarDate = dateKey;
+            loadAppointmentsForDate(dateKey);
         });
 
         datesContainer.appendChild(span);
     }
 }
 
-document.getElementById("prev").onclick = () => {
-    date.setMonth(date.getMonth() - 1);
-    renderCalendar();
-};
+const prevButton = document.getElementById("prev");
+const nextButton = document.getElementById("next");
 
-document.getElementById("next").onclick = () => {
-    date.setMonth(date.getMonth() + 1);
-    renderCalendar();
-};
+if (prevButton) {
+    prevButton.onclick = () => {
+        date.setMonth(date.getMonth() - 1);
+        refreshCalendarAppointments();
+    };
+}
 
-renderCalendar();
+if (nextButton) {
+    nextButton.onclick = () => {
+        date.setMonth(date.getMonth() + 1);
+        refreshCalendarAppointments();
+    };
+}
+
+if (appointmentTypeFilter) {
+    appointmentTypeFilter.addEventListener("change", async () => {
+        await refreshCalendarAppointments();
+
+        if (selectedCalendarDate) {
+            loadAppointmentsForDate(selectedCalendarDate);
+        } else if (appointmentsList) {
+            appointmentsList.innerHTML = '<div class="meeting">Select a date to view appointments.</div>';
+        }
+    });
+}
+
+refreshCalendarAppointments().then(() => {
+    const today = new Date();
+    if (today.getFullYear() === date.getFullYear() && today.getMonth() === date.getMonth()) {
+        const todayKey = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+        const todayCell = Array.from(document.querySelectorAll(".dates span")).find(
+            (cell) => Number(cell.textContent) === today.getDate()
+        );
+
+        if (todayCell) {
+            todayCell.classList.add("active-date");
+            selectedCalendarDate = todayKey;
+            loadAppointmentsForDate(todayKey);
+            return;
+        }
+    }
+
+    if (selectedDateHeading) {
+        selectedDateHeading.textContent = "Select a date";
+    }
+    if (appointmentsList) {
+        appointmentsList.innerHTML = '<div class="meeting">Select a date to view appointments.</div>';
+    }
+});
 
 
 // LINE CHART (empty dataset)
