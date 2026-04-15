@@ -302,9 +302,9 @@
 
                 <div class="profile-dropdown">
                     <a href="profile.php">Profile</a>
-                    <a href="#">Settings</a>
+                    <a href="settings.php">Settings</a>
                     <a href="news_management.php">Announcement</a>
-                    <a href="#" id="logout">Logout</a>
+                    <a href="admin_login.php" id="logout">Logout</a>
                 </div>
 
             </div>
