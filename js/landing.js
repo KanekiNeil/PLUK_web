@@ -1,109 +1,136 @@
-const leftArrow = document.querySelector('.left-arrow');
-const rightArrow = document.querySelector('.right-arrow');
-const carousel = document.querySelector('.priorities-carousel');
-
-let scrollAmount = 0;
-const scrollPerClick = 220; // Width of one card + gap
-
-rightArrow.addEventListener('click', () => {
-    scrollAmount += scrollPerClick;
-    if(scrollAmount > carousel.scrollWidth - carousel.clientWidth) {
-        scrollAmount = carousel.scrollWidth - carousel.clientWidth;
-    }
-    carousel.style.transform = `translateX(-${scrollAmount}px)`;
-});
-
-leftArrow.addEventListener('click', () => {
-    scrollAmount -= scrollPerClick;
-    if(scrollAmount < 0) scrollAmount = 0;
-    carousel.style.transform = `translateX(-${scrollAmount}px)`;
-});
-
-
-// Top Modal Script
-window.addEventListener('load', () => {
-    const modal = document.getElementById('topModal');
-    const closeBtn = document.querySelector('.top-modal .close-btn');
-
-    // Show popup
-    setTimeout(() => {
-        modal.classList.add('active');
-    }, 300);
-
-    // Close modal on X click
-    closeBtn.addEventListener('click', () => {
-        modal.classList.remove('active');
-    });
-
-    // Optional: auto-close after 5 seconds
-    setTimeout(() => {
-        modal.classList.remove('active');
-    }, 5000);
-});
-
-// sales_app and fa_app navigation js
 document.addEventListener("DOMContentLoaded", function () {
 
-    // Sales click
-    document.getElementById("salesLink").addEventListener("click", function (e) {
-        e.preventDefault(); // stop #
-        window.location.href = "user/sales_application.php";
-    });
+    /* ================= PRIORITIES CAROUSEL ================= */
+    const cards = document.querySelectorAll(".priority-card");
+    let index = 0;
+    let autoSlideInterval;
 
-    // Career click
-    document.getElementById("careerLink").addEventListener("click", function (e) {
-        e.preventDefault();
-        window.location.href = "user/fa_application.php";
-    });
+    function updateCarousel() {
+        cards.forEach((card, i) => {
+            card.classList.remove("active", "side");
 
-});
-
-
-//!Modal Script for Priority Images
-const images = document.querySelectorAll(".priority-image");
-const modal = document.getElementById("priorityModal");
-const modalTitle = document.getElementById("modalTitle");
-const closeModal = document.querySelector(".close-modal");
-
-images.forEach(img => {
-    img.addEventListener("click", () => {
-
-        const title = img.getAttribute("data-title");
-
-        modalTitle.innerText = title;
-        modal.style.display = "flex";
-
-    });
-});
-
-closeModal.onclick = function(){
-    modal.style.display = "none";
-}
-
-window.onclick = function(e){
-    if(e.target == modal){
-        modal.style.display = "none"; 
+            if (i === index) {
+                card.classList.add("active");
+            } else {
+                card.classList.add("side");
+            }
+        });
     }
-}
+
+    function autoSlide() {
+        index = (index + 1) % cards.length;
+        updateCarousel();
+    }
+
+    function startAutoSlide() {
+        autoSlideInterval = setInterval(autoSlide, 3000);
+    }
+
+    function stopAutoSlide() {
+        clearInterval(autoSlideInterval);
+    }
+
+    if (cards.length > 0) {
+        updateCarousel();
+        startAutoSlide();
+
+        cards.forEach(card => {
+            card.addEventListener("mouseenter", stopAutoSlide);
+            card.addEventListener("mouseleave", startAutoSlide);
+        });
+    }
 
 
-const accordionItems = document.querySelectorAll(".accordion-item");
+    /* ================= PRIORITY MODAL ================= */
+    const priorityModal = document.getElementById("priorityModal");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalImage = document.getElementById("modalImage");
+    const closePriorityModal = document.querySelector(".close-modal");
 
-accordionItems.forEach(item => {
+    if (priorityModal && modalTitle && modalImage) {
 
-    const header = item.querySelector(".accordion-header");
-    const icon = item.querySelector(".toggle-icon");
+        cards.forEach(card => {
+            card.addEventListener("click", () => {
 
-    header.addEventListener("click", () => {
+                const title = card.querySelector("p")?.innerText || "";
+                const img = card.querySelector("img")?.src || "";
 
-        item.classList.toggle("active");
+                modalTitle.innerText = title;
+                modalImage.src = img;
 
-        if(item.classList.contains("active")){
-            icon.textContent = "−";
-        }else{
-            icon.textContent = "+";
+                priorityModal.classList.add("active");
+            });
+        });
+
+        if (closePriorityModal) {
+            closePriorityModal.addEventListener("click", () => {
+               priorityModal.classList.remove("active");
+            });
         }
 
-    });
+        window.addEventListener("click", (e) => {
+            if (e.target === priorityModal) {
+                priorityModal.style.display = "none";
+            }
+        });
+    }
 
+
+    /* ================= ACCORDION (SMOOTH + CLEAN) ================= */
+document.querySelectorAll(".accordion-header").forEach(header => {
+    header.addEventListener("click", () => {
+        const item = header.parentElement;
+
+        // close other items (premium feel)
+        document.querySelectorAll(".accordion-item").forEach(i => {
+            if (i !== item) i.classList.remove("active");
+        });
+
+        // toggle current
+        item.classList.toggle("active");
+    });
+});
+
+
+    /* ================= NAVIGATION ================= */
+    const salesLink = document.getElementById("salesLink");
+    const careerLink = document.getElementById("careerLink");
+
+    if (salesLink) {
+        salesLink.addEventListener("click", function (e) {
+            e.preventDefault();
+            window.location.href = "user/sales_application.php";
+        });
+    }
+
+    if (careerLink) {
+        careerLink.addEventListener("click", function (e) {
+            e.preventDefault();
+            window.location.href = "user/fa_application.php";
+        });
+    }
+
+});
+
+
+/* ================= TOP MODAL ================= */
+window.addEventListener('load', () => {
+    const topModal = document.getElementById('topModal');
+    const closeBtn = document.querySelector('.top-modal .close-btn');
+
+    if (topModal) {
+        setTimeout(() => {
+            topModal.classList.add('active');
+        }, 300);
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                topModal.classList.remove('active');
+            });
+        }
+
+        setTimeout(() => {
+            topModal.classList.remove('active');
+        }, 5000);
+    }
 });
