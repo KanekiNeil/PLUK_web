@@ -223,6 +223,7 @@ $fullDates = [
             width: 100%;
             border-radius: 12px;
             border: 2px solid #e5e5e5;
+            transform: scaleX(-1);
         }
 
         /* FACE GUIDE */
@@ -473,8 +474,10 @@ $fullDates = [
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.34.0/dist/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
 
     /* =========================
        📅 CALENDAR
@@ -636,12 +639,17 @@ document.addEventListener("DOMContentLoaded", () => {
     /* =========================
        📷 CAMERA
     ========================== */
+    let faceDetected = false;
 
     const video = document.getElementById("video");
     const canvas = document.getElementById("canvas");
     const captureBtn = document.getElementById("captureBtn");
     const preview = document.getElementById("preview");
     const faceImage = document.getElementById("faceImage");
+    const detectorOptions = new faceapi.TinyFaceDetectorOptions({
+        inputSize: 128,
+        scoreThreshold: 0.5
+    });
 
     async function startCamera() {
         if (!video) return;
@@ -665,12 +673,63 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
     }
+        async function loadFaceModel() {
+            if (faceapi.tf && faceapi.tf.setBackend) {
+                await faceapi.tf.setBackend("cpu");
+                await faceapi.tf.ready();
+            }
 
-    startCamera();
+            await faceapi.nets.tinyFaceDetector.loadFromUri('../models/tiny_face_detector');
+        }
+
+    async function detectFace() {
+        if (!video || video.readyState !== 4) return;
+
+        const detection = await faceapi.detectSingleFace(
+            video,
+            detectorOptions
+        );
+
+        faceDetected = !!detection;
+
+        // Optional UI feedback
+        const circle = document.querySelector(".face-circle");
+        if (circle) {
+            circle.style.borderColor = faceDetected ? "lime" : "red";
+        }
+    }
+
+    if (typeof faceapi === "undefined") {
+        Swal.fire({
+            icon: "error",
+            title: "Face Library Missing",
+            text: "face-api.js failed to load. Refresh the page or check the CDN connection."
+        });
+        return;
+    }
+
+
+    await Promise.all([
+        startCamera(),
+        loadFaceModel()
+    ]);
+
+    await detectFace();
+
+    setInterval(detectFace, 300); // every 300ms
 
     if (captureBtn) {
 
         captureBtn.addEventListener("click", () => {
+
+            if (!faceDetected) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "No Face Detected",
+                    text: "Please position your face inside the circle."
+                });
+                return;
+            }
 
             if (!video.videoWidth) {
                 Swal.fire({
@@ -709,6 +768,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (form) {
 
         form.addEventListener("submit", async (e) => {
+
+            if (!faceImage.value) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Face Required",
+                    text: "Please capture your face before submitting."
+                });
+                return;
+            }
 
             e.preventDefault();
 
