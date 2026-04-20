@@ -10,8 +10,31 @@ $supabaseUrl = "https://ncsobcjlvytbivoxezfd.supabase.co";
 $supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jc29iY2psdnl0Yml2b3hlemZkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTU2ODc3NiwiZXhwIjoyMDg3MTQ0Nzc2fQ.TLktUWOmr-iAZTy4Vm0F_ihUa2q_tQuP83RLTodPcEY";
 $applicant_id = $_SESSION['app_id'] ?? null;
 $isTrainingPaymentVerified = false;
+$hasTrainingPaymentRequest = false;
+$isPaymentRejected = false;
 
 if (!empty($applicant_id)) {
+	$statusUrl = $supabaseUrl . "/rest/v1/applicant_information?select=status&uuid=eq." . urlencode($applicant_id) . "&limit=1";
+	$statusCh = curl_init($statusUrl);
+	curl_setopt($statusCh, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($statusCh, CURLOPT_HTTPHEADER, [
+		"apikey: $supabaseKey",
+		"Authorization: Bearer $supabaseKey",
+		"Content-Type: application/json"
+	]);
+
+	$statusResponse = curl_exec($statusCh);
+	$statusHttpCode = curl_getinfo($statusCh, CURLINFO_HTTP_CODE);
+	curl_close($statusCh);
+
+	if ($statusResponse !== false && $statusHttpCode >= 200 && $statusHttpCode < 300) {
+		$statusData = json_decode($statusResponse, true);
+		if (is_array($statusData) && !empty($statusData[0])) {
+			$currentStatus = strtolower(trim((string)($statusData[0]['status'] ?? '')));
+			$isPaymentRejected = ($currentStatus === 'payment rejected');
+		}
+	}
+
 	$verifyPaymentUrl = $supabaseUrl . "/rest/v1/training_payment?select=verified&applicant_id=eq." . urlencode($applicant_id);
 	$verifyCh = curl_init($verifyPaymentUrl);
 	curl_setopt($verifyCh, CURLOPT_RETURNTRANSFER, true);
@@ -28,6 +51,7 @@ if (!empty($applicant_id)) {
 	if ($verifyResponse !== false && $verifyHttpCode >= 200 && $verifyHttpCode < 300) {
 		$verifyData = json_decode($verifyResponse, true);
 		if (is_array($verifyData)) {
+			$hasTrainingPaymentRequest = !empty($verifyData);
 			foreach ($verifyData as $row) {
 				if (!empty($row['verified'])) {
 					$isTrainingPaymentVerified = true;
@@ -420,6 +444,11 @@ if (!empty($applicant_id)) {
 		<div class="content">
 			<!-- Heading -->
 			<h2>Confirm your training payment</h2>
+			<?php if ($isPaymentRejected): ?>
+				<div style="max-width: 500px; margin: 0 auto 16px; padding: 12px 14px; border-radius: 8px; background: #fff4e5; color: #9a3412; font-size: 13px; line-height: 1.4; text-align: left; border: 1px solid #fdba74;">
+					Your last payment was rejected. Please upload a new payment proof and submit again.
+				</div>
+			<?php endif; ?>
 			<?php if ($isTrainingPaymentVerified): ?>
 				<div style="max-width: 500px; margin: 0 auto 20px; padding: 14px 16px; border-radius: 6px; background: #e8f5e9; color: #1b5e20; text-align: left; font-size: 14px; line-height: 1.5;">
 					Your training payment is already verified. You can proceed directly to review.
@@ -474,8 +503,9 @@ if (!empty($applicant_id)) {
 	</div>
 	
 	<script>
-		const currentStep = 4;
+		const currentStep = 3;
 		const trainingPaymentVerified = <?= $isTrainingPaymentVerified ? 'true' : 'false' ?>;
+		let trainingPaymentSubmitted = <?= $hasTrainingPaymentRequest ? 'true' : 'false' ?>;
 		const receiptModal = document.getElementById('receiptModal');
 		const receiptFileInput = document.getElementById('receiptFileInput');
 		const receiptPreview = document.getElementById('receiptPreview');
@@ -498,6 +528,19 @@ if (!empty($applicant_id)) {
 				localStorage.setItem('completedSteps', JSON.stringify(completed));
 			}
 		}
+
+		function uncompleteStep(step) {
+			const completed = getCompletedSteps().filter(item => item !== step);
+			localStorage.setItem('completedSteps', JSON.stringify(completed));
+		}
+
+		function canAccessStep(stepNum) {
+			if (stepNum === 1) return true;
+			if (stepNum === 2) return true;
+			if (stepNum === 3) return true;
+			if (stepNum === 4) return trainingPaymentVerified;
+			return false;
+		}
 		
 		// Initialize step states based on completed steps
 		function initializeSteps() {
@@ -506,31 +549,41 @@ if (!empty($applicant_id)) {
 				if (sendConfirmationBtn) {
 					sendConfirmationBtn.textContent = 'Continue to Review';
 				}
+			} else if (trainingPaymentSubmitted) {
+				uncompleteStep(4);
+				if (sendConfirmationBtn) {
+					sendConfirmationBtn.textContent = 'Payment Confirmation Sent (Pending Verification)';
+					sendConfirmationBtn.disabled = true;
+					sendConfirmationBtn.style.cursor = 'not-allowed';
+					sendConfirmationBtn.style.opacity = '0.7';
+				}
+			} else {
+				uncompleteStep(4);
 			}
 
-			const completed = getCompletedSteps();
 			const steps = document.querySelectorAll('.step');
 			
 			steps.forEach(step => {
 				const stepNum = parseInt(step.dataset.step);
-				
-				// Unlock if step is completed or is the next available step
-				if (completed.includes(stepNum) || stepNum <= Math.max(...completed, 0) + 1) {
+
+				if (canAccessStep(stepNum)) {
 					step.classList.remove('locked');
 					step.onclick = () => navigateToStep(stepNum);
-					
-					if (completed.includes(stepNum) && stepNum < currentStep) {
+
+					if (stepNum < currentStep) {
 						step.classList.add('completed');
 					}
+				} else {
+					step.classList.add('locked');
+					step.classList.remove('completed');
+					step.onclick = null;
 				}
 			});
 		}
 		
 		function navigateToStep(targetStep) {
 			if (targetStep === currentStep) return;
-			const completed = getCompletedSteps();
-			// Can only navigate to completed steps or current step
-			if (completed.includes(targetStep) || targetStep <= Math.max(...completed, 0) + 1) {
+			if (canAccessStep(targetStep)) {
 				window.location.href = pages[targetStep];
 			}
 		}
@@ -539,6 +592,11 @@ if (!empty($applicant_id)) {
 			if (trainingPaymentVerified) {
 				completeStep(4);
 				window.location.href = 'review.php';
+				return;
+			}
+
+			if (trainingPaymentSubmitted) {
+				alert('Your training payment confirmation is already submitted and waiting for verification.');
 				return;
 			}
 
@@ -602,9 +660,17 @@ if (!empty($applicant_id)) {
 					throw new Error(data.message || 'Failed to submit payment confirmation.');
 				}
 
-				completeStep(4);
-				alert('Confirmation sent to admin for review.');
-				window.location.href = 'review.php';
+				trainingPaymentSubmitted = true;
+				uncompleteStep(4);
+				closeReceiptModal();
+				alert('Confirmation sent to admin for review. Please wait for payment verification before proceeding to review.');
+				if (sendConfirmationBtn) {
+					sendConfirmationBtn.textContent = 'Payment Confirmation Sent (Pending Verification)';
+					sendConfirmationBtn.disabled = true;
+					sendConfirmationBtn.style.cursor = 'not-allowed';
+					sendConfirmationBtn.style.opacity = '0.7';
+				}
+				initializeSteps();
 			} catch (error) {
 				alert(error.message || 'Something went wrong. Please try again.');
 			} finally {

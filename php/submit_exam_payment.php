@@ -62,6 +62,40 @@ if (base64_decode($paymentProof, true) === false) {
 $supabaseUrl = "https://ncsobcjlvytbivoxezfd.supabase.co";
 $supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jc29iY2psdnl0Yml2b3hlemZkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTU2ODc3NiwiZXhwIjoyMDg3MTQ0Nzc2fQ.TLktUWOmr-iAZTy4Vm0F_ihUa2q_tQuP83RLTodPcEY";
 
+$existingCheckCh = curl_init($supabaseUrl . '/rest/v1/exam_payment?select=id&applicant_id=eq.' . urlencode($appId) . '&limit=1');
+curl_setopt($existingCheckCh, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($existingCheckCh, CURLOPT_HTTPHEADER, [
+    'apikey: ' . $supabaseKey,
+    'Authorization: Bearer ' . $supabaseKey,
+    'Content-Type: application/json'
+]);
+
+$existingCheckResponse = curl_exec($existingCheckCh);
+$existingCheckHttpCode = curl_getinfo($existingCheckCh, CURLINFO_HTTP_CODE);
+$existingCheckCurlError = curl_error($existingCheckCh);
+curl_close($existingCheckCh);
+
+if ($existingCheckResponse === false || !empty($existingCheckCurlError)) {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Failed to check existing exam payment.'
+    ]);
+    exit;
+}
+
+if ($existingCheckHttpCode >= 200 && $existingCheckHttpCode < 300) {
+    $existingRows = json_decode($existingCheckResponse, true);
+    if (is_array($existingRows) && !empty($existingRows)) {
+        echo json_encode([
+            'success' => true,
+            'already_submitted' => true,
+            'message' => 'Exam payment confirmation is already submitted and pending verification.'
+        ]);
+        exit;
+    }
+}
+
 $insertPayload = [
     [
         'payment_proof' => $paymentProof,
@@ -104,7 +138,65 @@ if ($httpCode < 200 || $httpCode >= 300) {
     exit;
 }
 
+function updateApplicantStatusWithFallback($supabaseUrl, $supabaseKey, $appId, $statusValue) {
+    $candidateColumns = ['status', 'AI_Status'];
+    $lastError = null;
+
+    foreach ($candidateColumns as $column) {
+        $ch = curl_init($supabaseUrl . '/rest/v1/applicant_information?uuid=eq.' . urlencode($appId));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([$column => $statusValue]));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'apikey: ' . $supabaseKey,
+            'Authorization: Bearer ' . $supabaseKey,
+            'Content-Type: application/json',
+            'Prefer: return=representation'
+        ]);
+
+        $patchResponse = curl_exec($ch);
+        $patchHttpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $patchCurlError = curl_error($ch);
+        curl_close($ch);
+
+        if (!empty($patchCurlError)) {
+            $lastError = 'Connection error while updating applicant status.';
+            continue;
+        }
+
+        if ($patchHttpCode >= 200 && $patchHttpCode < 300) {
+            return [true, null];
+        }
+
+        $lastError = is_string($patchResponse) ? $patchResponse : 'Unknown status update error.';
+
+        if (stripos($lastError, 'Could not find the') !== false && stripos($lastError, 'column') !== false) {
+            continue;
+        }
+    }
+
+    return [false, $lastError ?: 'Unable to update applicant status.'];
+}
+
+[$statusUpdated, $statusUpdateError] = updateApplicantStatusWithFallback(
+    $supabaseUrl,
+    $supabaseKey,
+    $appId,
+    'verify exam payment'
+);
+
+if (!$statusUpdated) {
+    echo json_encode([
+        'success' => true,
+        'message' => 'Exam payment confirmation submitted, but applicant status was not updated.',
+        'status_updated' => false,
+        'status_update_error' => $statusUpdateError
+    ]);
+    exit;
+}
+
 echo json_encode([
     'success' => true,
-    'message' => 'Exam payment confirmation submitted successfully.'
+    'message' => 'Exam payment confirmation submitted successfully.',
+    'status_updated' => true
 ]);
