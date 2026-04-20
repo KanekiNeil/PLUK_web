@@ -26,7 +26,6 @@ $initials = strtoupper(substr($user_name, 0, 1)) .
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-<link rel="stylesheet" href="../style/dashboard.css">
 <link rel="stylesheet" href="../style/settings.css">
 <title>Settings</title>
 </head>
