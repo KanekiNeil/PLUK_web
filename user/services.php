@@ -259,18 +259,22 @@ left:0;
 top:0;
 width:100%;
 height:100%;
-background:rgba(0,0,0,0.55);
-backdrop-filter:blur(6px);
+background:rgba(15,15,15,0.55);
+backdrop-filter:blur(10px);
 justify-content:center;
 align-items:center;
 z-index:2000;
+animation:fadeIn .3s ease;
 }
 
 .modal-content{
-width:700px; /* wider */
-max-width:95%;
-border-radius:18px;
-background:white;
+width:680px;
+max-width:92%;
+border-radius:22px;
+background:linear-gradient(145deg,#ffffff,#f9f9f9);
+box-shadow:0 25px 60px rgba(0,0,0,0.15);
+overflow:hidden;
+animation:modalEnter .35s ease;
 }
 /* MODAL HEADER */
 
@@ -279,72 +283,93 @@ background:linear-gradient(135deg,#8b0014,#b3122a);
 color:white;
 display:flex;
 align-items:center;
-padding:20px 25px;
-gap:10px; /* tighter and cleaner */
+padding:22px 28px;
+gap:14px;
+position:relative;
+}
+
+.modal-header{
+    position: relative;
+    z-index: 2;
+}
+
+.close-btn{
+    position: relative;
+    z-index: 3;
+}
+
+.modal-header::after{
+content:"";
+position:absolute;
+inset:0;
+background:linear-gradient(120deg,transparent,rgba(255,255,255,0.15),transparent);
+opacity:.4;
 }
 
 .modal-icon{
-font-size:22px;
-color:white;
+width:42px;
+height:42px;
+border-radius:12px;
+background:rgba(255,255,255,0.15);
 display:flex;
 align-items:center;
 justify-content:center;
+font-size:18px;
+backdrop-filter:blur(6px);
 }
 
 .modal-header h2{
 flex:1;
-font-size:19px;
-letter-spacing:.5px;
+font-size:18px;
+font-weight:600;
+letter-spacing:.4px;
 }
 
 .close-btn{
-width:32px;
-height:32px;
+width:34px;
+height:34px;
 display:flex;
 align-items:center;
 justify-content:center;
 border-radius:50%;
-background:rgba(255,255,255,0.2);
+background:rgba(255,255,255,0.15);
 cursor:pointer;
 font-size:18px;
-transition:.3s;
+transition:.25s;
 }
 
 .close-btn:hover{
 background:white;
 color:#8b0014;
+transform:rotate(90deg);
 }
 
 /* MODAL BODY */
 
 .modal-body{
-padding:35px;
+padding:32px;
 display:flex;
 flex-direction:column;
-gap:25px;
-text-align:left;
+gap:24px;
 }
 
 /* CLICKABLE SMALL TITLE */
 
 .modal-link{
-display:inline-block;
-font-size:14px;
+font-size:13.5px;
 font-weight:600;
 color:#6b0f1a;
-margin-bottom:10px;
 text-decoration:none;
 position:relative;
-transition:.3s;
+width:fit-content;
 }
 
 .modal-link::after{
 content:"";
 display:block;
-width:0%;
 height:2px;
-background:#6b0f1a;
-margin:auto;
+width:0%;
+background:#8b0014;
 transition:.3s;
 }
 
@@ -355,6 +380,7 @@ color:#b3122a;
 .modal-link:hover::after{
 width:100%;
 }
+
 
 /* MAIN TITLE */
 
@@ -376,14 +402,14 @@ margin:auto;
 line-height:1.6;
 }
 
-/* OPTIONAL DIVIDER */
 
+/* DIVIDER */
 .modal-divider{
-width:60px;
+width:50px;
 height:3px;
-background:#8b0014;
-margin:15px auto 20px;
+background:linear-gradient(90deg,#8b0014,#d94b5f);
 border-radius:10px;
+margin:10px 0;
 }
 
 /* INFO BOX */
@@ -432,65 +458,116 @@ color:#444;
 .modal-hero{
 display:flex;
 align-items:center;
-gap:20px;
-background:#fafafa;
-padding:20px;
-border-radius:12px;
-border-color: #8b0000;
+gap:18px;
+background:linear-gradient(145deg,#fafafa,#ffffff);
+padding:18px;
+border-radius:16px;
+box-shadow:0 8px 20px rgba(0,0,0,0.05);
 }
 
 /* ICON INSIDE BODY */
 .modal-hero-icon{
 width:55px;
 height:55px;
-background:#8b0014;
+background:linear-gradient(135deg,#8b0014,#b3122a);
 color:white;
 display:flex;
 align-items:center;
 justify-content:center;
 border-radius:14px;
 font-size:22px;
+box-shadow:0 8px 18px rgba(139,0,20,0.25);
 }
 
 /* TITLE IMPROVED */
 .modal-main-title{
-font-size:24px;
+font-size:22px;
 font-weight:700;
 color:#111;
 }
 
 /* SUBTEXT */
 .modal-subtext{
-font-size:15px;
+font-size:14.5px;
 color:#666;
-margin-top:5px;
+margin-top:4px;
 line-height:1.5;
 }
 
 /* CTA BUTTON */
 .cta-btn{
-margin-top:10px;
+display:inline-flex;
+align-items:center;
+gap:10px;
+margin-top:12px;
+
 background:linear-gradient(135deg,#8b0014,#b3122a);
 color:white;
-padding:12px 20px;
-border-radius:10px;
+
+padding:14px 22px;
+border-radius:14px;
+
 font-weight:600;
-text-align:center;
+font-size:14px;
+letter-spacing:.3px;
+
 cursor:pointer;
-transition:.3s;
-width:fit-content;
+transition:.3s ease;
+
+box-shadow:0 10px 25px rgba(139,0,20,0.25);
+position:relative;
+overflow:hidden;
 }
 
+/* arrow */
+.cta-btn::after{
+content:"→";
+font-size:16px;
+transition:.3s;
+}
+
+/* shine effect */
+.cta-btn::before{
+content:"";
+position:absolute;
+top:0;
+left:-100%;
+width:100%;
+height:100%;
+background:linear-gradient(120deg,transparent,rgba(255,255,255,0.4),transparent);
+transition:.5s;
+}
+
+/* hover */
 .cta-btn:hover{
-transform:translateY(-2px);
-box-shadow:0 8px 20px rgba(139,0,20,0.25);
+transform:translateY(-3px) scale(1.02);
+box-shadow:0 15px 35px rgba(139,0,20,0.35);
+}
+
+.cta-btn:hover::before{
+left:100%;
+}
+
+.cta-btn:hover::after{
+transform:translateX(4px);
 }
 
 /* ANIMATION */
 
-@keyframes fade{
-from{transform:translateY(20px) scale(.95);opacity:0;}
-to{transform:translateY(0) scale(1);opacity:1;}
+@keyframes modalEnter{
+from{
+transform:translateY(30px) scale(.95);
+opacity:0;
+}
+to{
+transform:translateY(0) scale(1);
+opacity:1;
+}
+}
+
+@keyframes fadeIn{
+from{opacity:0;}
+to{opacity:1;}
 }
 
 </style>
@@ -567,7 +644,7 @@ to{transform:translateY(0) scale(1);opacity:1;}
 <i class="fas fa-shield-alt"></i>
 </div>
 <h2 id="modalTitle"></h2>
-<span class="close-btn">&times;</span>
+<button class="close-btn">&times;</button>
 
 </div>
 
@@ -614,9 +691,7 @@ text:`
     Answering Your Policy Questions →
 </a>
 
-<div class="cta-btn">
-    Proceed to Service
-</div>
+<a href="#" class="cta-btn">Proceed to Service</a>
 
 
 `
@@ -887,7 +962,6 @@ text:`
 <div class="cta-btn">
     Proceed to Service
 </div>
-</div>
 `
 }
 
@@ -920,9 +994,12 @@ modal.style.display="flex";
 });
 });
 
-closeBtn.onclick=function(){
-modal.style.display="none";
-}
+// Use event delegation (always works)
+document.addEventListener("click", function(e){
+    if(e.target.closest(".close-btn")){
+        modal.style.display = "none";
+    }
+});
 
 window.onclick=function(e){
 if(e.target==modal){
