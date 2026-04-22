@@ -68,7 +68,7 @@ body::before {
 .table-header,
 .table-row {
     display: grid;
-    grid-template-columns: 1fr 1fr 1.5fr 1.5fr 1.2fr 0.2fr;
+    grid-template-columns: 1.2fr 1fr 1.6fr 1.6fr 0.7fr;
     padding: 16px 15px;
     align-items: center;
 }
@@ -104,30 +104,60 @@ body::before {
 
 /* ===== STATUS BADGES ===== */
 .status-badge{
-    padding:2px 12px;
+    padding:4px 12px;
     border-radius:20px;
     font-size:0.75rem;
-    font-weight:500;
+    font-weight:600;
+    border: 1px solid transparent;
 }
 
 .badge-pending{
-    background:#fff3cd;
-    color:#856404;
+    background:#fff4cc;
+    color:#7a5a00;
+    border-color:#ffe08a;
 }
 
 .badge-approved{
-    background:#d1e7dd;
-    color:#0f5132;
+    background:#dcfce7;
+    color:#166534;
+    border-color:#86efac;
 }
 
 .badge-completed{
-    background:#cff4fc;
-    color:#055160;
+    background:#e0f2fe;
+    color:#0c4a6e;
+    border-color:#7dd3fc;
 }
 
 .badge-cancelled{
-    background:#f8d7da;
-    color:#842029;
+    background:#fee2e2;
+    color:#991b1b;
+    border-color:#fca5a5;
+}
+
+.badge-verify-exam {
+    background:#ffedd5;
+    color:#9a3412;
+    border-color:#fdba74;
+}
+
+.badge-verify-training {
+    background:#ede9fe;
+    color:#5b21b6;
+    border-color:#c4b5fd;
+}
+
+.badge-payment-verified,
+.badge-training-verified {
+    background:#dcfce7;
+    color:#166534;
+    border-color:#86efac;
+}
+
+.badge-default {
+    background:#e5e7eb;
+    color:#374151;
+    border-color:#d1d5db;
 }
 
 /* ===== USER HEADER (optional fix safe) ===== */
@@ -233,6 +263,22 @@ body::before {
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
 }
 
+.reject-modal-btn {
+    background-color: #b91c1c;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.reject-modal-btn:hover {
+    background-color: #991b1b;
+}
+
 </style>
 </head>
 
@@ -250,23 +296,29 @@ body::before {
     <div>Contact Number</div>
     <div>School Attended</div>
     <div>Job</div>
-    <div>Address</div>
     <div>Status</div>
 </div>
 
 <!-- DATA -->
 <?php foreach ($appointments as $appt): 
-    $statusClass = match($appt[5]) {
-        "Pending" => "badge-pending",
-        "Approved" => "badge-approved",
-        "Completed" => "badge-completed",
-        "Cancelled" => "badge-cancelled",
-        default => "bg-secondary"
+    $normalizedStatus = strtolower(trim((string)($appt[5] ?? '')));
+    $statusClass = match($normalizedStatus) {
+        "pending" => "badge-pending",
+        "approved" => "badge-approved",
+        "completed" => "badge-completed",
+        "cancelled" => "badge-cancelled",
+        "verify exam payment" => "badge-verify-exam",
+        "verify training payment" => "badge-verify-training",
+        "payment verified" => "badge-payment-verified",
+        "training payment verified" => "badge-training-verified",
+        "payment rejected" => "badge-cancelled",
+        default => "badge-default"
     };
 ?>
 
 <div class="table-row"
      data-name="<?= $appt[0] ?>"
+     data-app-id="<?= htmlspecialchars($appt[6] ?? 'N/A') ?>"
      data-contact="<?= $appt[1] ?>"
      data-school="<?= $appt[2] ?>"
      data-job="<?= $appt[3] ?>"
@@ -277,7 +329,6 @@ body::before {
     <div><?= $appt[1] ?></div>
     <div><?= $appt[2] ?></div>
     <div><?= $appt[3] ?></div>
-    <div class="col-address"><?= $appt[4] ?></div>
 
     <div>
         <span class="status-badge <?= $statusClass ?>">
@@ -293,6 +344,46 @@ body::before {
 </div>
 
 <?php include 'applicant_detail_modal.php'; ?>
+
+<div class="modal fade" id="examPaymentModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content custom-modal">
+            <div class="custom-header d-flex justify-content-between align-items-center">
+                <h5 class="m-0">Verify Exam Payment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom:8px;"><strong>Applicant:</strong> <span id="examModalName"></span></p>
+                <img id="examPaymentProof" alt="Exam payment proof" style="display:none; width:100%; max-height:320px; object-fit:contain; border:1px solid #ddd; border-radius:8px; padding:6px; background:#fff;">
+                <p id="examPaymentEmpty" style="display:none; color:#842029; background:#f8d7da; padding:10px; border-radius:8px;">No exam payment proof found.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="reject-modal-btn" id="rejectExamBtn">Reject Payment</button>
+                <button class="close-modal-btn" id="verifyExamBtn">Mark Exam Payment Verified</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="trainingPaymentModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content custom-modal">
+            <div class="custom-header d-flex justify-content-between align-items-center">
+                <h5 class="m-0">Verify Training Payment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom:8px;"><strong>Applicant:</strong> <span id="trainingModalName"></span></p>
+                <img id="trainingPaymentProof" alt="Training payment proof" style="display:none; width:100%; max-height:320px; object-fit:contain; border:1px solid #ddd; border-radius:8px; padding:6px; background:#fff;">
+                <p id="trainingPaymentEmpty" style="display:none; color:#842029; background:#f8d7da; padding:10px; border-radius:8px;">No training payment proof found.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="reject-modal-btn" id="rejectTrainingBtn">Reject Payment</button>
+                <button class="close-modal-btn" id="verifyTrainingBtn">Mark Training Payment Verified</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 
@@ -318,14 +409,226 @@ if (profile) {
 <script>
 document.querySelectorAll('.table-row').forEach(row => {
 
+    const normalizeStatus = (value) => (value || '').trim().toLowerCase();
+
+    const resetProofState = (proofImgEl, emptyEl, verifyBtn) => {
+        proofImgEl.style.display = 'none';
+        proofImgEl.removeAttribute('src');
+        emptyEl.style.display = 'none';
+        verifyBtn.disabled = false;
+    };
+
+    const toDataUrl = (value) => {
+        if (!value) return '';
+        if (value.startsWith('data:image')) return value;
+        return 'data:image/png;base64,' + value;
+    };
+
+    const loadPaymentProof = async (type, appId) => {
+        const response = await fetch(`../php/get_payment_request.php?type=${encodeURIComponent(type)}&applicant_id=${encodeURIComponent(appId)}`);
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Failed to load payment request.');
+        }
+        return data;
+    };
+
+    const verifyPayment = async (type, appId) => {
+        const response = await fetch('../php/verify_payment_request.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'verify', type, applicant_id: appId })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Failed to verify payment request.');
+        }
+        return data;
+    };
+
+    const rejectPayment = async (type, appId) => {
+        const response = await fetch('../php/verify_payment_request.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'reject', type, applicant_id: appId })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Failed to reject payment request.');
+        }
+        return data;
+    };
+
+    const getStatusBadgeClass = (statusValue) => {
+        const s = normalizeStatus(statusValue);
+        if (s === 'pending') return 'badge-pending';
+        if (s === 'approved') return 'badge-approved';
+        if (s === 'completed') return 'badge-completed';
+        if (s === 'cancelled') return 'badge-cancelled';
+        if (s === 'verify exam payment') return 'badge-verify-exam';
+        if (s === 'verify training payment') return 'badge-verify-training';
+        if (s === 'payment verified') return 'badge-payment-verified';
+        if (s === 'training payment verified') return 'badge-training-verified';
+        if (s === 'payment rejected') return 'badge-cancelled';
+        return 'badge-default';
+    };
+
     row.addEventListener('click', () => {
 
         const name = row.dataset.name;
+        const appId = row.dataset.appId;
         const contact = row.dataset.contact;
         const school = row.dataset.school;
         const job = row.dataset.job;
         const address = row.dataset.address;
         const status = row.dataset.status;
+        const normalizedStatus = normalizeStatus(status);
+
+        if (normalizedStatus === 'verify exam payment') {
+            const modalEl = document.getElementById('examPaymentModal');
+            const modal = new bootstrap.Modal(modalEl);
+            const proofImg = document.getElementById('examPaymentProof');
+            const emptyMsg = document.getElementById('examPaymentEmpty');
+            const verifyBtn = document.getElementById('verifyExamBtn');
+            const rejectBtn = document.getElementById('rejectExamBtn');
+
+            document.getElementById('examModalName').textContent = name;
+
+            resetProofState(proofImg, emptyMsg, verifyBtn);
+            verifyBtn.onclick = null;
+            rejectBtn.onclick = null;
+            rejectBtn.disabled = false;
+
+            modal.show();
+
+            loadPaymentProof('exam', appId)
+                .then((data) => {
+                    if (data.payment_proof) {
+                        proofImg.src = toDataUrl(data.payment_proof);
+                        proofImg.style.display = 'block';
+                    } else {
+                        emptyMsg.style.display = 'block';
+                        verifyBtn.disabled = true;
+                    }
+
+                    verifyBtn.onclick = async () => {
+                        verifyBtn.disabled = true;
+                        rejectBtn.disabled = true;
+                        try {
+                            await verifyPayment('exam', appId);
+                            row.dataset.status = 'payment verified';
+                            row.querySelector('.status-badge').textContent = 'payment verified';
+                            row.querySelector('.status-badge').className = 'status-badge ' + getStatusBadgeClass('payment verified');
+                            modal.hide();
+                        } catch (error) {
+                            alert(error.message || 'Verification failed.');
+                            verifyBtn.disabled = false;
+                            rejectBtn.disabled = false;
+                        }
+                    };
+
+                    rejectBtn.onclick = async () => {
+                        if (!confirm('Reject this payment request? This will delete the uploaded record.')) {
+                            return;
+                        }
+
+                        verifyBtn.disabled = true;
+                        rejectBtn.disabled = true;
+                        try {
+                            await rejectPayment('exam', appId);
+                            row.dataset.status = 'payment rejected';
+                            row.querySelector('.status-badge').textContent = 'payment rejected';
+                            row.querySelector('.status-badge').className = 'status-badge ' + getStatusBadgeClass('payment rejected');
+                            modal.hide();
+                        } catch (error) {
+                            alert(error.message || 'Reject failed.');
+                            verifyBtn.disabled = false;
+                            rejectBtn.disabled = false;
+                        }
+                    };
+                })
+                .catch((error) => {
+                    emptyMsg.textContent = error.message || 'Unable to load exam payment request.';
+                    emptyMsg.style.display = 'block';
+                    verifyBtn.disabled = true;
+                    rejectBtn.disabled = true;
+                });
+
+            return;
+        }
+
+        if (normalizedStatus === 'verify training payment') {
+            const modalEl = document.getElementById('trainingPaymentModal');
+            const modal = new bootstrap.Modal(modalEl);
+            const proofImg = document.getElementById('trainingPaymentProof');
+            const emptyMsg = document.getElementById('trainingPaymentEmpty');
+            const verifyBtn = document.getElementById('verifyTrainingBtn');
+            const rejectBtn = document.getElementById('rejectTrainingBtn');
+
+            document.getElementById('trainingModalName').textContent = name;
+
+            resetProofState(proofImg, emptyMsg, verifyBtn);
+            verifyBtn.onclick = null;
+            rejectBtn.onclick = null;
+            rejectBtn.disabled = false;
+
+            modal.show();
+
+            loadPaymentProof('training', appId)
+                .then((data) => {
+                    if (data.payment_proof) {
+                        proofImg.src = toDataUrl(data.payment_proof);
+                        proofImg.style.display = 'block';
+                    } else {
+                        emptyMsg.style.display = 'block';
+                        verifyBtn.disabled = true;
+                    }
+
+                    verifyBtn.onclick = async () => {
+                        verifyBtn.disabled = true;
+                        rejectBtn.disabled = true;
+                        try {
+                            await verifyPayment('training', appId);
+                            row.dataset.status = 'training payment verified';
+                            row.querySelector('.status-badge').textContent = 'training payment verified';
+                            row.querySelector('.status-badge').className = 'status-badge ' + getStatusBadgeClass('training payment verified');
+                            modal.hide();
+                        } catch (error) {
+                            alert(error.message || 'Verification failed.');
+                            verifyBtn.disabled = false;
+                            rejectBtn.disabled = false;
+                        }
+                    };
+
+                    rejectBtn.onclick = async () => {
+                        if (!confirm('Reject this payment request? This will delete the uploaded record.')) {
+                            return;
+                        }
+
+                        verifyBtn.disabled = true;
+                        rejectBtn.disabled = true;
+                        try {
+                            await rejectPayment('training', appId);
+                            row.dataset.status = 'payment rejected';
+                            row.querySelector('.status-badge').textContent = 'payment rejected';
+                            row.querySelector('.status-badge').className = 'status-badge ' + getStatusBadgeClass('payment rejected');
+                            modal.hide();
+                        } catch (error) {
+                            alert(error.message || 'Reject failed.');
+                            verifyBtn.disabled = false;
+                            rejectBtn.disabled = false;
+                        }
+                    };
+                })
+                .catch((error) => {
+                    emptyMsg.textContent = error.message || 'Unable to load training payment request.';
+                    emptyMsg.style.display = 'block';
+                    verifyBtn.disabled = true;
+                    rejectBtn.disabled = true;
+                });
+
+            return;
+        }
 
         // Fill modal
         document.getElementById('modalName').textContent = name;
@@ -337,13 +640,7 @@ document.querySelectorAll('.table-row').forEach(row => {
         // STATUS BADGE (dynamic color)
         const statusEl = document.getElementById('modalStatus');
         statusEl.textContent = status;
-
-        statusEl.className = "status-badge"; // reset
-
-        if (status === "Pending") statusEl.classList.add("badge-pending");
-        if (status === "Approved") statusEl.classList.add("badge-approved");
-        if (status === "Completed") statusEl.classList.add("badge-completed");
-        if (status === "Cancelled") statusEl.classList.add("badge-cancelled");
+        statusEl.className = "status-badge " + getStatusBadgeClass(status);
 
 
         // Show modal

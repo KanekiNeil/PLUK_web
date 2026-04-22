@@ -11,6 +11,32 @@ $supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 $applicant_id = $_SESSION['app_id'] ?? null;
 $hasTrainingSchedule = false;
 $existingTrainingSchedule = null;
+$applicantPaymentStatus = '';
+$canRegisterTraining = false;
+
+if (!empty($applicant_id)) {
+	$statusUrl = $supabaseUrl . "/rest/v1/applicant_information?select=status&uuid=eq." . urlencode($applicant_id) . "&limit=1";
+	$statusCh = curl_init($statusUrl);
+	curl_setopt($statusCh, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($statusCh, CURLOPT_HTTPHEADER, [
+		"apikey: $supabaseKey",
+		"Authorization: Bearer $supabaseKey",
+		"Content-Type: application/json"
+	]);
+
+	$statusResponse = curl_exec($statusCh);
+	$statusHttpCode = curl_getinfo($statusCh, CURLINFO_HTTP_CODE);
+	curl_close($statusCh);
+
+	if ($statusResponse !== false && $statusHttpCode >= 200 && $statusHttpCode < 300) {
+		$statusData = json_decode($statusResponse, true);
+		if (is_array($statusData) && !empty($statusData[0])) {
+			$applicantPaymentStatus = trim((string)($statusData[0]['status'] ?? $statusData[0]['AI_Status'] ?? ''));
+			$normalizedStatus = strtolower($applicantPaymentStatus);
+			$canRegisterTraining = ($normalizedStatus === 'exam passed' || $normalizedStatus === 'verify training payment' || $normalizedStatus === 'training payment verified');
+		}
+	}
+}
 
 if (!empty($applicant_id)) {
 	$lookupUrl = $supabaseUrl . "/rest/v1/training_sched?select=id,training_type,date,start_time,end_time,applicant_id&applicant_id=eq." . urlencode($applicant_id) . "&limit=1";
@@ -66,6 +92,14 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
 			'message' => 'Training is already registered.',
 			'already_registered' => true,
 			'next_url' => 'training_payment.php'
+		]);
+		exit;
+	}
+
+	if (!$canRegisterTraining) {
+		echo json_encode([
+			'success' => false,
+			'message' => 'You have not passed the exam yet. Please pass the exam before registering for training.'
 		]);
 		exit;
 	}
@@ -430,6 +464,11 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
 		<div class="content">
 			<!-- Heading -->
 			<h2>Register for Instruction-Led Training</h2>
+			<?php if (!$canRegisterTraining && !$hasTrainingSchedule): ?>
+				<div style="max-width: 500px; margin: 0 auto 20px; padding: 14px 16px; border-radius: 6px; background: #fff3cd; color: #856404; text-align: left; font-size: 14px; line-height: 1.5;">
+					You have not passed the exam yet. You can register for training only after passing the exam.
+				</div>
+			<?php endif; ?>
 			<?php if ($hasTrainingSchedule): ?>
 				<div style="max-width: 500px; margin: 0 auto 20px; padding: 14px 16px; border-radius: 6px; background: #e8f5e9; color: #1b5e20; text-align: left; font-size: 14px; line-height: 1.5;">
 					Your training schedule is already recorded. You can proceed directly to training payment.
@@ -504,8 +543,9 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
 	</div>
 	
 	<script>
-		const currentStep = 3;
+		const currentStep = 2;
 		const hasTrainingSchedule = <?= $hasTrainingSchedule ? 'true' : 'false' ?>;
+		const canRegisterTraining = <?= $canRegisterTraining ? 'true' : 'false' ?>;
 		const pages = ['verify_email.php', 'exam_payment.php', 'training_registration.php', 'training_payment.php', 'review.php'];
 		
 		// Get completed steps from localStorage
@@ -522,32 +562,39 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
 				localStorage.setItem('completedSteps', JSON.stringify(completed));
 			}
 		}
+
+		function canAccessStep(stepNum) {
+			if (stepNum === 1) return true;
+			if (stepNum === 2) return true;
+			if (stepNum === 3) return hasTrainingSchedule;
+			return false;
+		}
 		
 		// Initialize step states based on completed steps
 		function initializeSteps() {
-			const completed = getCompletedSteps();
 			const steps = document.querySelectorAll('.step');
 			
 			steps.forEach(step => {
 				const stepNum = parseInt(step.dataset.step);
-				
-				// Unlock if step is completed or is the next available step
-				if (completed.includes(stepNum) || stepNum <= Math.max(...completed, 0) + 1) {
+
+				if (canAccessStep(stepNum)) {
 					step.classList.remove('locked');
 					step.onclick = () => navigateToStep(stepNum);
-					
-					if (completed.includes(stepNum) && stepNum < currentStep) {
+
+					if (stepNum < currentStep) {
 						step.classList.add('completed');
 					}
+				} else {
+					step.classList.add('locked');
+					step.classList.remove('completed');
+					step.onclick = null;
 				}
 			});
 		}
 		
 		function navigateToStep(targetStep) {
 			if (targetStep === currentStep) return;
-			const completed = getCompletedSteps();
-			// Can only navigate to completed steps or current step
-			if (completed.includes(targetStep) || targetStep <= Math.max(...completed, 0) + 1) {
+			if (canAccessStep(targetStep)) {
 				window.location.href = pages[targetStep];
 			}
 		}
@@ -559,6 +606,14 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
 			const registerBtn = document.getElementById('registerBtn');
 			if (registerBtn) {
 				registerBtn.textContent = 'Continue to Training Payment';
+			}
+		} else if (!canRegisterTraining) {
+			const registerBtn = document.getElementById('registerBtn');
+			if (registerBtn) {
+				registerBtn.textContent = 'Waiting for Exam Completion';
+				registerBtn.disabled = true;
+				registerBtn.style.cursor = 'not-allowed';
+				registerBtn.style.opacity = '0.7';
 			}
 		}
 		
@@ -620,6 +675,11 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
 			if (hasTrainingSchedule) {
 				completeStep(3);
 				window.location.href = 'training_payment.php';
+				return;
+			}
+
+			if (!canRegisterTraining) {
+				alert('You have not passed the exam yet. Please pass the exam before registering for training.');
 				return;
 			}
 

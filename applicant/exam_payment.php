@@ -41,9 +41,32 @@ if ($response === false || !empty($curlErr)) {
 }
 
 $isExamPaymentVerified = false;
+$hasExamPaymentRequest = false;
+$isPaymentRejected = false;
 $sessionAppId = $_SESSION['app_id'] ?? null;
 
 if (!empty($sessionAppId)) {
+	$statusUrl = $supabaseUrl . "/rest/v1/applicant_information?select=status&uuid=eq." . urlencode($sessionAppId) . "&limit=1";
+	$statusCh = curl_init($statusUrl);
+	curl_setopt($statusCh, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($statusCh, CURLOPT_HTTPHEADER, [
+		"apikey: $anonKey",
+		"Authorization: Bearer $anonKey",
+		"Content-Type: application/json"
+	]);
+
+	$statusResponse = curl_exec($statusCh);
+	$statusHttpCode = curl_getinfo($statusCh, CURLINFO_HTTP_CODE);
+	curl_close($statusCh);
+
+	if ($statusResponse !== false && $statusHttpCode >= 200 && $statusHttpCode < 300) {
+		$statusData = json_decode($statusResponse, true);
+		if (is_array($statusData) && !empty($statusData[0])) {
+			$currentStatus = strtolower(trim((string)($statusData[0]['status'] ?? '')));
+			$isPaymentRejected = ($currentStatus === 'payment rejected');
+		}
+	}
+
 	$verifyPaymentUrl = $supabaseUrl . "/rest/v1/exam_payment?select=verified&applicant_id=eq." . urlencode($sessionAppId);
 	$verifyCh = curl_init($verifyPaymentUrl);
 	curl_setopt($verifyCh, CURLOPT_RETURNTRANSFER, true);
@@ -60,6 +83,7 @@ if (!empty($sessionAppId)) {
 	if ($verifyResponse !== false && $verifyHttpCode >= 200 && $verifyHttpCode < 300) {
 		$verifyData = json_decode($verifyResponse, true);
 		if (is_array($verifyData)) {
+			$hasExamPaymentRequest = !empty($verifyData);
 			foreach ($verifyData as $row) {
 				if (!empty($row['verified'])) {
 					$isExamPaymentVerified = true;
@@ -461,6 +485,11 @@ if (!empty($sessionAppId)) {
 		<div class="content">
 			<!-- Heading -->
 			<h2>Confirm your examination payment</h2>
+			<?php if ($isPaymentRejected): ?>
+				<div style="max-width: 500px; margin: 0 auto 16px; padding: 12px 14px; border-radius: 8px; background: #fff4e5; color: #9a3412; font-size: 13px; line-height: 1.4; text-align: left; border: 1px solid #fdba74;">
+					Your last payment was rejected. Please upload a new payment proof and submit again.
+				</div>
+			<?php endif; ?>
 			
 			<!-- Payment Details Box -->
 			<div class="payment-box">
@@ -510,8 +539,9 @@ if (!empty($sessionAppId)) {
 	</div>
 	
 	<script>
-		const currentStep = 2;
+		const currentStep = 1;
 		const examPaymentVerified = <?php echo $isExamPaymentVerified ? 'true' : 'false'; ?>;
+		let examPaymentSubmitted = <?php echo $hasExamPaymentRequest ? 'true' : 'false'; ?>;
 		const pages = ['verify_email.php', 'exam_payment.php', 'training_registration.php', 'training_payment.php', 'review.php'];
 		const receiptModal = document.getElementById('receiptModal');
 		const receiptFileInput = document.getElementById('receiptFileInput');
@@ -534,6 +564,17 @@ if (!empty($sessionAppId)) {
 				localStorage.setItem('completedSteps', JSON.stringify(completed));
 			}
 		}
+
+		function uncompleteStep(step) {
+			const completed = getCompletedSteps().filter(item => item !== step);
+			localStorage.setItem('completedSteps', JSON.stringify(completed));
+		}
+
+		function canAccessStep(stepNum) {
+			if (stepNum === 1) return true;
+			if (stepNum === 2) return examPaymentVerified;
+			return false;
+		}
 		
 		// Initialize step states based on completed steps
 		function initializeSteps() {
@@ -542,31 +583,40 @@ if (!empty($sessionAppId)) {
 				if (sendConfirmationBtn) {
 					sendConfirmationBtn.textContent = 'Continue to Training Registration';
 				}
+			} else if (examPaymentSubmitted) {
+				uncompleteStep(2);
+				if (sendConfirmationBtn) {
+					sendConfirmationBtn.textContent = 'Payment Confirmation Sent (Pending Verification)';
+					sendConfirmationBtn.disabled = true;
+					sendConfirmationBtn.style.cursor = 'not-allowed';
+					sendConfirmationBtn.style.opacity = '0.7';
+				}
+			} else {
+				uncompleteStep(2);
 			}
 
-			const completed = getCompletedSteps();
 			const steps = document.querySelectorAll('.step');
 			
 			steps.forEach(step => {
 				const stepNum = parseInt(step.dataset.step);
-				
-				// Unlock if step is completed or is the next available step
-				if (completed.includes(stepNum) || stepNum <= Math.max(...completed, 0) + 1) {
+				if (canAccessStep(stepNum)) {
 					step.classList.remove('locked');
 					step.onclick = () => navigateToStep(stepNum);
-					
-					if (completed.includes(stepNum) && stepNum < currentStep) {
+
+					if (stepNum < currentStep) {
 						step.classList.add('completed');
 					}
+				} else {
+					step.classList.add('locked');
+					step.classList.remove('completed');
+					step.onclick = null;
 				}
 			});
 		}
 		
 		function navigateToStep(targetStep) {
 			if (targetStep === currentStep) return;
-			const completed = getCompletedSteps();
-			// Can only navigate to completed steps or current step
-			if (completed.includes(targetStep) || targetStep <= Math.max(...completed, 0) + 1) {
+			if (canAccessStep(targetStep)) {
 				window.location.href = pages[targetStep];
 			}
 		}
@@ -575,6 +625,11 @@ if (!empty($sessionAppId)) {
 			if (examPaymentVerified) {
 				completeStep(2);
 				window.location.href = 'training_registration.php';
+				return;
+			}
+
+			if (examPaymentSubmitted) {
+				alert('Your exam payment confirmation is already submitted and waiting for verification.');
 				return;
 			}
 
@@ -638,9 +693,17 @@ if (!empty($sessionAppId)) {
 					throw new Error(data.message || 'Failed to submit payment confirmation.');
 				}
 
-				completeStep(2);
-				alert('Confirmation sent to admin for review.');
-				window.location.href = 'training_registration.php';
+				examPaymentSubmitted = true;
+				uncompleteStep(2);
+				closeReceiptModal();
+				alert('Confirmation sent to admin for review. Please wait for payment verification before proceeding to training registration.');
+				if (sendConfirmationBtn) {
+					sendConfirmationBtn.textContent = 'Payment Confirmation Sent (Pending Verification)';
+					sendConfirmationBtn.disabled = true;
+					sendConfirmationBtn.style.cursor = 'not-allowed';
+					sendConfirmationBtn.style.opacity = '0.7';
+				}
+				initializeSteps();
 			} catch (error) {
 				alert(error.message || 'Something went wrong. Please try again.');
 			} finally {
