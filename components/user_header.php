@@ -20,7 +20,11 @@
                     </ul>
                 </li>
 
-                <li ">
+                <li>
+                    <a href="/pluk_web/user/appointments.php" style="<?= $current_page === 'appointments.php' ? 'text-decoration: underline; font-weight: 700;' : '' ?>">View Appointments</a>
+                </li>
+
+                <li>
                     <a href="/pluk_web/user/services.php">Claim and Services</a>
                 </li>
 

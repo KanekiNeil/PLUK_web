@@ -63,7 +63,23 @@ if ($appointmentType === 'sales') {
 
 // Use appropriate status column name
 $statusColumn = ($appointmentType === 'sales') ? 'SA_Status' : 'status';
-$payload = json_encode([$statusColumn => $status]);
+$payloadData = [$statusColumn => $status];
+
+if ($appointmentType !== 'sales' && $appointmentDateTime !== '') {
+    try {
+        $normalizedDateTime = (new DateTime($appointmentDateTime))->format('Y-m-d H:i:s');
+        $payloadData['AA_DateTime'] = $normalizedDateTime;
+    } catch (Throwable $e) {
+        http_response_code(422);
+        echo json_encode([
+            "status" => "error",
+            "message" => "Invalid appointment_datetime value."
+        ]);
+        exit;
+    }
+}
+
+$payload = json_encode($payloadData);
 
 $ch = curl_init($updateUrl);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
