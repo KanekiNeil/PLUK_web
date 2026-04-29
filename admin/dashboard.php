@@ -165,17 +165,6 @@ $initials = strtoupper(substr($user_name, 0, 1)) .
 
             <p>No. of Applicants</p>
             <h1 id="applicantCount">0</h1>
-
-            <div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">
-                
-                <input type="date" id="startDate">
-                <input type="date" id="endDate">
-
-                <button onclick="exportApplicantsExcel()">
-                    Export Excel
-                </button>
-
-            </div>
         </div>
 
         <div class="stat-box">
@@ -190,6 +179,31 @@ $initials = strtoupper(substr($user_name, 0, 1)) .
             <h1 id="meetingCount">0</h1>
         </div>
 
+    </div>
+</div>
+
+<!-- EXPORT APPLICANTS CARD -->
+<div class="export-card">
+    <div class="export-header">
+        <span class="material-icons">file_download</span>
+        <h3>Export Applicants</h3>
+    </div>
+
+    <div class="export-container">
+        <div class="export-input-group">
+            <label for="startDate">From Date:</label>
+            <input type="date" id="startDate">
+        </div>
+
+        <div class="export-input-group">
+            <label for="endDate">To Date:</label>
+            <input type="date" id="endDate">
+        </div>
+
+        <button class="export-btn" onclick="exportApplicantsExcel()">
+            <span class="material-icons">download</span>
+            Export Excel
+        </button>
     </div>
 </div>
 
