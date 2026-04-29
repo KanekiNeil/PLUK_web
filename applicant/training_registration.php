@@ -149,6 +149,7 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Training Registration - Alpha Aquila</title>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<style>
 		* {
 			margin: 0;
@@ -679,7 +680,11 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
 			}
 
 			if (!canRegisterTraining) {
-				alert('You have not passed the exam yet. Please pass the exam before registering for training.');
+				Swal.fire({
+					text: 'You have not passed the exam yet. Please pass the exam before registering for training.',
+					icon: 'warning',
+					confirmButtonText: 'OK'
+				});
 				return;
 			}
 
@@ -688,15 +693,15 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
 			const time = document.getElementById('trainingTime').value;
 			
 			if (!trainingType) {
-				alert('Please select a training type');
+				Swal.fire({ text: 'Please select a training type', icon: 'warning', confirmButtonText: 'OK' });
 				return;
 			}
 			if (!date) {
-				alert('Please select a date');
+				Swal.fire({ text: 'Please select a date', icon: 'warning', confirmButtonText: 'OK' });
 				return;
 			}
 			if (!trainingType.includes('Whole Day') && !time) {
-				alert('Please select a time');
+				Swal.fire({ text: 'Please select a time', icon: 'warning', confirmButtonText: 'OK' });
 				return;
 			}
 			
@@ -717,19 +722,20 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
 				if (data.success) {
 					// Mark step 3 as completed
 					completeStep(3);
-					alert(data.message);
-					window.location.href = 'training_payment.php';
+					Swal.fire({ text: data.message, icon: 'success', confirmButtonText: 'OK' }).then(() => {
+						window.location.href = 'training_payment.php';
+					});
 				} else {
 					let errorMsg = 'Error: ' + data.message;
 					if (data.debug) {
 						errorMsg += '\n\nData sent: ' + JSON.stringify(data.debug);
 					}
-					alert(errorMsg);
+					Swal.fire({ text: errorMsg, icon: 'error', confirmButtonText: 'OK' });
 				}
 			})
 			.catch(error => {
 				console.error('Error:', error);
-				alert('An error occurred. Please try again.');
+				Swal.fire({ text: 'An error occurred. Please try again.', icon: 'error', confirmButtonText: 'OK' });
 			});
 		}
 	</script>

@@ -23,6 +23,7 @@ $initials = strtoupper(substr($user_name, 0, 1)) .
 
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
 
@@ -149,6 +150,12 @@ body::before {
 
 .badge-payment-verified,
 .badge-training-verified {
+    background:#dcfce7;
+    color:#166534;
+    border-color:#86efac;
+}
+
+.badge-exam-passed {
     background:#dcfce7;
     color:#166534;
     border-color:#86efac;
@@ -310,6 +317,7 @@ body::before {
         "verify exam payment" => "badge-verify-exam",
         "verify training payment" => "badge-verify-training",
         "payment verified" => "badge-payment-verified",
+        "exam passed" => "badge-exam-passed",
         "training payment verified" => "badge-training-verified",
         "payment rejected" => "badge-cancelled",
         default => "badge-default"
@@ -468,6 +476,7 @@ document.querySelectorAll('.table-row').forEach(row => {
         if (s === 'verify exam payment') return 'badge-verify-exam';
         if (s === 'verify training payment') return 'badge-verify-training';
         if (s === 'payment verified') return 'badge-payment-verified';
+        if (s === 'exam passed') return 'badge-exam-passed';
         if (s === 'training payment verified') return 'badge-training-verified';
         if (s === 'payment rejected') return 'badge-cancelled';
         return 'badge-default';
@@ -483,6 +492,52 @@ document.querySelectorAll('.table-row').forEach(row => {
         const address = row.dataset.address;
         const status = row.dataset.status;
         const normalizedStatus = normalizeStatus(status);
+
+        if (normalizedStatus === 'payment verified') {
+            Swal.fire({
+                title: 'Change status to Exam Passed?',
+                text: 'This payment has already been verified. Update the applicant status to Exam Passed?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, update status',
+                cancelButtonText: 'Cancel'
+            }).then(async (result) => {
+                if (!result.isConfirmed) {
+                    return;
+                }
+
+                try {
+                    const statusResponse = await fetch('../php/update_status.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            status: 'exam passed',
+                            status_target: 'applicant',
+                            applicant_id: appId
+                        })
+                    });
+
+                    const statusData = await statusResponse.json().catch(() => ({}));
+                    if (!statusResponse.ok || statusData.status !== 'success') {
+                        throw new Error(statusData.message || 'Failed to update applicant status to Exam Passed.');
+                    }
+
+                    row.dataset.status = 'exam passed';
+                    row.querySelector('.status-badge').textContent = 'exam passed';
+                    row.querySelector('.status-badge').className = 'status-badge ' + getStatusBadgeClass('exam passed');
+
+                    Swal.fire({
+                        text: 'Applicant status updated to Exam Passed.',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    });
+                } catch (error) {
+                    Swal.fire({ text: error.message || 'Failed to update applicant status.', icon: 'error', confirmButtonText: 'OK' });
+                }
+            });
+
+            return;
+        }
 
         if (normalizedStatus === 'verify exam payment') {
             const modalEl = document.getElementById('examPaymentModal');
@@ -520,17 +575,61 @@ document.querySelectorAll('.table-row').forEach(row => {
                             row.querySelector('.status-badge').textContent = 'payment verified';
                             row.querySelector('.status-badge').className = 'status-badge ' + getStatusBadgeClass('payment verified');
                             modal.hide();
+
+                            const examPassedPrompt = await Swal.fire({
+                                title: 'Change status to Exam Passed?',
+                                text: 'Payment has been verified. Update the applicant status to Exam Passed?',
+                                icon: 'question',
+                                showCancelButton: true,
+                                confirmButtonText: 'Yes, update status',
+                                cancelButtonText: 'Not now'
+                            });
+
+                            if (!examPassedPrompt.isConfirmed) {
+                                return;
+                            }
+
+                            const statusResponse = await fetch('../php/update_status.php', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    status: 'exam passed',
+                                    status_target: 'applicant',
+                                    applicant_id: appId
+                                })
+                            });
+
+                            const statusData = await statusResponse.json().catch(() => ({}));
+                            if (!statusResponse.ok || statusData.status !== 'success') {
+                                throw new Error(statusData.message || 'Failed to update applicant status to Exam Passed.');
+                            }
+
+                            row.dataset.status = 'exam passed';
+                            row.querySelector('.status-badge').textContent = 'exam passed';
+                            row.querySelector('.status-badge').className = 'status-badge ' + getStatusBadgeClass('exam passed');
+
+                            Swal.fire({
+                                text: 'Applicant status updated to Exam Passed.',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            });
                         } catch (error) {
-                            alert(error.message || 'Verification failed.');
+                            Swal.fire({ text: error.message || 'Verification failed.', icon: 'error', confirmButtonText: 'OK' });
                             verifyBtn.disabled = false;
                             rejectBtn.disabled = false;
                         }
                     };
 
                     rejectBtn.onclick = async () => {
-                        if (!confirm('Reject this payment request? This will delete the uploaded record.')) {
-                            return;
-                        }
+                        const result = await Swal.fire({
+                            title: 'Reject this payment request?',
+                            text: 'This will delete the uploaded record.',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Yes, reject',
+                            cancelButtonText: 'Cancel'
+                        });
+                        if (!result.isConfirmed) return;
 
                         verifyBtn.disabled = true;
                         rejectBtn.disabled = true;
@@ -541,7 +640,7 @@ document.querySelectorAll('.table-row').forEach(row => {
                             row.querySelector('.status-badge').className = 'status-badge ' + getStatusBadgeClass('payment rejected');
                             modal.hide();
                         } catch (error) {
-                            alert(error.message || 'Reject failed.');
+                            Swal.fire({ text: error.message || 'Reject failed.', icon: 'error', confirmButtonText: 'OK' });
                             verifyBtn.disabled = false;
                             rejectBtn.disabled = false;
                         }
@@ -594,16 +693,22 @@ document.querySelectorAll('.table-row').forEach(row => {
                             row.querySelector('.status-badge').className = 'status-badge ' + getStatusBadgeClass('training payment verified');
                             modal.hide();
                         } catch (error) {
-                            alert(error.message || 'Verification failed.');
+                            Swal.fire({ text: error.message || 'Verification failed.', icon: 'error', confirmButtonText: 'OK' });
                             verifyBtn.disabled = false;
                             rejectBtn.disabled = false;
                         }
                     };
 
                     rejectBtn.onclick = async () => {
-                        if (!confirm('Reject this payment request? This will delete the uploaded record.')) {
-                            return;
-                        }
+                        const result = await Swal.fire({
+                            title: 'Reject this payment request?',
+                            text: 'This will delete the uploaded record.',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Yes, reject',
+                            cancelButtonText: 'Cancel'
+                        });
+                        if (!result.isConfirmed) return;
 
                         verifyBtn.disabled = true;
                         rejectBtn.disabled = true;
@@ -614,7 +719,7 @@ document.querySelectorAll('.table-row').forEach(row => {
                             row.querySelector('.status-badge').className = 'status-badge ' + getStatusBadgeClass('payment rejected');
                             modal.hide();
                         } catch (error) {
-                            alert(error.message || 'Reject failed.');
+                            Swal.fire({ text: error.message || 'Reject failed.', icon: 'error', confirmButtonText: 'OK' });
                             verifyBtn.disabled = false;
                             rejectBtn.disabled = false;
                         }

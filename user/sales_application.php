@@ -14,6 +14,7 @@ $fullDates = [
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Alpha Aquila Sales Appointment</title>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
 
@@ -701,7 +702,7 @@ closeBtn.addEventListener("click", () => {
                     availableDateIdInput.value = availableDateIdMap.get(dateStr) ?? "";
                 }
 
-                alert("Selected Date: " + dateStr);
+                Swal.fire({ text: "Selected Date: " + dateStr, icon: 'info', confirmButtonText: 'OK' });
             });
 
             calendarDates.appendChild(btn);
@@ -733,17 +734,17 @@ closeBtn.addEventListener("click", () => {
             const selectedPriorities = selectedPrioritiesInput.value;
 
             if (!appointmentDate) {
-                alert("Please select an appointment date.");
+                Swal.fire({ text: "Please select an appointment date.", icon: 'warning', confirmButtonText: 'OK' });
                 return;
             }
 
             if (!selectedPriorities) {
-                alert("Please select at least one priority.");
+                Swal.fire({ text: "Please select at least one priority.", icon: 'warning', confirmButtonText: 'OK' });
                 return;
             }
 
             if (!availableDateId) {
-                alert("Please reselect an available appointment date.");
+                Swal.fire({ text: "Please reselect an available appointment date.", icon: 'warning', confirmButtonText: 'OK' });
                 return;
             }
 
@@ -765,20 +766,20 @@ closeBtn.addEventListener("click", () => {
 
                 if (data.status === "success") {
 
-                    alert(data.message);
+                    Swal.fire({ text: data.message, icon: 'success', confirmButtonText: 'OK' });
 
                     form.reset();
                     appointmentInput.value = "";
                     if (availableDateIdInput) availableDateIdInput.value = "";
 
                 } else {
-                    alert("Error: " + data.message);
+                    Swal.fire({ text: "Error: " + data.message, icon: 'error', confirmButtonText: 'OK' });
                 }
 
             } catch (err) {
 
                 console.error(err);
-                alert("Something went wrong. Please try again.");
+                Swal.fire({ text: "Something went wrong. Please try again.", icon: 'error', confirmButtonText: 'OK' });
 
             }
 

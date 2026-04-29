@@ -138,6 +138,8 @@ $jsonInput = json_decode($rawInput, true);
 $input = is_array($jsonInput) ? $jsonInput : $_POST;
 
 $status = trim($input['status'] ?? '');
+$statusTarget = trim($input['status_target'] ?? 'appointment');
+$applicantId = trim((string)($input['applicant_id'] ?? ''));
 $aaid = trim((string)($input['aaid'] ?? ''));
 $aiid = trim((string)($input['aiid'] ?? ''));
 $said = trim((string)($input['said'] ?? ''));
@@ -150,6 +152,74 @@ if ($status === '') {
     echo json_encode([
         "status" => "error",
         "message" => "Status is required."
+    ]);
+    exit;
+}
+
+if ($statusTarget === 'applicant' || $statusTarget === 'applicant_information') {
+    if ($applicantId === '') {
+        http_response_code(400);
+        echo json_encode([
+            "status" => "error",
+            "message" => "applicant_id is required for applicant status updates."
+        ]);
+        exit;
+    }
+
+    $updateUrl = $supabaseUrl . "/rest/v1/applicant_information?uuid=eq." . urlencode($applicantId);
+    $payload = json_encode(['status' => $status]);
+
+    $ch = curl_init($updateUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PATCH");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "apikey: $serviceRoleKey",
+        "Authorization: Bearer $serviceRoleKey",
+        "Content-Type: application/json",
+        "Prefer: return=representation"
+    ]);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+    if (curl_errno($ch)) {
+        $curlError = curl_error($ch);
+        curl_close($ch);
+        http_response_code(500);
+        echo json_encode([
+            "status" => "error",
+            "message" => "Request failed: " . $curlError
+        ]);
+        exit;
+    }
+
+    curl_close($ch);
+
+    if ($httpCode >= 400) {
+        http_response_code($httpCode);
+        echo json_encode([
+            "status" => "error",
+            "message" => "Supabase update failed.",
+            "details" => $response
+        ]);
+        exit;
+    }
+
+    $updatedRows = json_decode($response, true);
+    if (!is_array($updatedRows) || count($updatedRows) === 0) {
+        http_response_code(404);
+        echo json_encode([
+            "status" => "error",
+            "message" => "No matching applicant found to update."
+        ]);
+        exit;
+    }
+
+    echo json_encode([
+        "status" => "success",
+        "message" => "Applicant status updated successfully.",
+        "data" => $updatedRows[0]
     ]);
     exit;
 }

@@ -31,6 +31,7 @@ $initials = strtoupper(substr($user_name, 0, 1)) .
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link rel="stylesheet" href="../style/dashboard.css"> 
 <title>Appointment List</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
 body {
@@ -814,7 +815,7 @@ function persistStatus(select) {
     } else {
         if (!aaid && (!aiid)) {
             console.error("Missing IDs for status update", row?.dataset);
-            alert("Unable to update status: missing appointment identifiers.");
+            Swal.fire({ text: "Unable to update status: missing appointment identifiers.", icon: 'error', confirmButtonText: 'OK' });
             select.value = previousStatus;
             changeStatusColor(select);
             return;
@@ -844,7 +845,7 @@ function persistStatus(select) {
     .catch((error) => {
         select.value = previousStatus;
         changeStatusColor(select);
-        alert(error.message || "Unable to update status.");
+        Swal.fire({ text: error.message || "Unable to update status.", icon: 'error', confirmButtonText: 'OK' });
     });
 }
 
@@ -1007,12 +1008,12 @@ document.getElementById("logout").addEventListener("click", function(e) {
             // Redirect to login page
             window.location.href = "admin_login.php";
         } else {
-            alert("Logout failed");
+            Swal.fire({ text: "Logout failed", icon: 'error', confirmButtonText: 'OK' });
         }
     })
     .catch(err => {
         console.error(err);
-        alert("Something went wrong");
+        Swal.fire({ text: "Something went wrong", icon: 'error', confirmButtonText: 'OK' });
     });
 });
 

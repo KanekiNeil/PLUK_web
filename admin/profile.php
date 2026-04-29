@@ -34,6 +34,7 @@ $initials = strtoupper(substr($user_name, 0, 1)) .
 <link rel="stylesheet" href="../style/dashboard.css">
 <link rel="stylesheet" href="../style/profile.css">
 <title>User Profile</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -230,7 +231,7 @@ function saveProfile() {
     
     // Exit edit mode
     toggleEditMode();
-    alert('Profile updated successfully!');
+    Swal.fire({ text: 'Profile updated successfully!', icon: 'success', confirmButtonText: 'OK' });
 }
 
 function cancelEdit() {

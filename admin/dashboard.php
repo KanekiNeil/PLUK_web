@@ -38,6 +38,7 @@ $initials = strtoupper(substr($user_name, 0, 1)) .
 <head>
 <meta charset="UTF-8">
 <title>Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <link rel="stylesheet" href="../style/dashboard.css">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -316,7 +317,7 @@ document.getElementById("logout").addEventListener("click", function(e) {
     .then(res => res.json())
     .then(data => {
         if (data.success) window.location.href = "admin_login.php";
-        else alert("Logout failed.");
+        else Swal.fire({ text: "Logout failed.", icon: 'error', confirmButtonText: 'OK' });
     });
 });
 

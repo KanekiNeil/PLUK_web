@@ -4,6 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Verify Email - Alpha Aquila</title>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<style>
 		* {
 			margin: 0;
@@ -419,12 +420,12 @@
 			const resendSection = document.getElementById('resendSection');
 			
 			if (!email) {
-				alert('Please enter an email address');
+				Swal.fire({ text: 'Please enter an email address', icon: 'warning', confirmButtonText: 'OK' });
 				return;
 			}
-			
+		
 			if (!validateEmail(email)) {
-				alert('Please enter a valid email address');
+				Swal.fire({ text: 'Please enter a valid email address', icon: 'warning', confirmButtonText: 'OK' });
 				return;
 			}
 			

@@ -20,6 +20,13 @@ $initials = strtoupper(substr($user_name, 0, 1)) .
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="../style/set_availability.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* Ensure SweetAlert2 appears above Bootstrap modals/backdrops */
+        .swal2-container {
+            z-index: 20000 !important;
+        }
+    </style>
 </head>
 <body>
 

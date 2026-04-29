@@ -69,6 +69,7 @@ if (!empty($applicant_id)) {
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Training Payment - Alpha Aquila</title>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<style>
 		* {
 			margin: 0;
@@ -596,7 +597,7 @@ if (!empty($applicant_id)) {
 			}
 
 			if (trainingPaymentSubmitted) {
-				alert('Your training payment confirmation is already submitted and waiting for verification.');
+				swal.fire({ text: 'Your training payment confirmation is already submitted and waiting for verification.', icon: 'info', confirmButtonText: 'OK' });
 				return;
 			}
 
@@ -622,7 +623,7 @@ if (!empty($applicant_id)) {
 			}
 
 			if (!file.type.startsWith('image/')) {
-				alert('Please upload an image file only.');
+				swal.fire({ text: 'Please upload an image file only.', icon: 'error', confirmButtonText: 'OK' });
 				receiptFileInput.value = '';
 				return;
 			}
@@ -638,7 +639,7 @@ if (!empty($applicant_id)) {
 
 		async function submitTrainingPayment() {
 			if (!receiptBase64) {
-				alert('Please upload your e-receipt image before submitting.');
+				swal.fire({ text: 'Please upload your e-receipt image before submitting.', icon: 'error', confirmButtonText: 'OK' });
 				return;
 			}
 
@@ -663,7 +664,7 @@ if (!empty($applicant_id)) {
 				trainingPaymentSubmitted = true;
 				uncompleteStep(4);
 				closeReceiptModal();
-				alert('Confirmation sent to admin for review. Please wait for payment verification before proceeding to review.');
+				swal.fire({ text: 'Confirmation sent to admin for review. Please wait for payment verification before proceeding to review.', icon: 'success', confirmButtonText: 'OK' });
 				if (sendConfirmationBtn) {
 					sendConfirmationBtn.textContent = 'Payment Confirmation Sent (Pending Verification)';
 					sendConfirmationBtn.disabled = true;
@@ -672,7 +673,7 @@ if (!empty($applicant_id)) {
 				}
 				initializeSteps();
 			} catch (error) {
-				alert(error.message || 'Something went wrong. Please try again.');
+				swal.fire({ text: error.message || 'Something went wrong. Please try again.', icon: 'error', confirmButtonText: 'OK' });
 			} finally {
 				confirmUploadBtn.disabled = false;
 				confirmUploadBtn.textContent = 'Submit Receipt';

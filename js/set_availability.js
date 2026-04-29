@@ -206,7 +206,7 @@ async function loadSavedTimes(date) {
     div.querySelector(".delete-slot").addEventListener("click", async () => {
       if (!confirm("Delete this time slot?")) return
       const { error } = await supabase.from("available_dates").delete().eq("id", row.id)
-      if (error) return alert("Delete failed")
+      if (error) return Swal.fire({ text: "Delete failed", icon: 'error', confirmButtonText: 'OK' })
       loadSavedTimes(previewDate)
       loadAvailability(currentAppointmentType)
     })
@@ -218,12 +218,12 @@ async function loadSavedTimes(date) {
 // SAVE TIME SLOT
 saveBtn.addEventListener("click", async () => {
   const selectedList = getSortedSelectedDates()
-  if (!selectedList.length) return alert("Select at least one date")
-  if (!startTime.value || !endTime.value) return alert("Select start and end time")
-  if (startTime.value >= endTime.value) return alert("End time must be after start time")
+  if (!selectedList.length) return Swal.fire({ text: "Select at least one date", icon: 'warning', confirmButtonText: 'OK' })
+  if (!startTime.value || !endTime.value) return Swal.fire({ text: "Select start and end time", icon: 'warning', confirmButtonText: 'OK' })
+  if (startTime.value >= endTime.value) return Swal.fire({ text: "End time must be after start time", icon: 'warning', confirmButtonText: 'OK' })
 
   if (editingSlotId && selectedList.length > 1) {
-    return alert("Edit is only available when one date is selected")
+    return Swal.fire({ text: "Edit is only available when one date is selected", icon: 'info', confirmButtonText: 'OK' })
   }
 
   const slotsToSave = (!editingSlotId && currentAppointmentType === "client")
@@ -231,7 +231,7 @@ saveBtn.addEventListener("click", async () => {
     : [{ start_time: startTime.value, end_time: endTime.value }]
 
   if (!slotsToSave.length) {
-    return alert("No valid 1-hour slots found in selected range")
+    return Swal.fire({ text: "No valid 1-hour slots found in selected range", icon: 'warning', confirmButtonText: 'OK' })
   }
 
   const overlapDates = []
@@ -242,7 +242,7 @@ saveBtn.addEventListener("click", async () => {
       .eq("date", date)
       .eq("appointment_type", currentAppointmentType)
 
-    if (error) return alert("Failed to validate selected dates")
+    if (error) return Swal.fire({ text: "Failed to validate selected dates", icon: 'error', confirmButtonText: 'OK' })
 
     const slotsToCheck = editingSlotId
       ? existingSlots.filter(slot => slot.id !== editingSlotId)
@@ -258,7 +258,7 @@ saveBtn.addEventListener("click", async () => {
   }
 
   if (overlapDates.length) {
-    return alert(`Time slot overlaps on: ${overlapDates.join(", ")}`)
+    return Swal.fire({ text: `Time slot overlaps on: ${overlapDates.join(", ")}`, icon: 'warning', confirmButtonText: 'OK' })
   }
 
   let response
@@ -282,7 +282,7 @@ saveBtn.addEventListener("click", async () => {
     response = await supabase.from("available_dates").insert(rowsToInsert)
   }
 
-  if (response.error) return alert("Save failed")
+  if (response.error) return Swal.fire({ text: "Save failed", icon: 'error', confirmButtonText: 'OK' })
   startTime.value = ""
   endTime.value = ""
   meetingLink.value = ""   // ✅ ADD THIS

@@ -101,6 +101,7 @@ if (!empty($sessionAppId)) {
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Confirm Payment - Alpha Aquila</title>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<style>
 		* {
 			margin: 0;
@@ -457,7 +458,6 @@ if (!empty($sessionAppId)) {
 	<!-- Main Container -->
 	<div class="container">
 
-	<?= $_SESSION['pending_email']; ?>
 		<!-- Progress Steps -->
 		<div class="steps-progress">
 			<div class="step active" data-step="1">
@@ -629,7 +629,11 @@ if (!empty($sessionAppId)) {
 			}
 
 			if (examPaymentSubmitted) {
-				alert('Your exam payment confirmation is already submitted and waiting for verification.');
+				Swal.fire({
+					text: 'Your exam payment confirmation is already submitted and waiting for verification.',
+					icon: 'info',
+					confirmButtonText: 'OK'
+				});
 				return;
 			}
 
@@ -655,7 +659,11 @@ if (!empty($sessionAppId)) {
 			}
 
 			if (!file.type.startsWith('image/')) {
-				alert('Please upload an image file only.');
+				Swal.fire({
+					text: 'Please upload an image file only.',
+					icon: 'warning',
+					confirmButtonText: 'OK'
+				});
 				receiptFileInput.value = '';
 				return;
 			}
@@ -671,7 +679,11 @@ if (!empty($sessionAppId)) {
 
 		async function submitExamPayment() {
 			if (!receiptBase64) {
-				alert('Please upload your e-receipt image before submitting.');
+				Swal.fire({
+					text: 'Please upload your e-receipt image before submitting.',
+					icon: 'warning',
+					confirmButtonText: 'OK'
+				});
 				return;
 			}
 
@@ -696,7 +708,11 @@ if (!empty($sessionAppId)) {
 				examPaymentSubmitted = true;
 				uncompleteStep(2);
 				closeReceiptModal();
-				alert('Confirmation sent to admin for review. Please wait for payment verification before proceeding to training registration.');
+				Swal.fire({
+					text: 'Confirmation sent to admin for review. Please wait for payment verification before proceeding to training registration.',
+					icon: 'success',
+					confirmButtonText: 'OK'
+				});
 				if (sendConfirmationBtn) {
 					sendConfirmationBtn.textContent = 'Payment Confirmation Sent (Pending Verification)';
 					sendConfirmationBtn.disabled = true;
@@ -705,7 +721,11 @@ if (!empty($sessionAppId)) {
 				}
 				initializeSteps();
 			} catch (error) {
-				alert(error.message || 'Something went wrong. Please try again.');
+				Swal.fire({
+					text: error.message || 'Something went wrong. Please try again.',
+					icon: 'error',
+					confirmButtonText: 'OK'
+				});
 			} finally {
 				confirmUploadBtn.disabled = false;
 				confirmUploadBtn.textContent = 'Submit Receipt';
