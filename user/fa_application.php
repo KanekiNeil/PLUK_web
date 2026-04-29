@@ -174,10 +174,23 @@ $fullDates = [
         }
 
         /* FORM CONTAINER */
-        .form-container{
-            max-width: 850px;
-            margin: 60px auto;
-        }
+       .form-container{
+    max-width: 1100px; /* wider */
+    }
+
+    .section-title{
+    color:#880318;
+    font-weight:700;
+    margin-bottom:10px;
+}
+
+.form-check{
+    margin-bottom:8px;
+}
+
+.card{
+    padding:30px 40px;
+}
 
         /* CARD DESIGN */
         .card{
@@ -471,46 +484,55 @@ $fullDates = [
 
         <form id="applicationForm">
 
-            <!-- PERSONAL INFO -->
-            <div class="mb-3">
-                <label class="form-label">First Name</label>
-                <input type="text" name="first_name" class="form-control" placeholder="Enter first name">
-            </div>
+           <!-- PERSONAL INFO -->
+<h5 class="section-title">Step 1: Personal Information</h5>
 
-            <div class="mb-3">
-                <label class="form-label">Last Name</label>
-                <input type="text" name="last_name" class="form-control" placeholder="Enter last name">
-            </div>
+<div class="row g-3">
+    <div class="col-md-4">
+        <label class="form-label">First Name</label>
+        <input type="text" name="first_name" class="form-control" placeholder="First Name">
+    </div>
 
-            <div class="mb-3">
-                <label class="form-label">Email Address</label>
-                <input type="email" name="email" class="form-control" placeholder="Enter email">
-            </div>
+    <div class="col-md-4">
+        <label class="form-label">Last Name</label>
+        <input type="text" name="last_name" class="form-control" placeholder="Last Name">
+    </div>
 
-            <div class="mb-3">
-                <label class="form-label">Phone Number</label>
-                <input type="tel" name="phone" class="form-control" placeholder="Enter phone number">
-            </div>
+    <div class="col-md-4">
+        <label class="form-label">Middle Name</label>
+        <input type="text" name="middle_name" class="form-control" placeholder="Middle Name">
+    </div>
 
-            <div class="mb-3">
-                <label class="form-label">Address</label>
-                <input type="text" name="address" class="form-control" placeholder="Enter address">
-            </div>
+    <div class="col-md-6">
+        <label class="form-label">Email</label>
+        <input type="email" name="email" class="form-control" placeholder="@email.com">
+    </div>
 
-            <div class="mb-3">
-                <label class="form-label">Date of Birth</label>
-                <input type="date" name="birthdate" class="form-control">
-            </div>
+    <div class="col-md-6">
+        <label class="form-label">Phone</label>
+        <input type="tel" name="phone" class="form-control" placeholder="Phone Number">
+    </div>
 
-            <div class="mb-3">
-                <label class="form-label">Current Job</label>
-                <input type="text" name="current_job" class="form-control" placeholder="Enter Current Job">
-            </div>
+    <div class="col-md-6">
+        <label class="form-label">Address</label>
+        <input type="text" name="address" class="form-control" placeholder="Address">
+    </div>
 
-            <div class="mb-3">
-                <label class="form-label">School Graduated</label>
-                <input type="text" name="school_graduated" class="form-control" placeholder="Enter school graduated">
-            </div>
+    <div class="col-md-3">
+        <label class="form-label">Birthdate</label>
+        <input type="date" name="birthdate" class="form-control">
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label">Current Job</label>
+        <input type="text" name="current_job" class="form-control" placeholder="Job">
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">School Graduated</label>
+        <input type="text" name="school_graduated" class="form-control" placeholder="School">
+    </div>
+</div>
 
             <!-- UPLOAD WITH CAMERA ICON -->
             <h5 class="mt-4">Face Verification</h5>
