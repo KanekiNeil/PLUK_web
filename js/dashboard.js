@@ -472,3 +472,110 @@ function loadDashboardCounts() {
             console.error("Fetch Error:", error);
         });
 }
+
+
+//download function of applicants info
+
+const supabaseUrl = "https://ncsobcjlvytbivoxezfd.supabase.co";
+const anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jc29iY2psdnl0Yml2b3hlemZkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTU2ODc3NiwiZXhwIjoyMDg3MTQ0Nzc2fQ.TLktUWOmr-iAZTy4Vm0F_ihUa2q_tQuP83RLTodPcEY";
+
+async function exportApplicantsExcel() {
+
+    const start = document.getElementById("startDate").value;
+    const end = document.getElementById("endDate").value;
+
+    if (!start || !end) {
+        alert("Please select start and end date");
+        return;
+    }
+
+    const startDate = start + "T00:00:00";
+    const endDate = end + "T23:59:59";
+
+    const url =
+        `${supabaseUrl}/rest/v1/applicant_information?select=*`
+        + `&created_at=gte.${startDate}`
+        + `&created_at=lte.${endDate}`;
+
+    try {
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                apikey: anonKey,
+                Authorization: `Bearer ${anonKey}`
+            }
+        });
+
+        const data = await response.json();
+
+        // ============================
+        // FORMAT DATA (WITH ROW NUMBER)
+        // ============================
+        const rows = data.map((item, index) => ({
+            "No.": index + 1,
+            "Full Name": `${item.AI_LastName}, ${item.AI_FirstName}`,
+            "Email": item.AI_Email,
+            "Address": item.AI_Address,
+            "Birthdate": item.AI_Birthdate,
+            "Current Job": item.AI_CurrentJob,
+            "School Graduated": item.AI_SchoolGraduated,
+            "Contact Number": item.AI_ContactNum
+        }));
+
+        // ============================
+        // CREATE WORKSHEET
+        // ============================
+        const ws = XLSX.utils.json_to_sheet(rows);
+
+        // ============================
+        // AUTO COLUMN WIDTH
+        // ============================
+        const colWidths = Object.keys(rows[0] || {}).map(key => ({
+            wch: Math.max(
+                key.length,
+                ...rows.map(row =>
+                    row[key] ? row[key].toString().length : 10
+                )
+            )
+        }));
+
+        ws["!cols"] = colWidths;
+
+        // ============================
+        // FREEZE HEADER ROW
+        // ============================
+        ws["!freeze"] = { ySplit: 1 };
+
+        // ============================
+        // BOLD HEADER STYLE
+        // ============================
+        const range = XLSX.utils.decode_range(ws["!ref"]);
+
+        for (let C = range.s.c; C <= range.e.c; C++) {
+
+            const cell = XLSX.utils.encode_cell({ r: 0, c: C });
+
+            if (ws[cell]) {
+                ws[cell].s = {
+                    font: { bold: true },
+                    alignment: { horizontal: "center" }
+                };
+            }
+        }
+
+        // ============================
+        // CREATE WORKBOOK
+        // ============================
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Applicants");
+
+        // ============================
+        // DOWNLOAD FILE
+        // ============================
+        XLSX.writeFile(wb, "Applicants_Report.xlsx");
+
+    } catch (error) {
+        console.error(error);
+        alert("Failed to export data");
+    }
+}

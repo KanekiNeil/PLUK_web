@@ -161,8 +161,20 @@ $initials = strtoupper(substr($user_name, 0, 1)) .
 
         <div class="stat-box">
             <span class="material-icons stat-icon">groups</span>
+
             <p>No. of Applicants</p>
             <h1 id="applicantCount">0</h1>
+
+            <div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">
+                
+                <input type="date" id="startDate">
+                <input type="date" id="endDate">
+
+                <button onclick="exportApplicantsExcel()">
+                    Export Excel
+                </button>
+
+            </div>
         </div>
 
         <div class="stat-box">
@@ -291,6 +303,8 @@ $initials = strtoupper(substr($user_name, 0, 1)) .
 </div>
 
 <!-- ================= SCRIPTS ================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="../js/dashboard.js"></script>
 
 <script>
