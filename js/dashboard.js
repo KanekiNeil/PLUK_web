@@ -264,25 +264,75 @@ refreshCalendarAppointments().then(() => {
 });
 
 
-// LINE CHART (empty dataset)
-const ctx = document.getElementById("lineChart").getContext("2d");
+// LINE CHART
+const lineChartCanvas = document.getElementById("lineChart");
+let lineChartInstance = null;
 
-new Chart(ctx, {
-    type: "line",
-    data: {
-        labels: [],
-        datasets: [{
-            label: "No Data Yet",
-            data: [],
-            borderColor: "#8b0000",
-            fill: false
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false
+function renderLineChart(monthlyActivity) {
+    if (!lineChartCanvas || typeof Chart === "undefined") {
+        return;
     }
-});
+
+    const labels = Array.isArray(monthlyActivity?.labels) ? monthlyActivity.labels : [];
+    const applicants = Array.isArray(monthlyActivity?.applicants) ? monthlyActivity.applicants : [];
+    const sales = Array.isArray(monthlyActivity?.sales) ? monthlyActivity.sales : [];
+
+    const ctx = lineChartCanvas.getContext("2d");
+
+    if (lineChartInstance) {
+        lineChartInstance.destroy();
+    }
+
+    lineChartInstance = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: "Applicants",
+                    data: applicants,
+                    borderColor: "#8b0000",
+                    backgroundColor: "rgba(139, 0, 0, 0.12)",
+                    tension: 0.35,
+                    fill: false,
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                },
+                {
+                    label: "Sales",
+                    data: sales,
+                    borderColor: "#2563eb",
+                    backgroundColor: "rgba(37, 99, 235, 0.12)",
+                    tension: 0.35,
+                    fill: false,
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: "index",
+                intersect: false
+            },
+            plugins: {
+                legend: {
+                    position: "top"
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+}
 
 
 async function loadDashboard() {
@@ -293,6 +343,7 @@ async function loadDashboard() {
 
     renderPriorities(data.priorities);
     renderJobs(data.jobs);
+    renderLineChart(data.monthly_activity);
 }
 
 // PIE

@@ -214,26 +214,21 @@
 <body>
 	<div class="container">
 		<div class="left-panel">
-			<img src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/rlaNNhoEyR/wvx7rki4_expires_30_days.png" alt="Alpha Aquila">
+			<img src="../assets/nobg_logo.png" alt="Alpha Aquila">
 		</div>
 		
 		<div class="right-panel">
 			<div class="form-container">
 				<div class="logo-section">
-					<img src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/rlaNNhoEyR/fed41b8o_expires_30_days.png" alt="Logo">
+					<img src="../assets/nobg_logo.png" alt="Logo">
 				</div>
 				
 				<div class="welcome-text">Welcome Alpha Aquila!</div>
 				
 				<div id="errorMessage" class="error-message"></div>
 				<div id="successMessage" class="success-message"></div>
-				
-				<button type="button" class="google-btn" onclick="googleLogin()">
-					<img src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/rlaNNhoEyR/3r1e44g0_expires_30_days.png" alt="Google">
-					Login with Google
-				</button>
-				
-				<div class="divider">OR Login with Email</div>
+
+
 				
 				<form id="loginForm">
 					<div class="form-group">

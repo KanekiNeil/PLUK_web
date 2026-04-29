@@ -22,6 +22,42 @@ function supabaseGet($url, $key) {
     return json_decode($result, true);
 }
 
+function getMonthlyCounts($tableName, $supabaseUrl, $supabaseKey, $year) {
+    $start = sprintf('%04d-01-01T00:00:00', $year);
+    $end = sprintf('%04d-01-01T00:00:00', $year + 1);
+    $url = $supabaseUrl . "/rest/v1/" . $tableName . "?select=created_at"
+        . "&created_at=gte." . urlencode($start)
+        . "&created_at=lt." . urlencode($end)
+        . "&order=created_at.asc";
+
+    $rows = supabaseGet($url, $supabaseKey);
+    $counts = array_fill(1, 12, 0);
+
+    if (is_array($rows)) {
+        foreach ($rows as $row) {
+            $createdAt = $row['created_at'] ?? null;
+            if (!$createdAt) {
+                continue;
+            }
+
+            try {
+                $createdDate = new DateTime($createdAt);
+            } catch (Throwable $e) {
+                continue;
+            }
+
+            if ((int)$createdDate->format('Y') !== $year) {
+                continue;
+            }
+
+            $month = (int)$createdDate->format('n');
+            $counts[$month]++;
+        }
+    }
+
+    return array_values($counts);
+}
+
 // ============================
 // 1. PRIORITIES (JOINED DATA)
 // ============================
@@ -100,10 +136,29 @@ foreach ($jobCount as $job => $count) {
 }
 
 // ============================
+// 3. MONTHLY ACTIVITY (LINE)
+// ============================
+
+$currentYear = (int)date('Y');
+$monthlyLabels = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+];
+
+$monthlyApplicantCounts = getMonthlyCounts('applicant_information', $SUPABASE_URL, $SUPABASE_KEY, $currentYear);
+$monthlySalesCounts = getMonthlyCounts('sales_information', $SUPABASE_URL, $SUPABASE_KEY, $currentYear);
+
+// ============================
 // OUTPUT
 // ============================
 
 echo json_encode([
     "priorities" => $priorities,
-    "jobs" => $jobs
+    "jobs" => $jobs,
+    "monthly_activity" => [
+        "year" => $currentYear,
+        "labels" => $monthlyLabels,
+        "applicants" => $monthlyApplicantCounts,
+        "sales" => $monthlySalesCounts
+    ]
 ]);

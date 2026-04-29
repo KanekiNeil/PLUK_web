@@ -65,6 +65,60 @@ body::before {
     margin-bottom:20px;
 }
 
+.filter-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.filter-icon {
+    font-size: 14px;
+    cursor: pointer;
+    opacity: 0.6;
+}
+
+.filter-icon:hover {
+    opacity: 1;
+}
+
+.filter-box {
+    position: absolute;
+    top: 28px;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    display: none;
+    flex-direction: column;
+    min-width: 190px;
+    z-index: 50;
+    padding: 5px 0;
+}
+
+.filter-box div {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.filter-box div:hover {
+    background: #f3f4f8;
+}
+
+.filter-box .filter-selected {
+    background: #fce7ea;
+    color: #880318;
+    font-weight: 700;
+}
+
+.filter-summary {
+    margin: 12px 0 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #880318;
+}
+
 /* ===== GRID TABLE ===== */
 .table-header,
 .table-row {
@@ -95,6 +149,89 @@ body::before {
     .table-row {
         grid-template-columns: 1fr 1fr;
         row-gap: 10px;
+    }
+}
+
+@media (max-width: 680px) {
+    .container-al {
+        padding: 16px;
+    }
+
+    .card {
+        padding: 18px 14px;
+    }
+
+    .table-header {
+        display: none;
+    }
+
+    .table-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        padding: 14px 12px;
+        margin-bottom: 10px;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        background: #fff;
+    }
+
+    .table-row:hover {
+        transform: none;
+    }
+
+    .table-row div {
+        white-space: normal;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .table-row div::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #6b7280;
+        flex: 0 0 120px;
+    }
+
+    .table-row .status-badge {
+        margin-left: auto;
+    }
+
+    .filter-header {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .filter-header .active-filter-pill {
+        display: none;
+    }
+
+    .filter-box {
+        min-width: 220px;
+        right: auto;
+        left: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .container-al {
+        padding: 12px;
+    }
+
+    .card {
+        padding: 14px 12px;
+        border-radius: 14px;
+    }
+
+    .table-row div::before {
+        flex-basis: 98px;
+        font-size: 12px;
+    }
+
+    .status-badge {
+        font-size: 0.72rem;
+        padding: 4px 10px;
     }
 }
 
@@ -303,8 +440,23 @@ body::before {
     <div>Contact Number</div>
     <div>School Attended</div>
     <div>Job</div>
-    <div>Status</div>
+    <div class="filter-header">
+        Status
+        <span class="filter-icon" onclick="toggleFilter('statusFilterBox')">⏷</span>
+
+        <div class="filter-box" id="statusFilterBox">
+            <div onclick="applyStatusFilter('All')">All</div>
+            <div onclick="applyStatusFilter('Verify Exam Payment')">Verify Exam Payment</div>
+            <div onclick="applyStatusFilter('Verify Training Payment')">Verify Training Payment</div>
+            <div onclick="applyStatusFilter('Payment Verified')">Payment Verified</div>
+            <div onclick="applyStatusFilter('Exam Passed')">Exam Passed</div>
+            <div onclick="applyStatusFilter('Training Payment Verified')">Training Payment Verified</div>
+            <div onclick="applyStatusFilter('Payment Rejected')">Payment Rejected</div>
+        </div>
+    </div>
 </div>
+
+<div id="filterSummary" class="filter-summary">Showing: All records</div>
 
 <!-- DATA -->
 <?php foreach ($appointments as $appt): 
@@ -333,12 +485,12 @@ body::before {
      data-address="<?= $appt[4] ?>"
      data-status="<?= $appt[5] ?>">
 
-    <div><?= $appt[0] ?></div>
-    <div><?= $appt[1] ?></div>
-    <div><?= $appt[2] ?></div>
-    <div><?= $appt[3] ?></div>
+    <div data-label="Complete Name"><?= $appt[0] ?></div>
+    <div data-label="Contact Number"><?= $appt[1] ?></div>
+    <div data-label="School Attended"><?= $appt[2] ?></div>
+    <div data-label="Job"><?= $appt[3] ?></div>
 
-    <div>
+    <div data-label="Status">
         <span class="status-badge <?= $statusClass ?>">
             <?= $appt[5] ?>
         </span>
@@ -754,6 +906,68 @@ document.querySelectorAll('.table-row').forEach(row => {
     });
 
 });
+
+const applicantRows = Array.from(document.querySelectorAll('.table-row'));
+let selectedStatus = 'All';
+
+function normalizeStatus(value) {
+    return (value || '').trim().toLowerCase();
+}
+
+function toggleFilter(id) {
+    document.querySelectorAll('.filter-box').forEach((box) => {
+        if (box.id !== id) {
+            box.style.display = 'none';
+        }
+    });
+
+    const box = document.getElementById(id);
+    if (!box) return;
+    box.style.display = box.style.display === 'flex' ? 'none' : 'flex';
+}
+
+function applyStatusFilter(status) {
+    selectedStatus = status;
+
+    const summaryEl = document.getElementById('filterSummary');
+    const normalizedSelected = normalizeStatus(status);
+    let visibleCount = 0;
+
+    document.querySelectorAll('#statusFilterBox div').forEach((item) => {
+        const itemStatus = normalizeStatus(item.textContent);
+        if (itemStatus === normalizedSelected) {
+            item.classList.add('filter-selected');
+        } else {
+            item.classList.remove('filter-selected');
+        }
+    });
+
+    applicantRows.forEach((row) => {
+        const rowStatus = normalizeStatus(row.dataset.status);
+        const isVisible = normalizedSelected === 'all' || rowStatus === normalizedSelected;
+        row.style.display = isVisible ? 'grid' : 'none';
+        if (isVisible) visibleCount++;
+    });
+
+    if (summaryEl) {
+        summaryEl.innerText = `Showing: ${status} records (${visibleCount} of ${applicantRows.length})`;
+    }
+
+    const box = document.getElementById('statusFilterBox');
+    if (box) {
+        box.style.display = 'none';
+    }
+}
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.filter-header')) {
+        document.querySelectorAll('.filter-box').forEach((box) => {
+            box.style.display = 'none';
+        });
+    }
+});
+
+applyStatusFilter(selectedStatus);
 </script>
 
 </body>

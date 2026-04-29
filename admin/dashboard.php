@@ -232,7 +232,7 @@ $initials = strtoupper(substr($user_name, 0, 1)) .
 
 <!-- LINE CHART -->
 <div class="card line-chart-card">
-    <h3>Line</h3>
+    <h3>Monthly Activity</h3>
     <canvas id="lineChart"></canvas>
 </div>
 

@@ -2,6 +2,13 @@
 include_once __DIR__ . '/session.php';
 header('Content-Type: application/json');
 
+require_once __DIR__ . '/../vendor/phpmailer/Exception.php';
+require_once __DIR__ . '/../vendor/phpmailer/PHPMailer.php';
+require_once __DIR__ . '/../vendor/phpmailer/SMTP.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
     echo json_encode([
@@ -53,6 +60,83 @@ if ($type === 'exam') {
 
 $supabaseUrl = "https://ncsobcjlvytbivoxezfd.supabase.co";
 $supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jc29iY2psdnl0Yml2b3hlemZkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTU2ODc3NiwiZXhwIjoyMDg3MTQ0Nzc2fQ.TLktUWOmr-iAZTy4Vm0F_ihUa2q_tQuP83RLTodPcEY";
+$gmailEmail = "prulifeukaoki@gmail.com";
+$gmailAppPassword = "qwwpuzhibempdafc";
+
+function fetchApplicantByUuid(string $supabaseUrl, string $supabaseKey, string $applicantId): ?array
+{
+    $url = $supabaseUrl . '/rest/v1/applicant_information?select=uuid,AI_FirstName,AI_LastName,AI_Email&uuid=eq.' . urlencode($applicantId) . '&limit=1';
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'apikey: ' . $supabaseKey,
+        'Authorization: Bearer ' . $supabaseKey,
+        'Content-Type: application/json'
+    ]);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
+    curl_close($ch);
+
+    if ($response === false || !empty($curlError) || $httpCode < 200 || $httpCode >= 300) {
+        return null;
+    }
+
+    $rows = json_decode($response, true);
+    if (!is_array($rows) || empty($rows[0])) {
+        return null;
+    }
+
+    return $rows[0];
+}
+
+function sendPaymentUpdateEmail(array $applicant, string $type, string $action, string $gmailEmail, string $gmailAppPassword): void
+{
+    $email = trim((string)($applicant['AI_Email'] ?? ''));
+    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        throw new RuntimeException('Applicant email address is missing or invalid.');
+    }
+
+    $fullName = trim((string)($applicant['AI_FirstName'] ?? '') . ' ' . (string)($applicant['AI_LastName'] ?? ''));
+    if ($fullName === '') {
+        $fullName = 'Applicant';
+    }
+
+    $paymentLabel = ($type === 'training') ? 'Training Payment' : 'Exam Payment';
+    $isVerified = ($action === 'verify');
+
+    $subject = $paymentLabel . ($isVerified ? ' Verified' : ' Rejected');
+    $headline = $paymentLabel . ($isVerified ? ' Confirmed' : ' Update');
+    $message = $isVerified
+        ? 'Your ' . strtolower($paymentLabel) . ' has been verified successfully.'
+        : 'Your ' . strtolower($paymentLabel) . ' submission was rejected. Please upload a new and valid receipt.';
+
+    $mail = new PHPMailer(true);
+    $mail->isSMTP();
+    $mail->Host = 'smtp.gmail.com';
+    $mail->SMTPAuth = true;
+    $mail->Username = $gmailEmail;
+    $mail->Password = $gmailAppPassword;
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port = 587;
+
+    $mail->setFrom($gmailEmail, 'Prulife UK Black Orcas');
+    $mail->addAddress($email, $fullName);
+
+    $mail->isHTML(true);
+    $mail->Subject = $subject;
+    $mail->Body = '
+        <div style="font-family:Arial,Helvetica,sans-serif;line-height:1.6;color:#333;max-width:640px;margin:0 auto;padding:20px;">
+            <h2 style="color:#8B3A3A;margin:0 0 12px 0;">' . htmlspecialchars($headline, ENT_QUOTES, 'UTF-8') . '</h2>
+            <p>Hello ' . htmlspecialchars($fullName, ENT_QUOTES, 'UTF-8') . ',</p>
+            <p>' . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . '</p>
+            <p>If you have questions, please contact our support team.</p>
+            <p>Best regards,<br>Prulife UK Black Orcas Team</p>
+        </div>';
+    $mail->AltBody = $message;
+    $mail->send();
+}
 
 if (!in_array($action, ['verify', 'reject'], true)) {
     http_response_code(422);
@@ -182,8 +266,21 @@ if (!$statusUpdated) {
     exit;
 }
 
+$emailNotice = null;
+try {
+    $applicant = fetchApplicantByUuid($supabaseUrl, $supabaseKey, $applicantId);
+    if (!$applicant) {
+        throw new RuntimeException('Applicant record not found for email notification.');
+    }
+
+    sendPaymentUpdateEmail($applicant, $type, $action, $gmailEmail, $gmailAppPassword);
+} catch (Throwable $e) {
+    $emailNotice = $e->getMessage();
+}
+
 echo json_encode([
     'success' => true,
     'message' => ($action === 'reject' ? 'Payment rejected successfully.' : 'Payment verified successfully.'),
-    'status_updated' => true
+    'status_updated' => true,
+    'email_notice' => $emailNotice
 ]);
