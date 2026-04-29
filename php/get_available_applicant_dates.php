@@ -17,7 +17,7 @@ $now = new DateTime('now');
 $today = $now->format('Y-m-d');
 $currentTime = $now->format('H:i:s');
 
-$url = $supabaseUrl . '/rest/v1/available_dates?select=date,start_time,end_time,appointment_type&appointment_type=eq.applicant&date=gte.' . rawurlencode($today) . '&order=date.asc,start_time.asc';
+$url = $supabaseUrl . '/rest/v1/available_dates?select=date,start_time,end_time,appointment_type,meeting_link&appointment_type=eq.applicant&date=gte.' . rawurlencode($today) . '&order=date.asc,start_time.asc';
 
 $ch = curl_init($url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -70,6 +70,7 @@ foreach ($decoded as $row) {
     $date = $row['date'] ?? null;
     $startTime = $row['start_time'] ?? null;
     $endTime = $row['end_time'] ?? null;
+    $meetingLink = $row['meeting_link'] ?? null;
 
     if (!$date) {
         continue;
@@ -92,7 +93,8 @@ foreach ($decoded as $row) {
         'date' => $date,
         'start_time' => $startTime,
         'end_time' => $endTime,
-        'appointment_type' => $row['appointment_type'] ?? 'applicant'
+        'appointment_type' => $row['appointment_type'] ?? 'applicant',
+        'meeting_link' => $meetingLink
     ];
 }
 

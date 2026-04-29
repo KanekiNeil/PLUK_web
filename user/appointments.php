@@ -574,6 +574,34 @@ include_once __DIR__ . '/../php/session.php';
         background: #f8fafc;
     }
 
+    .slot-summary {
+        margin: -4px 0 14px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        background: #fff;
+        color: #334155;
+        font-size: 14px;
+        line-height: 1.5;
+        word-break: break-word;
+    }
+
+    .slot-summary strong {
+        display: block;
+        margin-bottom: 6px;
+        color: #111827;
+    }
+
+    .slot-summary a {
+        color: #8b0318;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .slot-summary a:hover {
+        text-decoration: underline;
+    }
+
     .slots-grid {
         display: grid;
         gap: 12px;
@@ -601,6 +629,13 @@ include_once __DIR__ . '/../php/session.php';
         margin-top: 4px;
         color: #64748b;
         font-size: 13px;
+    }
+
+    .slot-btn span + span {
+        margin-top: 8px;
+        color: #8b0318;
+        font-size: 12px;
+        word-break: break-word;
     }
 
     .slot-btn:hover {
@@ -753,6 +788,7 @@ include_once __DIR__ . '/../php/session.php';
                 <div class="detail-box"><strong>Current Job</strong><span id="currentJob"></span></div>
                 <div class="detail-box"><strong>Appointment Date</strong><span id="appointmentDate"></span></div>
                 <div class="detail-box"><strong>Appointment Time</strong><span id="appointmentTime"></span></div>
+                <div class="detail-box"><strong>Meeting Link</strong><span id="meetingLinkValue"></span></div>
             </div>
 
             <div class="request-row">
@@ -781,6 +817,7 @@ include_once __DIR__ . '/../php/session.php';
 
         <div class="schedule-modal-body">
             <div id="scheduleModalNotice" class="modal-inline-notice">Loading available schedule slots...</div>
+            <div id="selectedSlotSummary" class="slot-summary" style="display:none;"></div>
             <div id="scheduleSlots" class="slots-grid"></div>
         </div>
 
@@ -807,6 +844,7 @@ include_once __DIR__ . '/../php/session.php';
     const confirmRescheduleBtn = document.getElementById('confirmRescheduleBtn');
     const scheduleSlots = document.getElementById('scheduleSlots');
     const scheduleModalNotice = document.getElementById('scheduleModalNotice');
+    const selectedSlotSummary = document.getElementById('selectedSlotSummary');
 
     const viewState = {
         applicationId: '',
@@ -867,6 +905,19 @@ include_once __DIR__ . '/../php/session.php';
         document.getElementById('appointmentDate').textContent = data.appointment?.date || 'N/A';
         document.getElementById('appointmentTime').textContent = data.appointment?.time_range || 'N/A';
 
+        const meetingLinkValue = document.getElementById('meetingLinkValue');
+        const meetingLink = data.appointment?.meeting_link || '';
+        if (meetingLink) {
+            const link = document.createElement('a');
+            link.href = meetingLink;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.textContent = meetingLink;
+            meetingLinkValue.replaceChildren(link);
+        } else {
+            meetingLinkValue.textContent = 'N/A';
+        }
+
         const statusText = data.appointment?.status || data.applicant_status || 'Scheduled';
         const statusPill = document.getElementById('appointmentStatusPill');
         statusPill.className = `status-pill ${statusClass(statusText)}`;
@@ -918,6 +969,15 @@ include_once __DIR__ . '/../php/session.php';
         return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
     }
 
+    function escapeHtml(value) {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     function closeRescheduleModal() {
         setRescheduleModalLoading(false);
         scheduleModal.classList.remove('is-visible');
@@ -933,6 +993,8 @@ include_once __DIR__ . '/../php/session.php';
         scheduleSlots.innerHTML = '';
         viewState.selectedSlot = null;
         confirmRescheduleBtn.disabled = true;
+        selectedSlotSummary.style.display = 'none';
+        selectedSlotSummary.innerHTML = '';
 
         if (!slots.length) {
             scheduleModalNotice.textContent = 'No available applicant schedules were found.';
@@ -951,14 +1013,26 @@ include_once __DIR__ . '/../php/session.php';
             const dateText = toReadableDate(slot.date);
             const startText = normalizeTime(slot.start_time);
             const endText = normalizeTime(slot.end_time);
+            const meetingLinkText = slot.meeting_link || 'No meeting link provided';
 
-            button.innerHTML = `<strong>${dateText}</strong><span>${startText} - ${endText}</span>`;
+            button.innerHTML = `<strong>${escapeHtml(dateText)}</strong><span>${escapeHtml(startText)} - ${escapeHtml(endText)}</span><span>${escapeHtml(meetingLinkText)}</span>`;
 
             button.addEventListener('click', () => {
                 document.querySelectorAll('.slot-btn').forEach((item) => item.classList.remove('is-selected'));
                 button.classList.add('is-selected');
                 viewState.selectedSlot = slot;
                 confirmRescheduleBtn.disabled = false;
+
+                const linkMarkup = slot.meeting_link
+                    ? `<a href="${escapeHtml(slot.meeting_link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(slot.meeting_link)}</a>`
+                    : 'No meeting link provided';
+
+                selectedSlotSummary.style.display = 'block';
+                selectedSlotSummary.innerHTML = `
+                    <strong>Selected Schedule</strong>
+                    <div>${escapeHtml(dateText)} | ${escapeHtml(startText)} - ${escapeHtml(endText)}</div>
+                    <div style="margin-top: 6px;">Meeting Link: ${linkMarkup}</div>
+                `;
             });
 
             scheduleSlots.appendChild(button);
@@ -1086,7 +1160,8 @@ include_once __DIR__ . '/../php/session.php';
                 aiid: viewState.aiid,
                 aaid: viewState.aaid,
                 appointment_type: 'applicant',
-                appointment_datetime: getSelectedAppointmentDateTime()
+                appointment_datetime: getSelectedAppointmentDateTime(),
+                meeting_link: viewState.selectedSlot.meeting_link || ''
             };
 
             const response = await fetch('../php/update_status.php', {
