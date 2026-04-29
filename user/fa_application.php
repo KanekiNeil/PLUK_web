@@ -350,7 +350,73 @@ $fullDates = [
     margin-bottom:10px;
 }
 
+/* ================= MODAL ================= */
 
+.modal-overlay{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.4);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
+
+.modal-box{
+    background:white;
+    width:420px;
+    padding:30px;
+    border-radius:16px;
+    border:3px solid #f3f4f5;
+    position:relative;
+}
+
+.modal-box h3{
+    margin-bottom:10px;
+}
+
+.modal-box h4{
+    margin-top:15px;
+    margin-bottom:5px;
+}
+
+.modal-box ul{
+    padding-left:18px;
+}
+
+.modal-box li{
+    font-size:14px;
+    margin-bottom:4px;
+}
+
+.close-btn{
+    position:absolute;
+    top:10px;
+    right:15px;
+    font-size:20px;
+    cursor:pointer;
+}
+
+
+
+.apply-btn{
+    margin-top:20px;
+    width:100%;
+    padding:10px;
+    border:none;
+    border-radius:20px;
+    background:#880318;
+    color:white;
+    font-weight:600;
+    cursor:pointer;
+}
+
+.apply-btn:hover{
+    opacity:0.9;
+}
 
 
     </style>
@@ -358,6 +424,46 @@ $fullDates = [
 <body>
     
 <?php include '../components/user_header.php'; ?>
+
+<!-- ================= APPLICATION MODAL ================= -->
+<div class="modal-overlay" id="applyModal">
+
+    <div class="modal-box">
+
+        <span class="close-btn" id="closeModal">&times;</span>
+
+        <h3>Welcome, Applicants!</h3>
+
+        <p>
+        Take the next step toward a rewarding and flexible career opportunity. 
+        Check the qualifications and exciting benefits below:
+        </p>
+
+        <h4>Qualifications</h4>
+        <ul>
+            <li>Not more than 45 years old</li>
+            <li>At least Fourth Year Graduate</li>
+            <li>Open to applicants nationwide</li>
+            <li>Willing to learn and grow</li>
+        </ul>
+
+        <h4>Perks and Benefits</h4>
+        <ul>
+            <li>Fun and supportive work culture</li>
+            <li>45% commission-based income</li>
+            <li>HMO coverage</li>
+            <li>Opportunity to build your own business</li>
+            <li>Chance to lead a team in the future</li>
+            <li>Potential monthly income of ₱30,000–₱50,000+</li>
+            <li>Qualification for local and international travel incentives</li>
+        </ul>
+
+        <button class="apply-btn" id="applyNow">Apply</button>
+
+    </div>
+
+</div>
+
 
 <div class="container form-container">
     <div class="card shadow p-4">
@@ -465,6 +571,27 @@ $fullDates = [
     </div>
 </div>
 
+<!-- ================= JS ================= -->
+<script>
+
+
+const modal = document.getElementById("applyModal");
+const applyBtn = document.getElementById("applyNow");
+const closeBtn = document.getElementById("closeModal");
+const form = document.getElementById("applicationForm");
+
+// Apply button
+applyBtn.addEventListener("click", () => {
+    modal.style.display = "none";
+    form.style.display = "block";
+});
+
+// Close modal
+closeBtn.addEventListener("click", () => {
+    modal.style.display = "none";
+});
+</script>
+
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -478,6 +605,8 @@ $fullDates = [
 
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
+
+
 
     /* =========================
        📅 CALENDAR
@@ -759,9 +888,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     }
 
-    /* =========================
-       📤 FORM SUBMISSION
-    ========================== */
+   
 
     const form = document.getElementById("applicationForm");
 
