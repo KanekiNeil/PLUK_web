@@ -75,7 +75,7 @@ try {
         exit;
     }
 
-    $appointmentUrl = $supabaseUrl . '/rest/v1/application_appointment_with_applicant?select=aaid,AA_DateTime,status,AA_FaceID,applicant_aiid,AI_FirstName,AI_LastName,AI_ContactNum,AI_CurrentJob&applicant_aiid=eq.' . urlencode($aiid) . '&order=AA_DateTime.desc&limit=1';
+    $appointmentUrl = $supabaseUrl . '/rest/v1/application_appointment_with_applicant?select=aaid,AA_DateTime,status,AA_FaceID,applicant_aiid,AI_FirstName,AI_LastName,AI_ContactNum,AI_CurrentJob,meeting_link&applicant_aiid=eq.' . urlencode($aiid) . '&order=AA_DateTime.desc&limit=1';
     $appointmentRows = fetchSupabaseRows($appointmentUrl, $supabaseKey);
 
     if (empty($appointmentRows)) {
@@ -113,6 +113,7 @@ try {
                 'date' => $dateTime->format('F j, Y'),
                 'time_range' => $timeStart . ' - ' . $timeEnd->format('g:i A'),
                 'status' => $appointment['status'] ?? '',
+                'meeting_link' => $appointment['meeting_link'] ?? '',
                 'type' => 'Career'
             ]
         ]
