@@ -384,3 +384,91 @@ function renderJobs(data) {
 }
 
 document.addEventListener("DOMContentLoaded", loadDashboard);
+
+// total applicant count js
+
+document.addEventListener("DOMContentLoaded", () => {
+    loadApplicantCount();
+});
+
+function loadApplicantCount() {
+
+    fetch("../php/get_applicant_count.php")
+        .then(response => response.json())
+        .then(data => {
+
+            if (data.success) {
+                document.getElementById("applicantCount").innerText =
+                    data.totalApplicants;
+            } else {
+                console.error("Failed to load applicant count");
+            }
+
+        })
+        .catch(error => {
+            console.error("Fetch Error:", error);
+        });
+}
+
+
+//total clients js
+document.addEventListener("DOMContentLoaded", () => {
+    loadDashboardCounts();
+});
+
+function loadDashboardCounts() {
+
+    fetch("../php/get_client_count.php")
+        .then(response => response.json())
+        .then(data => {
+
+            if (data.success) {
+
+                document.getElementById("applicantCount").innerText =
+                    data.applicants;
+
+                document.getElementById("clientCount").innerText =
+                    data.clients;
+
+            } else {
+                console.error("Failed to load dashboard counts");
+            }
+
+        })
+        .catch(error => {
+            console.error("Fetch Error:", error);
+        });
+}
+
+// get_upcoming events js
+
+document.addEventListener("DOMContentLoaded", () => {
+    loadDashboardCounts();
+});
+
+function loadDashboardCounts() {
+
+    fetch("../php/get_upcoming_meeting.php")
+        .then(response => response.json())
+        .then(data => {
+
+            if (data.success) {
+
+                document.getElementById("applicantCount").innerText =
+                    data.applicants;
+
+                document.getElementById("clientCount").innerText =
+                    data.clients;
+
+                document.getElementById("meetingCount").innerText =
+                    data.meetings;
+
+            } else {
+                console.error("Failed to load dashboard counts");
+            }
+
+        })
+        .catch(error => {
+            console.error("Fetch Error:", error);
+        });
+}
