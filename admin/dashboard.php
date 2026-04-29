@@ -162,19 +162,19 @@ $initials = strtoupper(substr($user_name, 0, 1)) .
         <div class="stat-box">
             <span class="material-icons stat-icon">groups</span>
             <p>No. of Applicants</p>
-            <h1 id="applicantCount"><?= $stats['applicants'] ?></h1>
+            <h1 id="applicantCount">0</h1>
         </div>
 
         <div class="stat-box">
             <span class="material-icons stat-icon">person</span>
             <p>No. of Clients</p>
-            <h1 id="clientCount"><?= $stats['clients'] ?></h1>
+            <h1 id="clientCount">0</h1>
         </div>
 
         <div class="stat-box">
             <span class="material-icons stat-icon">event</span>
-            <p>Upcoming Events</p>
-            <h1 id="eventCount"><?= $stats['events'] ?></h1>
+            <p>Upcoming Meetings</p>
+            <h1 id="meetingCount">0</h1>
         </div>
 
     </div>
