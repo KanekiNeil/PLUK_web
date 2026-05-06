@@ -1,6 +1,15 @@
 <?php
 header("Content-Type: application/json");
 
+// compute $basePath = '/pluk_web' locally, or '' when site is served at root (Render)
+$projectRootFs = str_replace('\\', '/', realpath(__DIR__ . '/..'));
+$docRootFs     = str_replace('\\', '/', realpath($_SERVER['DOCUMENT_ROOT']));
+$basePath      = str_replace($docRootFs, '', $projectRootFs);
+$basePath      = $basePath === '' ? '' : '/' . trim($basePath, '/');
+
+// optional base URL when you need absolute links in emails
+$baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
+
 require_once __DIR__ . '/../vendor/phpmailer/Exception.php';
 require_once __DIR__ . '/../vendor/phpmailer/PHPMailer.php';
 require_once __DIR__ . '/../vendor/phpmailer/SMTP.php';
@@ -51,6 +60,11 @@ function fetchSupabaseRows(string $url, string $key): array
 
 function sendRescheduleEmail(array $applicant, array $appointment, string $baseUrl, string $gmailEmail, string $gmailAppPassword, string $meetingLink = ''): void
 {
+    // access global basePath computed in the outer scope
+    global $basePath;
+
+    // build a site base URL that respects deployment root
+    $siteUrlLocal = rtrim($baseUrl, '/') . $basePath;
         $email = trim((string)($applicant['AI_Email'] ?? ''));
         if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 throw new RuntimeException('Applicant email address is missing or invalid.');
@@ -65,7 +79,7 @@ function sendRescheduleEmail(array $applicant, array $appointment, string $baseU
         $appointmentLabel = $appointmentDate !== '' ? (new DateTime($appointmentDate))->format('F j, Y g:i A') : 'your updated schedule';
                 $meetingLink = trim($meetingLink);
                 if ($meetingLink === '') {
-                    $meetingLink = rtrim($baseUrl, '/') . '/PLUK_web/user/appointments.php?application_id=' . urlencode((string)($applicant['uuid'] ?? ''));
+                    $meetingLink = rtrim($baseUrl, '/') . $basePath . '/user/appointments.php?application_id=' . urlencode((string)($applicant['uuid'] ?? ''));
                 }
 
         $mail = new PHPMailer(true);
@@ -87,47 +101,31 @@ function sendRescheduleEmail(array $applicant, array $appointment, string $baseU
 
         $mail->isHTML(true);
         $mail->Subject = 'Your Rescheduled Appointment Request';
-        $mail->Body = '
+        // prepare escaped variables for the email body
+        $escapedSiteUrlLocal = htmlspecialchars($siteUrlLocal, ENT_QUOTES, 'UTF-8');
+        $escapedFullName = htmlspecialchars($fullName, ENT_QUOTES, 'UTF-8');
+        $escapedAppointmentLabel = htmlspecialchars($appointmentLabel, ENT_QUOTES, 'UTF-8');
+        $escapedMeetingLink = htmlspecialchars($meetingLink, ENT_QUOTES, 'UTF-8');
+
+        $mail->Body = <<<HTML
 <div style="font-family: system-ui, sans-serif, Arial; font-size: 16px; background-color: #fff8f1">
     <div style="max-width: 600px; margin: auto; padding: 16px">
-        <a style="text-decoration: none; outline: none" href="' . htmlspecialchars($baseUrl, ENT_QUOTES, 'UTF-8') . '/PLUK_web" target="_blank">
-            <img
-                style="height: 32px; vertical-align: middle"
-                height="32px"
-                src="cid:logo.png"
-                alt="logo"
-            />
+        <a style="text-decoration: none; outline: none" href="{$escapedSiteUrlLocal}" target="_blank">
+            <img style="height: 32px; vertical-align: middle" height="32px" src="cid:logo.png" alt="logo" />
         </a>
-        <p>Hello ' . htmlspecialchars($fullName, ENT_QUOTES, 'UTF-8') . ',</p>
+        <p>Hello {$escapedFullName},</p>
+        <p>Your rescheduling request has been received and your appointment has been updated.</p>
+        <p>New appointment schedule: <strong>{$escapedAppointmentLabel}</strong></p>
         <p>
-            Your rescheduling request has been received and your appointment has been updated.
+            <a href="{$escapedMeetingLink}" style="display: inline-block; background-color: #e53935; color: white; padding: 10px 16px; text-decoration: none; border-radius: 6px; font-weight: 600;">View Appointment</a>
         </p>
         <p>
-            New appointment schedule: <strong>' . htmlspecialchars($appointmentLabel, ENT_QUOTES, 'UTF-8') . '</strong>
-        </p>
-        <p>
-            <a href="' . htmlspecialchars($meetingLink, ENT_QUOTES, 'UTF-8') . '" style="
-                display: inline-block;
-                background-color: #e53935;
-                color: white;
-                padding: 10px 16px;
-                text-decoration: none;
-                border-radius: 6px;
-                font-weight: 600;
-            ">
-                View Appointment
-            </a>
-        </p>
-        <p>
-            If you have any questions or need help getting started, our support team is just an email away
-            at
-            <a href="mailto:giga75852@gmail.com" style="text-decoration: none; outline: none; color: #fc0038"
-                >giga75852@gmail.com</a
-            >. We&#39;re here to assist you every step of the way!
+            If you have any questions or need help getting started, our support team is just an email away at <a href="mailto:giga75852@gmail.com" style="text-decoration: none; outline: none; color: #fc0038">giga75852@gmail.com</a>. We're here to assist you every step of the way!
         </p>
         <p>Best regards,<br />The Prulife UK Black Orcas Team</p>
     </div>
-</div>';
+</div>
+HTML;
 
         $mail->AltBody = 'Your rescheduled appointment request has been received. New schedule: ' . $appointmentLabel . '. View it here: ' . $meetingLink;
         $mail->send();

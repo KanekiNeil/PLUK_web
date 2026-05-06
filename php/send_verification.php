@@ -1,6 +1,14 @@
 <?php
 session_start();
 header('Content-Type: application/json');
+// compute $basePath = '/pluk_web' locally, or '' when site is served at root (Render)
+$projectRootFs = str_replace('\\', '/', realpath(__DIR__ . '/..'));
+$docRootFs     = str_replace('\\', '/', realpath($_SERVER['DOCUMENT_ROOT']));
+$basePath      = str_replace($docRootFs, '', $projectRootFs);
+$basePath      = $basePath === '' ? '' : '/' . trim($basePath, '/');
+
+// optional base URL when you need absolute links in emails
+$baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
 
 // Include PHPMailer
 require_once __DIR__ . '/../vendor/phpmailer/Exception.php';
@@ -93,7 +101,7 @@ if ($httpCode < 200 || $httpCode >= 300) {
 
 // Build verification URL
 $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . $_SERVER['HTTP_HOST'];
-$verifyUrl = $baseUrl . "/PLUK_web/applicant/exam_payment.php?token=" . $token;
+$verifyUrl = $baseUrl . $basePath . "/applicant/exam_payment.php?token=" . $token;
 
 // Store email in session for later use
 $_SESSION['pending_email'] = $email;
