@@ -1,0 +1,27 @@
+.git
+.github
+.vscode
+.idea
+*.log
+*.tmp
+*.swp
+*.swo
+Thumbs.db
+.DS_Store
+
+# Local environment files
+.env
+.env.*
+*.local
+
+# Local IDE / OS files
+desktop.ini
+
+# Optional: exclude test/build artifacts if they appear later
+node_modules
+dist
+build
+coverage
+
+# If you ever add Composer locally
+vendor/bin
