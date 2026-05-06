@@ -130,7 +130,7 @@ if (!$type || $type === 'sales') {
                 "Sales", // Appointment type
                 $row['SA_Status'] ?? null,
                 $faceImage,
-                null,  // No current job for sales
+                '',  // No current job for sales
                 $contactNum,
                 "sales",  // [10] Type indicator
                 $appointmentDateTime  // [11] Full datetime for sorting
