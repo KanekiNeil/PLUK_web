@@ -251,7 +251,6 @@
         <!-- Navigation -->
         <nav class="nav">
             <a href="dashboard.php" class="nav-link <?= $current_page === 'dashboard.php' ? 'active' : '' ?>">Home</a>
-            <a href="insurance_inquiries.php" class="nav-link <?= $current_page === 'insurance_inquiries.php' ? 'active' : '' ?>">Insurance Inquiries</a>
             <a href="set_availability_ui.php" class="nav-link <?= $current_page === 'set_availability_ui.php' ? 'active' : '' ?>"> Set Availability </a>
             <a href="appointment_list.php" class="nav-link <?= $current_page === 'appointment_list.php' ? 'active' : '' ?>">Appointment List</a>
             <a href="applicant_list.php" class="nav-link <?= $current_page === 'applicant_list.php' ? 'active' : '' ?>">Applicant List</a>
